@@ -7,11 +7,11 @@ const dialect = (process.env.DB_DIALECT as Dialect) ?? "mysql";
 const host = process.env.DB_HOST as string;
 const port = parseInt(process.env.DB_PORT as string);
 
-const sequelize = new Sequelize(database,username,password,{
+const sequelize = new Sequelize(database, username, password, {
   host,
   dialect,
   port,
-  logging:false
-})
+  logging: false,
+});
 
-export default sequelize
+export default sequelize;
