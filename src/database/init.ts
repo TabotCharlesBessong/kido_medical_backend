@@ -4,8 +4,8 @@ import Db from "./index";
 
 const DbInitialize = async () => {
   try {
-    console.log("Connected to the database")
     await Db.authenticate();
+    console.log("Connected to the database")
     UserModel.sync({ alter: false });
     TokenModel.sync({ alter: false });
   } catch (error) {
