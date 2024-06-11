@@ -139,7 +139,7 @@ export default UserModel;
 
 
 #### models/doctor.model.ts
-typescript
+```typescript
 import { DataTypes } from "sequelize";
 import Db from "../config/database";
 import UserModel from "./user.model";
