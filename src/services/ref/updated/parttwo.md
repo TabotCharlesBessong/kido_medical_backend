@@ -249,7 +249,7 @@ export default PatientController;
 ### Routes
 
 #### routes/doctor.routes.ts
-typescript
+```typescript
 import express from "express";
 import DoctorController from "../controllers/doctor.controller";
 import { DoctorDataSource } from "../services/doctor.service";
@@ -267,7 +267,7 @@ router.post("/create-timeslot", (req, res) => doctorController.createTimeSlot(re
 router.get("/timeslots/:userId", (req, res) => doctorController.getAvailableTimeSlots(req, res));
 
 export default router;
-
+```
 
 #### routes/patient.routes.ts
 ```typescript
