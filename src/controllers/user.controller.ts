@@ -33,7 +33,7 @@ class UserController {
         email: params.email,
         username: params.email.split("@")[0],
         password: params.password,
-        role: UserRoles.CUSTOMER,
+        role: UserRoles.PATIENT,
         isEmailVerified: EmailStatus.NOT_VERIFIED,
         accountStatus: AccountStatus.ACTIVE,
       } as IUserCreationBody;

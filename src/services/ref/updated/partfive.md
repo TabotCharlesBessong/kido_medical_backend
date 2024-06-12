@@ -302,3 +302,4 @@ const authController = new AuthController();
 router.post('/register', (req, res) => authController.register(req, res));
 router.post('/verify-otp', (req, res) => authController.verifyOTP(req, res));
 router.post('/request-password
+```

@@ -71,7 +71,7 @@ export default Db;
 ### Models
 
 #### models/user.model.ts
-typescript
+```typescript
 import { DataTypes } from "sequelize";
 import Db from "../config/database";
 import { IUserModel } from "../interfaces/user.interface";
@@ -136,7 +136,7 @@ const UserModel = Db.define<IUserModel>("User", {
 });
 
 export default UserModel;
-
+```
 
 #### models/doctor.model.ts
 ```typescript
@@ -179,10 +179,10 @@ DoctorModel.belongsTo(UserModel, {
 });
 
 export default DoctorModel;
-
+```
 
 #### models/patient.model.ts
-typescript
+```typescript
 import { DataTypes } from "sequelize";
 import Db from "../config/database";
 import UserModel from "./user.model";
@@ -225,12 +225,13 @@ PatientModel.belongsTo(UserModel, {
 });
 
 export default PatientModel;
+```
 
 
 ### Interfaces
 
 #### interfaces/user.interface.ts
-typescript
+```typescript
 import { Model, Optional } from "sequelize";
 
 export interface IUser {
@@ -264,10 +265,10 @@ export interface IUserDataSource {
   create(record: IUserCreationBody): Promise<IUser>;
   updateOne(searchBy: IFindUserQuery, data: Partial<IUser>): Promise<void>;
 }
-
+```
 
 #### interfaces/doctor.interface.ts
-typescript
+```typescript
 import { Model, Optional } from "sequelize";
 
 export interface IDoctor {
@@ -311,7 +312,7 @@ export interface IPatientDataSource {
   create(record: IPatientCreationBody): Promise<IPatient>;
   updateOne(searchBy: IFindUserQuery, data: Partial<IPatient>): Promise<void>;
 }
-
+```
 
 ### Services
 
@@ -342,3 +343,4 @@ class DoctorService {
   }
 
   async createDoctor(record: IDoctorCreationBody): Promise<IDoctor
+```
