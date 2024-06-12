@@ -1,37 +1,36 @@
 import { DataTypes } from "sequelize";
 import Db from "../database";
-import UserModel from "./user.model";
-import { IDoctorModel } from "../interfaces/doctor.interface";
+import DoctorModel from "./doctor.model";
+import { ITimeSlotModel } from "../interfaces/timeslot.interface";
 
-const DoctorModel = Db.define<IDoctorModel>(
-  "Doctor",
+const TimeSlotModel = Db.define<ITimeSlotModel>(
+  "TimeSlot",
   {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    userId: {
+    doctorId: {
       type: DataTypes.UUID,
       allowNull: false,
-      unique:true,
       references: {
-        model: UserModel,
-        key: "id",
+        model: DoctorModel,
+        key: "userId",
       },
     },
-    specialization: {
-      type: DataTypes.STRING,
+    startTime: {
+      type: DataTypes.DATE,
       allowNull: false,
     },
-    verificationStatus: {
-      type: DataTypes.STRING,
+    endTime: {
+      type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: "PENDING",
     },
-    documents: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    isAvailable: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -46,18 +45,18 @@ const DoctorModel = Db.define<IDoctorModel>(
   },
   {
     timestamps: true,
-    tableName: "doctors",
+    tableName: "timeslots",
     createdAt: "createdAt",
     updatedAt: "updatedAt",
   }
 );
 
-UserModel.hasOne(DoctorModel, {
-  foreignKey: "userId",
-  as: "doctor",
+DoctorModel.hasMany(TimeSlotModel, {
+  foreignKey: "doctorId",
+  as: "timeSlots",
 });
-DoctorModel.belongsTo(UserModel, {
-  foreignKey: "userId",
+TimeSlotModel.belongsTo(DoctorModel, {
+  foreignKey: "doctorId",
 });
 
-export default DoctorModel;
+export default TimeSlotModel;

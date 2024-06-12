@@ -1,4 +1,5 @@
 import DoctorModel from "../models/doctor.model";
+import TimeSlotModel from "../models/timeslot.model";
 import TokenModel from "../models/token.model";
 import UserModel from "../models/user.model";
 import Db from "./index";
@@ -10,6 +11,7 @@ const DbInitialize = async () => {
     UserModel.sync({ alter: false });
     TokenModel.sync({ alter: false });
     DoctorModel.sync({ alter: false });
+    TimeSlotModel.sync({ alter: false });
   } catch (error) {
     console.log("Unable to connect our database", error);
   }
