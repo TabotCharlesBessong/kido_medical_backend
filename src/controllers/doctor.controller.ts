@@ -4,6 +4,7 @@ import DoctorService from "../services/doctor.service";
 import UserService from "../services/user.services";
 import Utility from "../utils/index.utils";
 import { ResponseCode } from "../interfaces/enum/code.enum";
+import { UserRoles } from "../interfaces/enum/user.enum";
 
 class DoctorController {
   private doctorService: DoctorService;
@@ -16,21 +17,18 @@ class DoctorController {
 
   async registerDoctor(req: Request, res: Response) {
     try {
-      const {
-        userId,
-        specialization,
-        verificationStatus,
-        documents,
-      }: IDoctorCreationBody = req.body;
-
-      // Create the doctor record
-      const doctorRecord = {
-        userId,
-        specialization,
-        verificationStatus,
-        documents,
+      const params = { ...req.body };
+      const newDoctor = {
+        userId: params.user.id,
+        specialization: params.specialization,
+        verificationStatus: params.verificationStatus,
+        documents: params.documents,
       };
-      const doctor = await this.doctorService.createDoctor(doctorRecord);
+
+      const doctor = await this.doctorService.createDoctor(newDoctor);
+
+      // Update the user's role to "doctor"
+      await this.userService.updateUserRole(params.user.id, UserRoles.DOCTOR);
       return Utility.handleSuccess(
         res,
         "Doctor created successfully",

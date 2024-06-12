@@ -5,7 +5,7 @@ import DoctorService from '../services/doctor.service';
 import DoctorDataSource from '../datasources/doctor.datasource';
 import DoctorController from '../controllers/doctor.controller';
 import validationSchema from '../validators/doctor.validator.schema';
-import { validator } from '../middlewares/index.middlewares';
+import { Auth, validator } from '../middlewares/index.middlewares';
 
 const createDoctorRoute = () => {
   const router = express.Router()
@@ -13,7 +13,7 @@ const createDoctorRoute = () => {
   const doctorService = new DoctorService(new DoctorDataSource())
   const doctorController = new DoctorController(doctorService,userService)
 
-  router.post("/create",validator(validationSchema.doctorValidationSchema),(req:Request,res:Response) => {
+  router.post("/create",validator(validationSchema.doctorValidationSchema),Auth(),(req:Request,res:Response) => {
     return doctorController.registerDoctor(req,res)
   })
 
