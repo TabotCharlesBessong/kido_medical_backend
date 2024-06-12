@@ -24,7 +24,18 @@ class DoctorController {
         verificationStatus: params.verificationStatus,
         documents: params.documents,
       };
+      // checkign if the doctor already exist
+      let doctorExists = await this.doctorService.getDoctorByUserId(
+        newDoctor.userId
+      );
+      if (doctorExists)
+        return Utility.handleError(
+          res,
+          "We are sorry but you have already created a doctor account",
+          ResponseCode.ALREADY_EXIST
+        );
 
+      // creating a new doctor
       const doctor = await this.doctorService.createDoctor(newDoctor);
 
       // Update the user's role to "doctor"
@@ -41,4 +52,4 @@ class DoctorController {
   }
 }
 
-export default DoctorController
+export default DoctorController;
