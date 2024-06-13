@@ -28,4 +28,4 @@ class TimeSlotDataSource implements ITimeSlotDataSource {
   }
 }
 
-export default new TimeSlotDataSource();
+export default TimeSlotDataSource

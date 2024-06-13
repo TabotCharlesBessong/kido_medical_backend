@@ -5,14 +5,22 @@ import UserService from "../services/user.services";
 import Utility from "../utils/index.utils";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import { UserRoles } from "../interfaces/enum/user.enum";
+import TimeSlotService from "../services/timeslot.service";
+import { ITimeSlotCreationBody } from "../interfaces/timeslot.interface";
 
 class DoctorController {
   private doctorService: DoctorService;
   private userService: UserService;
+  private timeSlotService: TimeSlotService;
 
-  constructor(_doctorService: DoctorService, _userService: UserService) {
+  constructor(
+    _doctorService: DoctorService,
+    _userService: UserService,
+    _timeSlotService: TimeSlotService
+  ) {
     this.doctorService = _doctorService;
     this.userService = _userService;
+    this.timeSlotService = _timeSlotService;
   }
 
   async registerDoctor(req: Request, res: Response) {
@@ -48,6 +56,31 @@ class DoctorController {
       );
     } catch (error) {
       return res.status(500).json({ error: "Server error" });
+    }
+  }
+
+  async createTimeSlot(req: Request, res: Response) {
+    try {
+      const {
+        doctorId,
+        startTime,
+        endTime,
+        isAvailable,
+      }: ITimeSlotCreationBody = req.body;
+      const newTimeSlot = await this.timeSlotService.createTimeSlot({
+        doctorId,
+        startTime,
+        endTime,
+        isAvailable,
+      });
+      return Utility.handleSuccess(
+        res,
+        "Doctor created successfully",
+        { newTimeSlot },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      res.status(500).json({ message: "Error creating time slot", error });
     }
   }
 }
