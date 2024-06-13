@@ -1,4 +1,4 @@
-import { Model, Optional } from "sequelize";
+import { FindOptions, Model, Optional } from "sequelize";
 
 export interface IDoctor {
   id: string;
@@ -29,4 +29,5 @@ export interface IDoctorDataSource {
   fetchOne(query: IFindDoctorQuery): Promise<IDoctor | null>;
   create(record: IDoctorCreationBody): Promise<IDoctor>;
   updateOne(searchBy: IFindDoctorQuery, data: Partial<IDoctor>): Promise<void>;
+  fetchAll(query: FindOptions<IDoctor>): Promise<IDoctor[]>;
 }

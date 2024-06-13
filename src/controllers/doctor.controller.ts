@@ -59,15 +59,53 @@ class DoctorController {
     }
   }
 
+  async getAllDoctors(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      let doctors = await this.doctorService.getDoctors();
+      return Utility.handleSuccess(
+        res,
+        "Account fetched successfully",
+        { doctors },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getAllTimeSlots(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      let timeslots = await this.timeSlotService.getTimeSlots()
+      return Utility.handleSuccess(
+        res,
+        "Account fetched successfully",
+        { timeslots },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
   async createTimeSlot(req: Request, res: Response) {
     try {
-      const params = {...req.body}
+      const params = { ...req.body };
       const newTimeSlot = {
         doctorId: params.user.id,
-        startTime:params.startTime,
-        endTime:params.endTime,
-        isAvailable:params.isAvailable
-      }
+        startTime: params.startTime,
+        endTime: params.endTime,
+        isAvailable: params.isAvailable,
+      };
 
       const timeSlot = await this.timeSlotService.createTimeSlot(newTimeSlot);
       return Utility.handleSuccess(

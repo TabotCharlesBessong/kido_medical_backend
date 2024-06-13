@@ -1,4 +1,4 @@
-import { Model, Optional } from "sequelize";
+import { FindOptions, Model, Optional } from "sequelize";
 
 export interface ITimeSlot {
   id: string;
@@ -26,5 +26,9 @@ export interface ITimeSlotModel extends Model<ITimeSlot, ITimeSlotCreationBody>,
 export interface ITimeSlotDataSource {
   fetchOne(query: IFindTimeSlotQuery): Promise<ITimeSlot | null>;
   create(record: ITimeSlotCreationBody): Promise<ITimeSlot>;
-  updateOne(searchBy: IFindTimeSlotQuery, data: Partial<ITimeSlot>): Promise<void>;
+  updateOne(
+    searchBy: IFindTimeSlotQuery,
+    data: Partial<ITimeSlot>
+  ): Promise<void>;
+  fetchAll(query: FindOptions<ITimeSlot>): Promise<ITimeSlot[]>;
 }

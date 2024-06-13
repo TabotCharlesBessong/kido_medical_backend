@@ -10,21 +10,11 @@ class TimeSlotService {
   async createTimeSlot(record: ITimeSlotCreationBody): Promise<ITimeSlot> {
     return this.timeSlotDatasource.create(record);
   }
-  // async getTimeSlotById(id: string): Promise<ITimeSlot | null> {
-  //   return await TimeSlotDataSource.getTimeSlotById(id);
-  // }
 
-  // async updateTimeSlot(id: string, data: Partial<ITimeSlot>): Promise<void> {
-  //   await timeSlotDataSource.updateTimeSlot(id, data);
-  // }
-
-  // async deleteTimeSlot(id: string): Promise<void> {
-  //   await timeSlotDataSource.deleteTimeSlot(id);
-  // }
-
-  // async getAvailableTimeSlots(doctorId: string): Promise<ITimeSlot[]> {
-  //   return await timeSlotDataSource.getAvailableTimeSlots(doctorId);
-  // }
+  async getTimeSlots(): Promise<ITimeSlot[]> {
+    const query = { where: {}, raw: true };
+    return this.timeSlotDatasource.fetchAll(query);
+  }
 }
 
 export default TimeSlotService
