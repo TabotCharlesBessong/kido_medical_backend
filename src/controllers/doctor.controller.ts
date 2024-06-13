@@ -61,22 +61,19 @@ class DoctorController {
 
   async createTimeSlot(req: Request, res: Response) {
     try {
-      const {
-        doctorId,
-        startTime,
-        endTime,
-        isAvailable,
-      }: ITimeSlotCreationBody = req.body;
-      const newTimeSlot = await this.timeSlotService.createTimeSlot({
-        doctorId,
-        startTime,
-        endTime,
-        isAvailable,
-      });
+      const params = {...req.body}
+      const newTimeSlot = {
+        doctorId: params.user.id,
+        startTime:params.startTime,
+        endTime:params.endTime,
+        isAvailable:params.isAvailable
+      }
+
+      const timeSlot = await this.timeSlotService.createTimeSlot(newTimeSlot);
       return Utility.handleSuccess(
         res,
         "Doctor created successfully",
-        { newTimeSlot },
+        { timeSlot },
         ResponseCode.SUCCESS
       );
     } catch (error) {

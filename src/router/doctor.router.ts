@@ -5,7 +5,7 @@ import DoctorService from "../services/doctor.service";
 import DoctorDataSource from "../datasources/doctor.datasource";
 import DoctorController from "../controllers/doctor.controller";
 import validationSchema from "../validators/doctor.validator.schema";
-import { Auth, validator } from "../middlewares/index.middlewares";
+import { Auth, DoctorMiddleware, validator } from "../middlewares/index.middlewares";
 import TimeSlotService from "../services/timeslot.service";
 import TimeSlotDataSource from "../datasources/timeslot.datasource";
 
@@ -28,6 +28,10 @@ const createDoctorRoute = () => {
       return doctorController.registerDoctor(req, res);
     }
   );
+
+  router.post("/create-time-slot",validator(validationSchema.timeSlotSchema),DoctorMiddleware(),(req:Request,res:Response) => {
+    return doctorController.createTimeSlot(req,res)
+  })
 
   return router;
 };

@@ -2,17 +2,18 @@ import { DataTypes } from "sequelize";
 import Db from "../database";
 import DoctorModel from "./doctor.model";
 import { ITimeSlotModel } from "../interfaces/timeslot.interface";
+import {v4 as uuidv4} from "uuid"
 
 const TimeSlotModel = Db.define<ITimeSlotModel>(
   "TimeSlot",
   {
     id: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: () => uuidv4(),
       primaryKey: true,
     },
     doctorId: {
-      type: DataTypes.UUID,
+      type: DataTypes.STRING,
       allowNull: false,
       references: {
         model: DoctorModel,
@@ -20,11 +21,11 @@ const TimeSlotModel = Db.define<ITimeSlotModel>(
       },
     },
     startTime: {
-      type: DataTypes.DATE,
+      type: DataTypes.TIME,
       allowNull: false,
     },
     endTime: {
-      type: DataTypes.DATE,
+      type: DataTypes.TIME,
       allowNull: false,
     },
     isAvailable: {

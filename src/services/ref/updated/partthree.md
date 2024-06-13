@@ -138,7 +138,7 @@ export default authMiddleware;
 
 
 #### middlewares/role.middleware.ts
-typescript
+```typescript
 import { Request, Response, NextFunction } from "express";
 import UserModel from "../models/user.model";
 
@@ -153,7 +153,7 @@ const roleMiddleware = (roles: string[]) => {
 };
 
 export default roleMiddleware;
-
+```
 
 ### Main Application Entry Point
 
