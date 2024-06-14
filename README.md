@@ -47,7 +47,7 @@ Kido Medical Backend is a RESTful API built using Node.js, Express.js, and Seque
 
 1. Create a `.env` file in the root directory and add the following environment variables:
 
-   ```env
+```env
 APPNAME="KIDO"
 DB_USERNAME="postgres"
 DB_PASSWORD='postgres password'
@@ -67,7 +67,7 @@ MAILTRAP_USER = "email address to mail trap user" // create it from google
 MAILTRAP_PASS = "password to mail trap user"
 VERIFICATION_EMAIL = "verification email address"
 PASSWORD_RESET_LINK = http://localhost:5001/reset-password.html
-   ```
+```
 
 2. Set up the database:
 
