@@ -115,7 +115,7 @@ class DoctorController {
         ResponseCode.SUCCESS
       );
     } catch (error) {
-      res.status(500).json({ message: "Error creating time slot", error });
+      res.status(ResponseCode.SERVER_ERROR).json((error as TypeError).message);
     }
   }
 }

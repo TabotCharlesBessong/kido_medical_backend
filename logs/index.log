@@ -12,3 +12,4 @@
 2024-06-13 21:07:29 error : startTime must be in the format HH:MM 
 2024-06-13 21:56:46 error : We are sorry but you have already created a doctor account 
 2024-06-13 22:48:04 error : Authorization failed 
+2024-06-14 20:08:17 error : startTime must be a `date` type, but the final value was: `Invalid Date` (cast from the value `"08:30"`). 
