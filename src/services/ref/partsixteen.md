@@ -1,4 +1,4 @@
-Sure, here's the PostgreSQL code to create the database, create the tables, and insert some initial values into these tables. This will reflect the database schema described earlier.
+Sure, here is the updated response with the SQL code for inserting values into the `TimeSlots` table.
 
 ### Create Database
 
@@ -27,17 +27,24 @@ CREATE TABLE Users (
 -- Create Specializations table
 CREATE TABLE Specializations (
     id UUID PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL UNIQUE
 );
 
 -- Create Doctors table
 CREATE TABLE Doctors (
     userId UUID PRIMARY KEY,
-    specializationId UUID NOT NULL,
     verificationStatus VARCHAR(50) NOT NULL DEFAULT 'PENDING',
     createdAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (userId) REFERENCES Users (id),
+    FOREIGN KEY (userId) REFERENCES Users (id)
+);
+
+-- Create DoctorSpecializations table
+CREATE TABLE DoctorSpecializations (
+    id UUID PRIMARY KEY,
+    doctorId UUID NOT NULL,
+    specializationId UUID NOT NULL,
+    FOREIGN KEY (doctorId) REFERENCES Doctors (userId),
     FOREIGN KEY (specializationId) REFERENCES Specializations (id)
 );
 
@@ -140,17 +147,27 @@ INSERT INTO Specializations (id, name) VALUES
 ('c3b07384-d9a3-4e1d-baf4-1f2db65f4080', 'Neurology');
 
 -- Insert doctors
-INSERT INTO Doctors (userId, specializationId, verificationStatus, createdAt, updatedAt) VALUES
-('b3b07384-d9a3-4e1d-baf4-1f2db65f407e', 'c3b07384-d9a3-4e1d-baf4-1f2db65f407f', 'VERIFIED', NOW(), NOW());
+INSERT INTO Doctors (userId, verificationStatus, createdAt, updatedAt) VALUES
+('b3b07384-d9a3-4e1d-baf4-1f2db65f407e', 'VERIFIED', NOW(), NOW());
+
+-- Insert doctor specializations
+INSERT INTO DoctorSpecializations (id, doctorId, specializationId) VALUES
+('d4b07384-d9a3-4e1d-baf4-1f2db65f4081', 'b3b07384-d9a3-4e1d-baf4-1f2db65f407e', 'c3b07384-d9a3-4e1d-baf4-1f2db65f407f');
 
 -- Insert patients
-INSERT INTO Patients (userId, dateOfBirth, address, phoneNumber, createdAt, updatedAt)
+INSERT INTO Patients (userId, dateOfBirth, address, phoneNumber, createdAt, updatedAt) VALUES
+('a3b07384-d9a3-4e1d-baf4-1f2db65f407d', '1990-01-01', '123 Main St', '123-456-7890', NOW(), NOW());
 
-```sql
-07384-d9a3-4e1d-baf4-1f2db65f4083', 'SCHEDULED'),
+-- Insert time slots
+INSERT INTO TimeSlots (id, doctorId, startTime, endTime, isAvailable, createdAt, updatedAt) VALUES
+('e3b07384-d9a3-4e1d-baf4-1f2db65f4081', 'b3b07384-d9a3-4e1d-baf4-1f2db65f407e', '2024-06-15 09:00:00+00', '2024-06-15 10:00:00+00', TRUE, NOW(), NOW()),
+('e3b07384-d9a3-4e1d-baf4-1f2db65f4082', 'b3b07384-d9a3-4e1d-baf4-1f2db65f407e', '2024-06-15 10:00:00+00', '2024-06-15 11:00:00+00', TRUE, NOW(), NOW());
+
+-- Insert appointment statuses
+INSERT INTO AppointmentStatuses (id, status) VALUES
+('f3b07384-d9a3-4e1d-baf4-1f2db65f4083', 'SCHEDULED'),
 ('f3b07384-d9a3-4e1d-baf4-1f2db65f4084', 'COMPLETED'),
 ('f3b07384-d9a3-4e1d-baf4-1f2db65f4085', 'CANCELLED');
-
 
 -- Insert appointments
 INSERT INTO Appointments (id, patientId, doctorId, timeSlotId, statusId, createdAt, updatedAt) VALUES
@@ -158,7 +175,9 @@ INSERT INTO Appointments (id, patientId, doctorId, timeSlotId, statusId, created
 
 -- Insert prescriptions
 INSERT INTO Prescriptions (id, patientId, doctorId, medication, dosage, frequency, createdAt, updatedAt) VALUES
-('h3b07384-d9a3-4e1d-baf4-1f2db65f4087', 'a3b07384-d9a3-4e1d-baf4-1f2db65f407d', 'b3b07384-d9a3-4e1d-baf4-1f2db65f407e', 'Aspirin', '500mg', 'Twice a day', NOW(), NOW());
+('h3b07384-d9a3-4e1d-baf4-1f2db65f4087', 'a3b07384-d9a3-4e1
+
+d-baf4-1f2db65f407d', 'b3b07384-d9a3-4e1d-baf4-1f2db65f407e', 'Aspirin', '500mg', 'Twice a day', NOW(), NOW());
 
 -- Insert test results
 INSERT INTO TestResults (id, patientId, doctorId, testType, result, createdAt, updatedAt) VALUES
@@ -169,43 +188,6 @@ INSERT INTO Messages (id, senderId, receiverId, content, createdAt, updatedAt) V
 ('j3b07384-d9a3-4e1d-baf4-1f2db65f4089', 'a3b07384-d9a3-4e1d-baf4-1f2db65f407d', 'b3b07384-d9a3-4e1d-baf4-1f2db65f407e', 'Hello, Doctor!', NOW(), NOW()),
 ('j3b07384-d9a3-4e1d-baf4-1f2db65f4090', 'b3b07384-d9a3-4e1d-baf4-1f2db65f407e', 'a3b07384-d9a3-4e1d-baf4-1f2db65f407d', 'Hello, Patient!', NOW(), NOW());
 ```
-
-This script sets up the database with all necessary tables and some initial data for the `kido_medical` project.
-
-### PostGIS Extension for Postgres (if spatial data support is needed)
-```sql
-CREATE EXTENSION IF NOT EXISTS postgis;
-```
-
-### Ensure Unique Constraints
-To resolve the unique constraint issue, we need to ensure that the referenced columns in the `Doctors` table have unique constraints. If the `userId` in `Doctors` is a primary key, it already has a unique constraint. But the unique constraint on `Specializations` might be missing in our previous setup. Here's how to ensure it:
-
-```sql
-ALTER TABLE Specializations ADD CONSTRAINT unique_specialization_name UNIQUE (name);
-```
-
-### Normalized Tables Setup
-To ensure the database schema adheres to the principles of normalization:
-
-- Split the `Users` table to separate roles-specific information.
-- Ensure `Appointments`, `Prescriptions`, and `TestResults` correctly reference the `Patients` and `Doctors` tables.
-
-### Normalized Tables Creation
-
-```sql
--- Adjust the schema as needed to ensure proper normalization
-CREATE TABLE DoctorSpecializations (
-    id UUID PRIMARY KEY,
-    doctorId UUID NOT NULL,
-    specializationId UUID NOT NULL,
-    FOREIGN KEY (doctorId) REFERENCES Doctors (userId),
-    FOREIGN KEY (specializationId) REFERENCES Specializations (id)
-);
-```
-
-### Final Checks
-
-Ensure that each table correctly references the other with foreign keys and that every referenced column has a unique constraint as needed.
 
 ### Diagram and Class Diagram Code (PlantUML)
 
@@ -221,4 +203,109 @@ class User {
   String password
   String role
   DateTime createdAt
-  DateTime
+  DateTime updatedAt
+}
+
+class Specialization {
+  UUID id
+  String name
+}
+
+class Doctor {
+  UUID userId
+  String verificationStatus
+  DateTime createdAt
+  DateTime updatedAt
+}
+
+class DoctorSpecialization {
+  UUID id
+  UUID doctorId
+  UUID specializationId
+}
+
+class Patient {
+  UUID userId
+  Date dateOfBirth
+  String address
+  String phoneNumber
+  DateTime createdAt
+  DateTime updatedAt
+}
+
+class TimeSlot {
+  UUID id
+  UUID doctorId
+  DateTime startTime
+  DateTime endTime
+  Boolean isAvailable
+  DateTime createdAt
+  DateTime updatedAt
+}
+
+class AppointmentStatus {
+  UUID id
+  String status
+}
+
+class Appointment {
+  UUID id
+  UUID patientId
+  UUID doctorId
+  UUID timeSlotId
+  UUID statusId
+  DateTime createdAt
+  DateTime updatedAt
+}
+
+class Prescription {
+  UUID id
+  UUID patientId
+  UUID doctorId
+  String medication
+  String dosage
+  String frequency
+  DateTime createdAt
+  DateTime updatedAt
+}
+
+class TestResult {
+  UUID id
+  UUID patientId
+  UUID doctorId
+  String testType
+  String result
+  DateTime createdAt
+  DateTime updatedAt
+}
+
+class Message {
+  UUID id
+  UUID senderId
+  UUID receiverId
+  String content
+  DateTime createdAt
+  DateTime updatedAt
+}
+
+User --> Patient
+User --> Doctor
+Doctor --> Specialization : specializationId
+Doctor --> DoctorSpecialization : userId
+Specialization --> DoctorSpecialization : specializationId
+Doctor --> TimeSlot : doctorId
+Patient --> Appointment : userId
+Doctor --> Appointment : userId
+TimeSlot --> Appointment : timeSlotId
+Appointment --> AppointmentStatus : statusId
+Patient --> Prescription : userId
+Doctor --> Prescription : userId
+Patient --> TestResult : userId
+Doctor --> TestResult : userId
+User --> Message : senderId
+User --> Message : receiverId
+
+@enduml
+```
+
+This PlantUML code generates a class diagram that reflects the database schema with relationships between tables. The SQL code ensures the `kido_medical` database is correctly set up, with tables created and initial data inserted.
