@@ -13,7 +13,7 @@ const TimeSlotModel = Db.define<ITimeSlotModel>(
       primaryKey: true,
     },
     doctorId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       allowNull: true,
       references: {
         model: DoctorModel,

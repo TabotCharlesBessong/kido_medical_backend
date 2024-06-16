@@ -12,7 +12,7 @@ const DoctorModel = Db.define<IDoctorModel>(
       primaryKey: true,
     },
     userId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       allowNull: false,
       unique:true,
       references: {
