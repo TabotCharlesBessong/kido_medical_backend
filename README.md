@@ -19,6 +19,7 @@ Kido Medical Backend is a RESTful API built using Node.js, Express.js, and Seque
 - Image Uploads using Cloudinary
 - Real-time Chat using Socket.io
 - Video and Voice Call Integration
+- Making post by doctors to educate rhe public
 
 ## Table of Contents
 
@@ -98,6 +99,7 @@ kido_medical_backend/
 │   ├── timeslot.controller.ts
 │   ├── prescription.controller.ts
 │   └── testResult.controller.ts
+|   └── post.controller.ts
 ├── interfaces/
 │   ├── auth.interface.ts
 │   ├── doctor.interface.ts
@@ -105,6 +107,7 @@ kido_medical_backend/
 │   ├── timeslot.interface.ts
 │   ├── prescription.interface.ts
 │   └── testResult.interface.ts
+|   └── post.interface.ts
 ├── middlewares/
 │   ├── auth.middleware.ts
 │   ├── role.middleware.ts
@@ -117,11 +120,15 @@ kido_medical_backend/
 │   ├── timeslot.model.ts
 │   ├── prescription.model.ts
 │   └── testResult.model.ts
+|   └── post.model.ts
+|   └── comment.model.ts
+|   └── like.model.ts
 ├── routes/
 │   ├── auth.router.ts
 │   ├── doctor.router.ts
 │   ├── patient.router.ts
 │   └── index.ts
+|   └── post.router.ts
 ├── services/
 │   ├── auth.service.ts
 │   ├── doctor.service.ts
@@ -129,6 +136,7 @@ kido_medical_backend/
 │   ├── timeslot.service.ts
 │   ├── prescription.service.ts
 │   └── testResult.service.ts
+|   └── post.services.ts
 ├── utils/
 │   ├── jwt.util.ts
 │   └── otp.util.ts
@@ -137,6 +145,7 @@ kido_medical_backend/
 │   ├── doctor.validator.ts
 │   ├── patient.validator.ts
 │   └── timeslot.validator.ts
+|   └── post.validator.ts
 ├── app.ts
 ├── server.ts
 └── README.md
