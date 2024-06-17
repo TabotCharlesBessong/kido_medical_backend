@@ -5,8 +5,10 @@ export const EmailStatus = {
 
 export const UserRoles = {
   ADMIN: "ADMIN",
-  EDITOR: "EDITOR",
-  CUSTOMER: "CUSTOMER",
+  DOCTOR: "DOCTOR",
+  PATIENT: "PATIENT",
+  NURSE: "NURSE",
+  LAB_TECHNICIAN: "LAB_TECHNICIAN",
 };
 
 export const AccountStatus = {

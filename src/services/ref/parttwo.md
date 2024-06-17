@@ -3,7 +3,7 @@ hello
 ### Services (Continued)
 
 #### services/doctor.service.ts (continued)
-typescript
+```typescript
   async createDoctor(record: IDoctorCreationBody): Promise<IDoctor> {
     return this.doctorDataSource.create(record);
   }
@@ -29,10 +29,10 @@ typescript
 }
 
 export { DoctorDataSource, DoctorService };
-
+```
 
 #### services/patient.service.ts
-typescript
+```typescript
 import { IPatient, IPatientDataSource, IPatientCreationBody } from "../interfaces/patient.interface";
 import PatientModel from "../models/patient.model";
 
@@ -82,10 +82,10 @@ class PatientService {
 }
 
 export { PatientDataSource, PatientService };
-
+```
 
 #### services/appointment.service.ts
-typescript
+```typescript
 import { IAppointment, IAppointmentDataSource, IAppointmentCreationBody } from "../interfaces/appointment.interface";
 import AppointmentModel from "../models/appointment.model";
 
@@ -136,12 +136,12 @@ class AppointmentService {
 }
 
 export { AppointmentDataSource, AppointmentService };
-
+```
 
 ### Controllers
 
 #### controllers/doctor.controller.ts
-typescript
+```typescript
 import { Request, Response } from "express";
 import { DoctorService } from "../services/doctor.service";
 import { UserService } from "../services/user.service";
@@ -192,10 +192,10 @@ class DoctorController {
 }
 
 export default DoctorController;
-
+```
 
 #### controllers/patient.controller.ts
-typescript
+```typescript
 import { Request, Response } from "express";
 import { PatientService } from "../services/patient.service";
 
@@ -244,12 +244,12 @@ class PatientController {
 }
 
 export default PatientController;
-
+```
 
 ### Routes
 
 #### routes/doctor.routes.ts
-typescript
+```typescript
 import express from "express";
 import DoctorController from "../controllers/doctor.controller";
 import { DoctorDataSource } from "../services/doctor.service";
@@ -267,7 +267,7 @@ router.post("/create-timeslot", (req, res) => doctorController.createTimeSlot(re
 router.get("/timeslots/:userId", (req, res) => doctorController.getAvailableTimeSlots(req, res));
 
 export default router;
-
+```
 
 #### routes/patient.routes.ts
 ```typescript

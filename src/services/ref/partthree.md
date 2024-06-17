@@ -3,16 +3,16 @@ Sure, let's continue with the implementation.
 ### Routes (Continued)
 
 #### routes/patient.routes.ts (continued)
-typescript
+```typescript
 router.get("/appointments/:patientId", (req, res) => patientController.getAppointments(req, res));
 
 export default router;
-
+```
 
 ### Interfaces (Continued)
 
 #### interfaces/appointment.interface.ts
-typescript
+```typescript
 import { Model, Optional } from "sequelize";
 
 export interface IAppointment {
@@ -36,7 +36,7 @@ export interface IAppointmentDataSource {
   fetchOne(query: IFindUserQuery): Promise<IAppointment | null>;
   updateOne(searchBy: IFindUserQuery, data: Partial<IAppointment>): Promise<void>;
 }
-
+```
 
 ### Models (Continued)
 
@@ -138,7 +138,7 @@ export default authMiddleware;
 
 
 #### middlewares/role.middleware.ts
-typescript
+```typescript
 import { Request, Response, NextFunction } from "express";
 import UserModel from "../models/user.model";
 
@@ -153,7 +153,7 @@ const roleMiddleware = (roles: string[]) => {
 };
 
 export default roleMiddleware;
-
+```
 
 ### Main Application Entry Point
 
