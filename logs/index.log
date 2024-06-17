@@ -33,3 +33,4 @@
 2024-06-17 17:14:52 error : date is a required field 
 2024-06-17 17:15:19 error : reason is a required field 
 2024-06-17 17:15:51 error : patientId is a required field 
+2024-06-17 17:19:37 error : timeslotId is a required field 
