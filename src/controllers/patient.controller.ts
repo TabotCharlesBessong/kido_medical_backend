@@ -3,14 +3,18 @@ import PatientService from "../services/patient.service";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import Utility from "../utils/index.utils";
 import { IPatient } from "../interfaces/patient.interface";
-// import AppointmentService from "../services/appointment.service";
+import AppointmentService from "../services/appointment.service";
 
 class PatientController {
   private patientService: PatientService;
-  // private appointmentService: AppointmentService;
+  private appointmentService: AppointmentService;
 
-  constructor(_patientService: PatientService) {
+  constructor(
+    _patientService: PatientService,
+    _appointmentService: AppointmentService
+  ) {
     this.patientService = _patientService;
+    this.appointmentService = _appointmentService;
   }
 
   async createPatient(req: Request, res: Response) {
@@ -64,8 +68,7 @@ class PatientController {
           { patient },
           ResponseCode.SUCCESS
         );
-    } 
-    catch (error) {
+    } catch (error) {
       return Utility.handleError(
         res,
         (error as TypeError).message,
@@ -85,6 +88,57 @@ class PatientController {
         { patient },
         ResponseCode.SUCCESS
       );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async bookAppointment(req: Request, res: Response) {
+    try {
+      const params = {...req.body}
+      const newAppointment = {
+        patientId:params.user.id,
+        doctorId:params.doctorId,
+        timeslotId:params.timeslotId,
+        date:params.date,
+        reason:params.reason
+      }
+      const appointment = await this.appointmentService.createAppointment(
+        newAppointment
+      );
+      return Utility.handleSuccess(
+        res,
+        "Doctor created successfully",
+        { appointment },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      res.status(ResponseCode.SERVER_ERROR).json((error as TypeError).message);
+    }
+  }
+
+  async getAppointmentById(req: Request, res: Response) {
+    try {
+      const appointment = await this.appointmentService.getAppointmentById(
+        req.params.userId
+      );
+      if (!appointment)
+        return Utility.handleError(
+          res,
+          "Could not get appointment",
+          ResponseCode.NOT_FOUND
+        );
+      else
+        return Utility.handleSuccess(
+          res,
+          "Account fetched successfully",
+          { appointment },
+          ResponseCode.SUCCESS
+        );
     } catch (error) {
       return Utility.handleError(
         res,

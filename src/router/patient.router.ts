@@ -5,11 +5,14 @@ import validationSchema from "../validators/patient.validator";
 import PatientService from "../services/patient.service";
 import UserDataSource from "../datasources/user.datasource";
 import PatientDataSource from "../datasources/patient.datasource";
+import AppointmentService from "../services/appointment.service";
+import AppointmentDataSource from "../datasources/appointment.datasource";
 
 const createPatientRoute = () => {
   const router = express.Router();
   const patientService = new PatientService(new PatientDataSource());
-  const patientController = new PatientController(patientService);
+  const appointmentService = new AppointmentService(new AppointmentDataSource())
+  const patientController = new PatientController(patientService,appointmentService);
 
   router.post(
     "/create",
@@ -33,13 +36,13 @@ const createPatientRoute = () => {
     }
   );
 
-  // router.post(
-  //   "/:userId/appointments",
-  //   validator(validationSchema.bookAppointmentSchema),
-  //   (req: Request, res: Response) => {
-  //     return patientController.bookAppointment(req, res);
-  //   }
-  // );
+  router.post(
+    "/appointment/create",
+    validator(validationSchema.bookAppointmentSchema),
+    (req: Request, res: Response) => {
+      return patientController.bookAppointment(req, res);
+    }
+  );
 
   return router;
 };

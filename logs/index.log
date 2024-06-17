@@ -29,3 +29,7 @@
 2024-06-17 15:51:27 error : Could not get patient 
 2024-06-17 15:51:36 error : WHERE parameter "userId" has invalid "undefined" value 
 2024-06-17 15:55:32 error : We are sorry but you have already created a patient account 
+2024-06-17 17:12:54 error : date is a required field 
+2024-06-17 17:14:52 error : date is a required field 
+2024-06-17 17:15:19 error : reason is a required field 
+2024-06-17 17:15:51 error : patientId is a required field 

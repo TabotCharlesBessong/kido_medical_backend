@@ -8,6 +8,9 @@ const createPatientSchema = yup.object({
 const bookAppointmentSchema = yup.object({
   date: yup.date().required(),
   reason: yup.string().required(),
+  // patientId: yup.string().uuid().required(),
+  doctorId: yup.string().uuid().required(),
+  timeslotId: yup.string().uuid().required(),
 });
 
 const validationSchema = {
