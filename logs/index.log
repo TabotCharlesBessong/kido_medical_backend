@@ -28,3 +28,4 @@
 2024-06-17 15:50:24 error : Could not get patient 
 2024-06-17 15:51:27 error : Could not get patient 
 2024-06-17 15:51:36 error : WHERE parameter "userId" has invalid "undefined" value 
+2024-06-17 15:55:32 error : We are sorry but you have already created a patient account 
