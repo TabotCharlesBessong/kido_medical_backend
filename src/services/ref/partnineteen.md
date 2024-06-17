@@ -207,10 +207,10 @@ class PatientDataSource implements IPatientDataSource {
 }
 
 export default PatientDataSource;
-
+```
 // appointment.datasource.ts
 
-Let's continue with the data sources and services:
+Let uss continue with the data sources and services:
 
 ```typescript
 // appointment.datasource.ts
