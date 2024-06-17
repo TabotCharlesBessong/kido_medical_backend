@@ -1,6 +1,7 @@
 import CommentModel from "../models/comment.model";
 import DoctorModel from "../models/doctor.model";
 import LikeModel from "../models/like.model";
+import PatientModel from "../models/patient.model";
 import PostModel from "../models/post.model";
 import TimeSlotModel from "../models/timeslot.model";
 import TokenModel from "../models/token.model";
@@ -18,6 +19,7 @@ const DbInitialize = async () => {
     PostModel.sync({ alter: false });
     CommentModel.sync({ alter: false });
     LikeModel.sync({ alter: false });
+    PatientModel.sync({ alter: false });
   } catch (error) {
     console.log("Unable to connect our database", error);
   }
