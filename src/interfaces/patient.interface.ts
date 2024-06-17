@@ -1,4 +1,4 @@
-import { Model, Optional } from "sequelize";
+import { FindOptions, Model, Optional } from "sequelize";
 
 export interface IPatient {
   id: string;
@@ -23,6 +23,7 @@ export interface IPatientDataSource {
     searchBy: IFindPatientQuery,
     data: Partial<IPatient>
   ): Promise<void>;
+  fetchAll(query: FindOptions<IPatient>): Promise<IPatient[]>;
 }
 
 export interface IFindPatientQuery {

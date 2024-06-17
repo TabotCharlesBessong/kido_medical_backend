@@ -6,6 +6,7 @@ import DbInitialize from "./database/init";
 import userRouter from "./router/user.router";
 import doctorRouter from "./router/doctor.router";
 import postRouter from "./router/post.router";
+import patientRouter from "./router/patient.router";
 
 //create an app
 const app = express();
@@ -32,6 +33,7 @@ app.use((err: TypeError, req: Request, res: Response, next: NextFunction) => {
 app.use("/api/user", userRouter);
 app.use("/api/doctor", doctorRouter);
 app.use("/api/posts", postRouter);
+app.use("/api/patient", patientRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.send(`Welcome to ${process.env.APPNAME}`);

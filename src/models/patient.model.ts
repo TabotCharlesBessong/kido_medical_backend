@@ -9,13 +9,14 @@ const PatientModel = Db.define<IPatientModel>(
   {
     id: {
       type: DataTypes.UUID,
-      defaultValue: () => uuidv4(),
+      defaultValue: DataTypes.UUIDV4,
       allowNull: false,
       primaryKey: true,
     },
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
+      unique:true,
       references: {
         model: UserModel,
         key: "id",

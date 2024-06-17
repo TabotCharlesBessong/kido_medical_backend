@@ -21,3 +21,10 @@
 2024-06-16 10:24:29 error : Authorization failed 
 2024-06-16 10:24:56 error : column "userId" does not exist 
 2024-06-16 13:12:19 error : startTime must be a `date` type, but the final value was: `Invalid Date` (cast from the value `"12:30:00"`). 
+2024-06-17 15:15:47 error : Authorization failed 
+2024-06-17 15:18:46 error : gender is a required field 
+2024-06-17 15:39:26 error : Could not get patient 
+2024-06-17 15:43:15 error : WHERE parameter "userId" has invalid "undefined" value 
+2024-06-17 15:50:24 error : Could not get patient 
+2024-06-17 15:51:27 error : Could not get patient 
+2024-06-17 15:51:36 error : WHERE parameter "userId" has invalid "undefined" value 

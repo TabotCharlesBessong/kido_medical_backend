@@ -1,3 +1,4 @@
+import { FindOptions } from "sequelize";
 import {
   IFindPatientQuery,
   IPatient,
@@ -20,6 +21,10 @@ class PatientDataSource implements IPatientDataSource {
     data: Partial<IPatient>
   ): Promise<void> {
     await PatientModel.update(data, searchBy);
+  }
+
+  async fetchAll(query: FindOptions<IPatient>): Promise<IPatient[]> {
+    return await PatientModel.findAll(query);
   }
 }
 
