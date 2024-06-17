@@ -7,3 +7,17 @@
 2024-06-12 15:43:59 error : userId is a required field 
 2024-06-12 16:25:12 error : Authorization failed 
 2024-06-12 16:39:48 error : We are sorry but you have already created a doctor account 
+2024-06-13 20:50:24 error : startTime must be a `date` type, but the final value was: `Invalid Date` (cast from the value `"12:30"`). 
+2024-06-13 20:59:23 error : endTime is a required field 
+2024-06-13 21:07:29 error : startTime must be in the format HH:MM 
+2024-06-13 21:56:46 error : We are sorry but you have already created a doctor account 
+2024-06-13 22:48:04 error : Authorization failed 
+2024-06-14 20:08:17 error : startTime must be a `date` type, but the final value was: `Invalid Date` (cast from the value `"08:30"`). 
+2024-06-15 23:11:50 error : Authorization failed 
+2024-06-15 23:28:13 error : column "userId" does not exist 
+2024-06-15 23:31:30 error : column "doctorId" does not exist 
+2024-06-15 23:35:41 error : column "userId" does not exist 
+2024-06-16 06:11:57 error : Authorization failed 
+2024-06-16 10:24:29 error : Authorization failed 
+2024-06-16 10:24:56 error : column "userId" does not exist 
+2024-06-16 13:12:19 error : startTime must be a `date` type, but the final value was: `Invalid Date` (cast from the value `"12:30:00"`). 

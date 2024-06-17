@@ -1,10 +1,7 @@
-import {
-  IFindDoctorQuery,
-  IDoctor,
-  IDoctorCreationBody,
-  IDoctorDataSource,
-} from "../interfaces/doctor.interface";
+import { FindOptions } from "sequelize";
+import { IDoctor, IDoctorCreationBody, IDoctorDataSource, IFindDoctorQuery } from "../interfaces/doctor.interface";
 import DoctorModel from "../models/doctor.model";
+
 
 class DoctorDataSource implements IDoctorDataSource {
   async create(record: IDoctorCreationBody): Promise<IDoctor> {
@@ -20,6 +17,10 @@ class DoctorDataSource implements IDoctorDataSource {
     data: Partial<IDoctor>
   ): Promise<void> {
     await DoctorModel.update(data, searchBy);
+  }
+
+  async fetchAll(query: FindOptions<IDoctor>): Promise<IDoctor[]> {
+    return await DoctorModel.findAll(query);
   }
 }
 

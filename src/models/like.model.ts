@@ -1,37 +1,34 @@
 import { DataTypes } from "sequelize";
 import Db from "../database";
+import { ILikeModel } from "../interfaces/post.interface";
+import { v4 as uuidv4 } from "uuid";
+import PostModel from "./post.model";
 import UserModel from "./user.model";
-import { IDoctorModel } from "../interfaces/doctor.interface";
 
-const DoctorModel = Db.define<IDoctorModel>(
-  "Doctor",
+const LikeModel = Db.define<ILikeModel>(
+  "LikeModel",
   {
     id: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: () => uuidv4(),
+      allowNull: false,
       primaryKey: true,
+    },
+    postId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: PostModel,
+        key: "id",
+      },
     },
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
-      unique:true,
       references: {
         model: UserModel,
         key: "id",
       },
-    },
-    specialization: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    verificationStatus: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: "PENDING",
-    },
-    documents: {
-      type: DataTypes.STRING,
-      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -46,18 +43,27 @@ const DoctorModel = Db.define<IDoctorModel>(
   },
   {
     timestamps: true,
-    tableName: "doctors",
+    tableName: "likes",
     createdAt: "createdAt",
     updatedAt: "updatedAt",
   }
 );
 
-UserModel.hasOne(DoctorModel, {
-  foreignKey: "userId",
-  as: "doctor",
+PostModel.hasMany(LikeModel, {
+  foreignKey: "postId",
+  as: "postLikes",
 });
-DoctorModel.belongsTo(UserModel, {
+
+LikeModel.belongsTo(PostModel, {
+  foreignKey: "postId",
+});
+
+UserModel.hasOne(LikeModel, {
+  foreignKey: "userId",
+  as: "userLikes",
+});
+LikeModel.belongsTo(UserModel, {
   foreignKey: "userId",
 });
 
-export default DoctorModel;
+export default LikeModel;

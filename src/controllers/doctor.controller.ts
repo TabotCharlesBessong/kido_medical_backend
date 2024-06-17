@@ -5,14 +5,22 @@ import UserService from "../services/user.services";
 import Utility from "../utils/index.utils";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import { UserRoles } from "../interfaces/enum/user.enum";
+import TimeSlotService from "../services/timeslot.service";
+import { ITimeSlotCreationBody } from "../interfaces/timeslot.interface";
 
 class DoctorController {
   private doctorService: DoctorService;
   private userService: UserService;
+  private timeSlotService: TimeSlotService;
 
-  constructor(_doctorService: DoctorService, _userService: UserService) {
+  constructor(
+    _doctorService: DoctorService,
+    _userService: UserService,
+    _timeSlotService: TimeSlotService
+  ) {
     this.doctorService = _doctorService;
     this.userService = _userService;
+    this.timeSlotService = _timeSlotService;
   }
 
   async registerDoctor(req: Request, res: Response) {
@@ -48,6 +56,66 @@ class DoctorController {
       );
     } catch (error) {
       return res.status(500).json({ error: "Server error" });
+    }
+  }
+
+  async getAllDoctors(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      let doctors = await this.doctorService.getDoctors();
+      return Utility.handleSuccess(
+        res,
+        "Account fetched successfully",
+        { doctors },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getAllTimeSlots(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      let timeslots = await this.timeSlotService.getTimeSlots()
+      return Utility.handleSuccess(
+        res,
+        "Account fetched successfully",
+        { timeslots },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async createTimeSlot(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      const newTimeSlot = {
+        doctorId: params.user.id,
+        startTime: params.startTime,
+        endTime: params.endTime,
+        isAvailable: params.isAvailable,
+      };
+
+      const timeSlot = await this.timeSlotService.createTimeSlot(newTimeSlot);
+      return Utility.handleSuccess(
+        res,
+        "Doctor created successfully",
+        { timeSlot },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      res.status(ResponseCode.SERVER_ERROR).json((error as TypeError).message);
     }
   }
 }
