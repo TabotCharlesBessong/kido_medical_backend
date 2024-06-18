@@ -51,6 +51,8 @@ const MessageModel = Db.define<IMessageModel>(
   {
     timestamps: true,
     tableName: "messages",
+    createdAt: "createdAt",
+    updatedAt: "updatedAt",
   }
 );
 
