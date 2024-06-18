@@ -99,14 +99,14 @@ class PatientController {
 
   async bookAppointment(req: Request, res: Response) {
     try {
-      const params = {...req.body}
+      const params = { ...req.body };
       const newAppointment = {
-        patientId:params.user.id,
-        doctorId:params.doctorId,
-        timeslotId:params.timeslotId,
-        date:params.date,
-        reason:params.reason
-      }
+        patientId: params.user.id,
+        doctorId: params.doctorId,
+        timeslotId: params.timeslotId,
+        date: params.date,
+        reason: params.reason,
+      };
       const appointment = await this.appointmentService.createAppointment(
         newAppointment
       );
@@ -124,7 +124,7 @@ class PatientController {
   async getAppointmentById(req: Request, res: Response) {
     try {
       const appointment = await this.appointmentService.getAppointmentById(
-        req.params.userId
+        req.params.appointmentId
       );
       if (!appointment)
         return Utility.handleError(
@@ -139,6 +139,25 @@ class PatientController {
           { appointment },
           ResponseCode.SUCCESS
         );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getAllAppointments(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      let appointments = await this.appointmentService.getAppointments();
+      return Utility.handleSuccess(
+        res,
+        "Account fetched successfully",
+        { appointments },
+        ResponseCode.SUCCESS
+      );
     } catch (error) {
       return Utility.handleError(
         res,

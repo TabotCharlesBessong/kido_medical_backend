@@ -34,3 +34,6 @@
 2024-06-17 17:15:19 error : reason is a required field 
 2024-06-17 17:15:51 error : patientId is a required field 
 2024-06-17 17:19:37 error : timeslotId is a required field 
+2024-06-18 16:33:27 error : date is a required field 
+2024-06-18 16:37:54 error : invalid input syntax for type uuid: "12345677" 
+2024-06-18 16:40:19 error : Could not get appointment 
