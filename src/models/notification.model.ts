@@ -83,7 +83,7 @@ NotificationModel.belongsTo(UserModel, {
   foreignKey: "userId",
 });
 
-MessageModel.hasMany(NotificationModel, {
+MessageModel.hasOne(NotificationModel, {
   foreignKey: "messageId",
   as: "messageNotifications",
 });
@@ -91,7 +91,7 @@ NotificationModel.belongsTo(MessageModel, {
   foreignKey: "messageId",
 });
 
-AppointmentModel.hasMany(NotificationModel, {
+AppointmentModel.hasOne(NotificationModel, {
   foreignKey: "appointmentId",
   as: "appointmentNotifications",
 });
