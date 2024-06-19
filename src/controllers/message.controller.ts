@@ -5,7 +5,7 @@ import MessageService from "../services/message.service";
 import Utility from "../utils/index.utils";
 
 class MessageController {
-  private messageService: MessageService;
+  public messageService: MessageService;
 
   constructor() {
     const messageDataSource = new MessageDataSource();
