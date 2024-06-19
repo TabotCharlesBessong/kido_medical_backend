@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import PatientController from "../controllers/patient.controller";
 import { Auth, validator } from "../middlewares/index.middlewares";
-import validationSchema from "../validators/patient.validator";
+import validationSchema from "../validators/patient.validator.schema";
 import PatientService from "../services/patient.service";
 import UserDataSource from "../datasources/user.datasource";
 import PatientDataSource from "../datasources/patient.datasource";

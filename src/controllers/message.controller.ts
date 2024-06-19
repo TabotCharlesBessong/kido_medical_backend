@@ -16,7 +16,13 @@ class MessageController {
 
   createMessage = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const message = await this.messageService.createMessage(req.body);
+      const params = {...req.body}
+      const newMessage = {
+        senderId:params.user.id,
+        receiverId:params.receiverId,
+        content:params.content
+      }
+      const message = await this.messageService.createMessage(newMessage);
       return Utility.handleSuccess(
         res,
         "Post updated successfully",

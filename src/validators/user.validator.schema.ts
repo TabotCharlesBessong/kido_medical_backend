@@ -22,11 +22,18 @@ const resetPasswordSchema = yup.object({
   password: yup.string().min(6).trim().required(),
 });
 
+const createMessageSchema = yup.object().shape({
+  // senderId: yup.string().uuid().required(),
+  receiverId: yup.string().uuid().required(),
+  content: yup.string().required(),
+});
+
 const validationSchema = {
   registrationSchema,
   loginSchema,
   forgotPasswordSchema,
-  resetPasswordSchema
+  resetPasswordSchema,
+  createMessageSchema
 }
 
 export default validationSchema
