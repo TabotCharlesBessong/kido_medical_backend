@@ -5,7 +5,7 @@ import {
   DoctorMiddleware,
   validator,
 } from "../middlewares/index.middlewares";
-import validationSchema from "../validators/post.validator";
+import validationSchema from "../validators/post.validator.schema";
 
 const createPostRoute = () => {
   const router = express.Router();

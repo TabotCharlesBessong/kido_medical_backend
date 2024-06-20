@@ -7,20 +7,25 @@ import { ResponseCode } from "../interfaces/enum/code.enum";
 import { UserRoles } from "../interfaces/enum/user.enum";
 import TimeSlotService from "../services/timeslot.service";
 import { ITimeSlotCreationBody } from "../interfaces/timeslot.interface";
+import AppointmentService from "../services/appointment.service";
+import sequelize from "../database";
 
 class DoctorController {
   private doctorService: DoctorService;
   private userService: UserService;
   private timeSlotService: TimeSlotService;
+  private appointmentService: AppointmentService;
 
   constructor(
     _doctorService: DoctorService,
     _userService: UserService,
-    _timeSlotService: TimeSlotService
+    _timeSlotService: TimeSlotService,
+    _appointmentService: AppointmentService
   ) {
     this.doctorService = _doctorService;
     this.userService = _userService;
     this.timeSlotService = _timeSlotService;
+    this.appointmentService = _appointmentService;
   }
 
   async registerDoctor(req: Request, res: Response) {
@@ -81,7 +86,7 @@ class DoctorController {
   async getAllTimeSlots(req: Request, res: Response) {
     try {
       const params = { ...req.body };
-      let timeslots = await this.timeSlotService.getTimeSlots()
+      let timeslots = await this.timeSlotService.getTimeSlots();
       return Utility.handleSuccess(
         res,
         "Account fetched successfully",
@@ -116,6 +121,50 @@ class DoctorController {
       );
     } catch (error) {
       res.status(ResponseCode.SERVER_ERROR).json((error as TypeError).message);
+    }
+  }
+
+  async approveAppointment(req: Request, res: Response) {
+    const transaction = await sequelize.transaction();
+    try {
+      const { id } = req.params;
+      await this.appointmentService.approveAppointment(id);
+      await transaction.commit();
+      return Utility.handleSuccess(
+        res,
+        "Appointment approved successfully",
+        {},
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      await transaction.rollback();
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async cancelAppointment(req: Request, res: Response) {
+    const transaction = await sequelize.transaction();
+    try {
+      const { id } = req.params;
+      await this.appointmentService.cancelAppointment(id);
+      await transaction.commit();
+      return Utility.handleSuccess(
+        res,
+        "Appointment canceled successfully",
+        {},
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      await transaction.rollback();
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
     }
   }
 }

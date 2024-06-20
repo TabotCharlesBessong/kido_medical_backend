@@ -29,3 +29,14 @@
 2024-06-17 15:51:27 error : Could not get patient 
 2024-06-17 15:51:36 error : WHERE parameter "userId" has invalid "undefined" value 
 2024-06-17 15:55:32 error : We are sorry but you have already created a patient account 
+2024-06-17 17:12:54 error : date is a required field 
+2024-06-17 17:14:52 error : date is a required field 
+2024-06-17 17:15:19 error : reason is a required field 
+2024-06-17 17:15:51 error : patientId is a required field 
+2024-06-17 17:19:37 error : timeslotId is a required field 
+2024-06-18 16:33:27 error : date is a required field 
+2024-06-18 16:37:54 error : invalid input syntax for type uuid: "12345677" 
+2024-06-18 16:40:19 error : Could not get appointment 
+2024-06-19 04:41:26 error : notNull Violation: MessageModel.senderId cannot be null 
+2024-06-19 04:56:09 error : Authorization failed 
+2024-06-20 07:08:46 error : Could not get appointment 
