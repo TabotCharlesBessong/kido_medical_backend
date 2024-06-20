@@ -39,3 +39,4 @@
 2024-06-18 16:40:19 error : Could not get appointment 
 2024-06-19 04:41:26 error : notNull Violation: MessageModel.senderId cannot be null 
 2024-06-19 04:56:09 error : Authorization failed 
+2024-06-20 07:08:46 error : Could not get appointment 
