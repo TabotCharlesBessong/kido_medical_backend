@@ -4,6 +4,7 @@ import { IAppointmentModel } from "../interfaces/appointment.interface";
 import { v4 as uuidv4 } from "uuid";
 import PatientModel from "./patient.model";
 import DoctorModel from "./doctor.model";
+import { AppointmentStatus } from "../interfaces/enum/patient.enum";
 
 const AppointmentModel = Db.define<IAppointmentModel>(
   "AppointmentModel",
@@ -40,6 +41,10 @@ const AppointmentModel = Db.define<IAppointmentModel>(
     },
     reason: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    staus: {
+      type: DataTypes.ENUM("PENDING", "APPROVED", "CANCELED"),
       allowNull: false,
     },
     createdAt: {

@@ -2,6 +2,8 @@ import AppointmentModel from "../models/appointment.model";
 import CommentModel from "../models/comment.model";
 import DoctorModel from "../models/doctor.model";
 import LikeModel from "../models/like.model";
+import MessageModel from "../models/message.model";
+import NotificationModel from "../models/notification.model";
 import PatientModel from "../models/patient.model";
 import PostModel from "../models/post.model";
 import TimeSlotModel from "../models/timeslot.model";
@@ -22,6 +24,8 @@ const DbInitialize = async () => {
     LikeModel.sync({ alter: false });
     PatientModel.sync({ alter: false });
     AppointmentModel.sync({ alter: false });
+    MessageModel.sync({ alter: false });
+    NotificationModel.sync({ alter: false });
   } catch (error) {
     console.log("Unable to connect our database", error);
   }
