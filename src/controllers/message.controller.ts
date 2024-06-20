@@ -3,14 +3,17 @@ import MessageDataSource from "../datasources/message.datasource";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import MessageService from "../services/message.service";
 import Utility from "../utils/index.utils";
+import NotificationDataSource from "../datasources/notification.datasource";
 
 class MessageController {
-  private messageService: MessageService;
+  public messageService: MessageService;
 
   constructor() {
     const messageDataSource = new MessageDataSource();
+    const notificationDataSource = new NotificationDataSource()
     this.messageService = new MessageService(
       messageDataSource,
+      notificationDataSource
     );
   }
 

@@ -1,4 +1,4 @@
-import { Model, Optional } from "sequelize";
+import { Model, Optional, Transaction } from "sequelize";
 import { NotificationType } from "./enum/notification.enum";
 
 
@@ -25,7 +25,25 @@ export interface INotificationModel
     INotification {}
 
 export interface INotificationDataSource {
-  create(record: INotificationCreationBody): Promise<INotification>;
+  fetchOne(query: IFindNotificationQuery): Promise<INotification | null>;
+  fetchAll(query: IFindNotificationQuery): Promise<INotification[]>;
+  create(
+    record: INotificationCreationBody,
+    options?: Partial<IFindNotificationQuery>
+  ): Promise<INotification>;
+  updateOne(
+    data: Partial<INotification>,
+    query: IFindNotificationQuery
+  ): Promise<void>;
   fetchAllByUserId(userId: string): Promise<INotification[]>;
   markAsRead(notificationId: string): Promise<void>;
+}
+
+export interface IFindNotificationQuery {
+  where: {
+    [key: string]: any;
+  };
+  transaction?: Transaction;
+  raw?: boolean;
+  returning?: boolean
 }

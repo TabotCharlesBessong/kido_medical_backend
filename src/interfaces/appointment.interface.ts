@@ -1,4 +1,5 @@
-import { FindOptions, Model, Optional } from "sequelize";
+import { AppointmentStatus } from './enum/patient.enum';
+import { FindOptions, Model, Optional, Transaction } from "sequelize";
 
 export interface IAppointment {
   id: string;
@@ -7,23 +8,27 @@ export interface IAppointment {
   timeslotId: string;
   date: Date;
   reason: string;
+  staus: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IAppointmentCreationBody
-  extends Optional<IAppointment, "id" | "createdAt" | "updatedAt"> {}
+  extends Optional<IAppointment, "id"| "createdAt" | "updatedAt"> {}
 
 export interface IAppointmentModel
   extends Model<IAppointment, IAppointmentCreationBody>,
     IAppointment {}
 
 export interface IAppointmentDataSource {
-  create(record: IAppointmentCreationBody): Promise<IAppointment>;
+  create(
+    record: IAppointmentCreationBody,
+    options?: Partial<IFindAppointmentQuery>
+  ): Promise<IAppointment>;
   fetchOne(query: IFindAppointmentQuery): Promise<IAppointment | null>;
   updateOne(
-    searchBy: IFindAppointmentQuery,
-    data: Partial<IAppointment>
+    data: Partial<IAppointment>,
+    query: IFindAppointmentQuery
   ): Promise<void>;
   fetchAll(query: FindOptions<IAppointment>): Promise<IAppointment[]>;
 }
@@ -33,5 +38,6 @@ export interface IFindAppointmentQuery {
     [key: string]: string;
   };
   raw?: boolean;
+  transaction?:Transaction
   returning?: boolean;
 }

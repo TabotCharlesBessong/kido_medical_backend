@@ -166,6 +166,39 @@ class PatientController {
       );
     }
   }
+
+  // async getAllAppointments(req: Request, res: Response) {
+  //   try {
+  //     const query = req.query;
+  //     const appointments = await this.appointmentService.fetchAllAppointments(query);
+  //     return Utility.handleSuccess(
+  //       res,
+  //       "Appointments fetched successfully",
+  //       { appointments },
+  //       ResponseCode.SUCCESS
+  //     );
+  //   } catch (error) {
+  //     return Utility.handleError(
+  //       res,
+  //       (error as TypeError).message,
+  //       ResponseCode.SERVER_ERROR
+  //     );
+  //   }
+  // }
+
+  async updateAppointment(req: Request, res: Response) {
+    try {
+      await this.appointmentService.updateAppointment(req.params.id, req.body);
+      return Utility.handleSuccess(
+        res,
+        "Appointment updated successfully",
+        {  },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      res.status(ResponseCode.SERVER_ERROR).json((error as TypeError).message);
+    }
+  }
 }
 
 export default PatientController;
