@@ -3,3 +3,10 @@ export const Gender = {
   FEMALE: "FEMALE",
   OTHER: "OTHER",
 };
+
+
+export const AppointmentStatus = {
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  CANCELED: "CANCELED"
+}

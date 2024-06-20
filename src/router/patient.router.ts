@@ -7,11 +7,12 @@ import UserDataSource from "../datasources/user.datasource";
 import PatientDataSource from "../datasources/patient.datasource";
 import AppointmentService from "../services/appointment.service";
 import AppointmentDataSource from "../datasources/appointment.datasource";
+import NotificationDataSource from "../datasources/notification.datasource";
 
 const createPatientRoute = () => {
   const router = express.Router();
   const patientService = new PatientService(new PatientDataSource());
-  const appointmentService = new AppointmentService(new AppointmentDataSource())
+  const appointmentService = new AppointmentService(new AppointmentDataSource(),new NotificationDataSource())
   const patientController = new PatientController(patientService,appointmentService);
 
   router.post(
