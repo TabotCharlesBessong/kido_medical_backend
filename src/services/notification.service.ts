@@ -1,22 +1,47 @@
-import {
-  INotification,
-  INotificationDataSource,
-} from "../interfaces/notification.interface";
+// import { autoInjectable } from "tsyringe";
+// import NotificationDataSource from "../datasources/notification.datasource";
+// import {
+//   IFindNotificationQuery,
+//   INotification,
+//   INotificationCreationBody,
+// } from "../interfaces/notification.interface";
 
-class NotificationService {
-  private notificationDataSource: INotificationDataSource;
+// @autoInjectable()
+// class NotificationService {
+//   private notificationDataSource: NotificationDataSource;
 
-  constructor(notificationDataSource: INotificationDataSource) {
-    this.notificationDataSource = notificationDataSource;
-  }
+//   constructor(_notificationDataSource: NotificationDataSource) {
+//     this.notificationDataSource = _notificationDataSource;
+//   }
 
-  async getAllNotificationsByUserId(userId: string): Promise<INotification[]> {
-    return await this.notificationDataSource.fetchAllByUserId(userId);
-  }
+//   async fetchNotificationById(id: string): Promise<INotification | null> {
+//     const query = {
+//       where: { id },
+//       raw: true,
+//     };
+//     return this.notificationDataSource.fetchOne(query);
+//   }
 
-  async markNotificationAsRead(notificationId: string): Promise<void> {
-    await this.notificationDataSource.markAsRead(notificationId);
-  }
-}
+//   async fetchAllNotifications(
+//     query: IFindNotificationQuery
+//   ): Promise<INotification[]> {
+//     return this.notificationDataSource.fetchAll(query);
+//   }
 
-export default NotificationService;
+//   async createNotification(
+//     data: Partial<INotification>
+//   ): Promise<INotification> {
+//     const notification = {
+//       ...data,
+//     } as INotificationCreationBody;
+//     return this.notificationDataSource.create(notification);
+//   }
+
+//   async markAsRead(notificationId: string): Promise<void> {
+//     const filter = { where: { id: notificationId } };
+//     const update = { read: true };
+//     await this.notificationDataSource.updateOne(update, filter);
+//   }
+// }
+
+// export default NotificationService;

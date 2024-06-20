@@ -3,19 +3,81 @@ import {
   IAppointmentCreationBody,
   IAppointment,
   IAppointmentDataSource,
+  IFindAppointmentQuery,
 } from "../interfaces/appointment.interface";
+import { NotificationType } from "../interfaces/enum/notification.enum";
+import { AppointmentStatus } from "../interfaces/enum/patient.enum";
+import { INotificationDataSource } from "../interfaces/notification.interface";
 
 class AppointmentService {
   private appointmentDataSource: IAppointmentDataSource;
+  private notificationDataSource: INotificationDataSource;
 
-  constructor(_appointmentDataSource:IAppointmentDataSource) {
-    this.appointmentDataSource = _appointmentDataSource
+  constructor(
+    appointmentDataSource: IAppointmentDataSource,
+    notificationDataSource: INotificationDataSource
+  ) {
+    this.appointmentDataSource = appointmentDataSource;
+    this.notificationDataSource = notificationDataSource;
   }
 
   async createAppointment(
-    data: IAppointmentCreationBody
+    record: Partial<IAppointment>
   ): Promise<IAppointment> {
-    return await this.appointmentDataSource.create(data);
+    const appointment = {
+      ...record,
+      status: AppointmentStatus.PENDING,
+    } as IAppointmentCreationBody;
+    const createdAppointment = await this.appointmentDataSource.create(
+      appointment
+    );
+
+    // Notify the doctor
+    await this.notificationDataSource.create({
+      userId: createdAppointment.patientId,
+      appointmentId: createdAppointment.id,
+      message: "Your appointment has been created",
+      type: NotificationType.APPOINTMENT_SCHEDULED,
+      read: false,
+    });
+
+    return createdAppointment;
+  }
+
+  async approveAppointment(appointmentId: string): Promise<void> {
+    const filter = { where: { id: appointmentId } };
+    const update = {
+      status: AppointmentStatus.APPROVED,
+    } as Partial<IAppointment>;
+    await this.appointmentDataSource.updateOne(update, filter);
+
+    const appointment = await this.getAppointmentById(appointmentId);
+    if (appointment) {
+      await this.notificationDataSource.create({
+        userId: appointment.patientId,
+        appointmentId: appointment.id,
+        message: "Your appointment has been approved",
+        type: NotificationType.APPOINTMENT_APPROVED,
+      });
+    }
+  }
+
+  async cancelAppointment(appointmentId: string): Promise<void> {
+    const filter = { where: { id: appointmentId } };
+    const update = {
+      status: AppointmentStatus.CANCELED,
+    } as Partial<IAppointment>;
+    await this.appointmentDataSource.updateOne(update, filter);
+
+    const appointment = await this.getAppointmentById(appointmentId);
+    if (appointment) {
+      await this.notificationDataSource.create({
+        userId: appointment.patientId,
+        appointmentId: appointment.id,
+        message: "Your appointment has been canceled",
+        type: NotificationType.APPOINTMENT_CANCELLED,
+      });
+    }
   }
 
   async getAppointmentById(
@@ -27,13 +89,11 @@ class AppointmentService {
   }
 
   async updateAppointment(
-    appointmentId: string,
+    id: string,
     data: Partial<IAppointment>
   ): Promise<void> {
-    await this.appointmentDataSource.updateOne(
-      { where: { id: appointmentId } },
-      data
-    );
+    const filter = { where: { id } } as IFindAppointmentQuery;
+    await this.appointmentDataSource.updateOne(data, filter);
   }
 
   async getAppointments(): Promise<IAppointment[]> {
