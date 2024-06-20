@@ -46,6 +46,15 @@ const createPatientRoute = () => {
     }
   );
 
+  router.put(
+    "/appointment/:appointmentId",
+    Auth(),
+    validator(validationSchema.bookAppointmentSchema),
+    (req: Request, res: Response) => {
+      return patientController.updateAppointment(req, res);
+    }
+  );
+
   router.get(
     "/appointment/all",
     Auth(),

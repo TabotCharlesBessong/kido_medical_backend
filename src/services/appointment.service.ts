@@ -44,10 +44,40 @@ class AppointmentService {
     return createdAppointment;
   }
 
-  async approveAppointment(appointmentId:string):Promise<void>{
-    const filter = {where:{id:appointmentId}}
-    const update = {status:AppointmentStatus.APPROVED} as Partial<IAppointment>
-    await this.appointmentDataSource.updateOne(update,filter)
+  async approveAppointment(appointmentId: string): Promise<void> {
+    const filter = { where: { id: appointmentId } };
+    const update = {
+      status: AppointmentStatus.APPROVED,
+    } as Partial<IAppointment>;
+    await this.appointmentDataSource.updateOne(update, filter);
+
+    const appointment = await this.getAppointmentById(appointmentId);
+    if (appointment) {
+      await this.notificationDataSource.create({
+        userId: appointment.patientId,
+        appointmentId: appointment.id,
+        message: "Your appointment has been approved",
+        type: NotificationType.APPOINTMENT_APPROVED,
+      });
+    }
+  }
+
+  async cancelAppointment(appointmentId: string): Promise<void> {
+    const filter = { where: { id: appointmentId } };
+    const update = {
+      status: AppointmentStatus.CANCELED,
+    } as Partial<IAppointment>;
+    await this.appointmentDataSource.updateOne(update, filter);
+
+    const appointment = await this.getAppointmentById(appointmentId);
+    if (appointment) {
+      await this.notificationDataSource.create({
+        userId: appointment.patientId,
+        appointmentId: appointment.id,
+        message: "Your appointment has been canceled",
+        type: NotificationType.APPOINTMENT_CANCELLED,
+      });
+    }
   }
 
   async getAppointmentById(

@@ -12,16 +12,24 @@ import {
 } from "../middlewares/index.middlewares";
 import TimeSlotService from "../services/timeslot.service";
 import TimeSlotDataSource from "../datasources/timeslot.datasource";
+import AppointmentDataSource from "../datasources/appointment.datasource";
+import AppointmentService from "../services/appointment.service";
+import NotificationDataSource from "../datasources/notification.datasource";
 
 const createDoctorRoute = () => {
   const router = express.Router();
   const userService = new UserService(new UserDataSource());
   const doctorService = new DoctorService(new DoctorDataSource());
+  const appointmentService = new AppointmentService(
+    new AppointmentDataSource(),
+    new NotificationDataSource()
+  );
   const timeSlotService = new TimeSlotService(new TimeSlotDataSource());
   const doctorController = new DoctorController(
     doctorService,
     userService,
-    timeSlotService
+    timeSlotService,
+    appointmentService
   );
 
   router.post(
@@ -49,6 +57,22 @@ const createDoctorRoute = () => {
   router.get("/all-time-slot", Auth(), (req: Request, res: Response) => {
     return doctorController.getAllTimeSlots(req, res);
   });
+
+  router.put(
+    "/cancel/:appointmentId",
+    DoctorMiddleware(),
+    (req: Request, res: Response) => {
+      doctorController.approveAppointment(req, res);
+    }
+  );
+
+  router.put(
+    "/approve/:appointmentId",
+    DoctorMiddleware(),
+    (req: Request, res: Response) => {
+      doctorController.approveAppointment(req, res);
+    }
+  );
 
   return router;
 };
