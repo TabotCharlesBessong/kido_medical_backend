@@ -1,16 +1,10 @@
 import express, { Request, Response } from "express";
 import UserController from "../controllers/user.controller";
-import TokenDataSource from "../datasources/token.datasource";
-import UserDataSource from "../datasources/user.datasource";
 import { validator } from "../middlewares/index.middlewares";
-import TokenService from "../services/token.service";
-import UserService from "../services/user.services";
 import validationSchema from "../validators/user.validator.schema";
 const createUserRoute = () => {
   const router = express.Router();
-  const userService = new UserService(new UserDataSource());
-  const tokenService = new TokenService(new TokenDataSource());
-  const userController = new UserController(userService, tokenService);
+  const userController = new UserController();
 
   router.post(
     "/register",

@@ -1,11 +1,12 @@
+import DoctorDataSource from "../datasources/doctor.datasource";
 import { IDoctor, IDoctorCreationBody, IDoctorDataSource, IFindDoctorQuery } from "../interfaces/doctor.interface";
 import UserService from "./user.services";
 
 class DoctorService {
-  private doctorDatasource: IDoctorDataSource;
+  private doctorDatasource: DoctorDataSource;
 
-  constructor(_doctorDatasource: IDoctorDataSource) {
-    this.doctorDatasource = _doctorDatasource;
+  constructor() {
+    this.doctorDatasource = new DoctorDataSource()
   }
 
   async createDoctor(record: IDoctorCreationBody): Promise<IDoctor> {

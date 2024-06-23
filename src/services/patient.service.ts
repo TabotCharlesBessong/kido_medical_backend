@@ -6,10 +6,10 @@ import {
 } from "../interfaces/patient.interface";
 
 class PatientService {
-  private patientDataSource: IPatientDataSource;
+  private patientDataSource: PatientDataSource;
 
-  constructor(_patientDataSource:IPatientDataSource) {
-    this.patientDataSource = _patientDataSource
+  constructor() {
+    this.patientDataSource = new PatientDataSource()
   }
 
   async createPatient(data: IPatientCreationBody): Promise<IPatient> {

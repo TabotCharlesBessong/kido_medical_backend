@@ -22,7 +22,7 @@ const DbInitialize = async () => {
     PostModel.sync({ alter: false });
     CommentModel.sync({ alter: false });
     LikeModel.sync({ alter: false });
-    // PatientModel.sync({ alter: false });
+    PatientModel.sync({ alter: false });
     // AppointmentModel.sync({ alter: false });
     // MessageModel.sync({ alter: false });
     // NotificationModel.sync({ alter: false });

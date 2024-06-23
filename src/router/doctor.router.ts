@@ -1,36 +1,15 @@
 import express, { Request, Response } from "express";
-import UserService from "../services/user.services";
-import UserDataSource from "../datasources/user.datasource";
-import DoctorService from "../services/doctor.service";
-import DoctorDataSource from "../datasources/doctor.datasource";
 import DoctorController from "../controllers/doctor.controller";
-import validationSchema from "../validators/doctor.validator.schema";
 import {
   Auth,
   DoctorMiddleware,
   validator,
 } from "../middlewares/index.middlewares";
-import TimeSlotService from "../services/timeslot.service";
-import TimeSlotDataSource from "../datasources/timeslot.datasource";
-import AppointmentDataSource from "../datasources/appointment.datasource";
-import AppointmentService from "../services/appointment.service";
-import NotificationDataSource from "../datasources/notification.datasource";
+import validationSchema from "../validators/doctor.validator.schema";
 
 const createDoctorRoute = () => {
   const router = express.Router();
-  const userService = new UserService(new UserDataSource());
-  const doctorService = new DoctorService(new DoctorDataSource());
-  const appointmentService = new AppointmentService(
-    new AppointmentDataSource(),
-    new NotificationDataSource()
-  );
-  const timeSlotService = new TimeSlotService(new TimeSlotDataSource());
-  const doctorController = new DoctorController(
-    doctorService,
-    userService,
-    timeSlotService,
-    appointmentService
-  );
+  const doctorController = new DoctorController();
 
   router.post(
     "/create",
