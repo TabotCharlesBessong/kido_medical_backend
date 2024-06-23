@@ -10,11 +10,9 @@ class PatientController {
   private appointmentService: AppointmentService;
 
   constructor(
-    _patientService: PatientService,
-    _appointmentService: AppointmentService
   ) {
-    this.patientService = _patientService;
-    this.appointmentService = _appointmentService;
+    this.patientService = new PatientService();
+    this.appointmentService = new AppointmentService();
   }
 
   async createPatient(req: Request, res: Response) {

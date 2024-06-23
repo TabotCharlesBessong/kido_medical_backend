@@ -1,27 +1,27 @@
+import bcrypt from "bcrypt";
 import { Request, Response } from "express";
-import UserService from "../services/user.services";
+import JWT from "jsonwebtoken";
+import moment from "moment";
+import { ResponseCode } from "../interfaces/enum/code.enum";
 import {
   AccountStatus,
   EmailStatus,
   UserRoles,
 } from "../interfaces/enum/user.enum";
-import { IUserCreationBody } from "../interfaces/user.interfaces";
-import bcrypt from "bcrypt";
-import Utility from "../utils/index.utils";
-import { ResponseCode } from "../interfaces/enum/code.enum";
-import JWT from "jsonwebtoken";
-import TokenService from "../services/token.service";
 import { IToken } from "../interfaces/token.interface";
+import { IUserCreationBody } from "../interfaces/user.interfaces";
 import EmailService from "../services/email.service";
-import moment from "moment";
+import TokenService from "../services/token.service";
+import UserService from "../services/user.services";
+import Utility from "../utils/index.utils";
 
 class UserController {
   private userService: UserService;
   private tokenService: TokenService;
 
-  constructor(_userService: UserService, _tokenService: TokenService) {
-    this.userService = _userService;
-    this.tokenService = _tokenService;
+  constructor() {
+    this.userService = new UserService();
+    this.tokenService = new TokenService();
   }
 
   async register(req: Request, res: Response) {
@@ -148,11 +148,7 @@ class UserController {
         status: this.tokenService.TokenStatus.NOTUSED,
       });
 
-      if(!isValidToken){
-        return Utility.handleError(res,"Token has expired",ResponseCode.NOT_FOUND)
-      }
-
-      if(isValidToken && moment(isValidToken.expires).diff(moment(),"minute")<=0){
+      if (!isValidToken) {
         return Utility.handleError(
           res,
           "Token has expired",
@@ -160,8 +156,19 @@ class UserController {
         );
       }
 
-      let user = await this.userService.getUserByField({email:params.email})
-      if(!user){
+      if (
+        isValidToken &&
+        moment(isValidToken.expires).diff(moment(), "minute") <= 0
+      ) {
+        return Utility.handleError(
+          res,
+          "Token has expired",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      let user = await this.userService.getUserByField({ email: params.email });
+      if (!user) {
         return Utility.handleError(
           res,
           "Invalid user records",
@@ -169,12 +176,23 @@ class UserController {
         );
       }
 
-      const _password = bcrypt.hashSync(params.password,10)
+      const _password = bcrypt.hashSync(params.password, 10);
 
-      await this.userService.updateRecord({id:user.id},{password:_password})
+      await this.userService.updateRecord(
+        { id: user.id },
+        { password: _password }
+      );
 
-      await this.tokenService.updateRecord({id:isValidToken.id},{status:this.tokenService.TokenStatus.USED})
-      return Utility.handleSuccess(res,"Password reset successfully",{},ResponseCode.SUCCESS)
+      await this.tokenService.updateRecord(
+        { id: isValidToken.id },
+        { status: this.tokenService.TokenStatus.USED }
+      );
+      return Utility.handleSuccess(
+        res,
+        "Password reset successfully",
+        {},
+        ResponseCode.SUCCESS
+      );
     } catch (error) {
       return Utility.handleError(
         res,

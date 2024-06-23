@@ -1,11 +1,12 @@
 // import { where } from "sequelize"
+import UserDataSource from "../datasources/user.datasource";
 import { IFindUserQuery, IUser, IUserCreationBody, IUserDataSource } from "../interfaces/user.interfaces"
 // import { raw } from "express"
 
 class UserService {
-  private userDataSource: IUserDataSource;
-  constructor(_userDataSource: IUserDataSource) {
-    this.userDataSource = _userDataSource;
+  private userDataSource: UserDataSource;
+  constructor() {
+    this.userDataSource = new UserDataSource();
   }
 
   async getUserByField(record: Partial<IUser>): Promise<IUser | null> {

@@ -1,10 +1,11 @@
+import TimeSlotDataSource from "../datasources/timeslot.datasource";
 import TimeslotDatasource from "../datasources/timeslot.datasource";
 import { ITimeSlotCreationBody, ITimeSlot, ITimeSlotDataSource } from "../interfaces/timeslot.interface";
 
 class TimeSlotService {
-  private timeSlotDatasource: ITimeSlotDataSource;
-  constructor(_timeSlotDatasource: ITimeSlotDataSource) {
-    this.timeSlotDatasource = _timeSlotDatasource;
+  private timeSlotDatasource: TimeSlotDataSource;
+  constructor() {
+    this.timeSlotDatasource = new TimeSlotDataSource();
   }
 
   async createTimeSlot(record: ITimeSlotCreationBody): Promise<ITimeSlot> {
