@@ -62,3 +62,10 @@
 2024-06-23 09:40:30 error : Authorization failed 
 2024-06-23 09:40:46 error : Could not get patient 
 2024-06-23 10:30:59 error : Could not get patient 
+2024-06-23 10:33:15 error : WHERE parameter "userId" has invalid "undefined" value 
+2024-06-23 10:44:18 error : WHERE parameter "patientId" has invalid "undefined" value 
+2024-06-23 10:46:24 error : Could not get patient 
+2024-06-23 10:47:23 error : Could not get patient 
+2024-06-23 10:48:30 error : Could not get patient 
+2024-06-23 11:03:49 error : Authorization failed 
+2024-06-23 11:22:27 error : Authorization failed 

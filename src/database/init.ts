@@ -23,9 +23,9 @@ const DbInitialize = async () => {
     CommentModel.sync({ alter: false });
     LikeModel.sync({ alter: false });
     PatientModel.sync({ alter: false });
-    // AppointmentModel.sync({ alter: false });
-    // MessageModel.sync({ alter: false });
-    // NotificationModel.sync({ alter: false });
+    AppointmentModel.sync({ alter: false });
+    MessageModel.sync({ alter: false });
+    NotificationModel.sync({ alter: false });
   } catch (error) {
     console.log("Unable to connect our database", error);
   }
