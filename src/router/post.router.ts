@@ -24,6 +24,10 @@ const createPostRoute = () => {
     return postController.getPostById(req, res);
   });
 
+  router.get("/all", Auth(), (req: Request, res: Response) => {
+    return postController.getAllPosts(req, res);
+  });
+
   router.put(
     "/:postId",
     validator(validationSchema.updatePostSchema),
@@ -57,6 +61,7 @@ const createPostRoute = () => {
   router.post(
     "/:postId/like",
     // validator(validationSchema.addLikeSchema),
+    Auth(),
     (req: Request, res: Response) => {
       return postController.addLikeToPost(req, res);
     }

@@ -9,6 +9,7 @@ import CommentModel from "../models/comment.model";
 import LikeModel from "../models/like.model";
 import UserModel from "../models/user.model";
 import DoctorModel from "../models/doctor.model";
+import { FindOptions } from "sequelize";
 
 class PostDataSource implements IPostDataSource {
   async create(record: IPostCreationBody): Promise<IPost> {
@@ -23,12 +24,12 @@ class PostDataSource implements IPostDataSource {
         {
           model: LikeModel,
           as: "postLikes",
-          include: [{ model: UserModel, as: "userLikes" }],
+          include: [{ model: UserModel, as: "likeUser" }],
         },
         {
-          model:DoctorModel,
-          as:"postDoctor"
-        }
+          model: DoctorModel,
+          as: "postDoctor",
+        },
       ],
     });
   }
@@ -52,7 +53,20 @@ class PostDataSource implements IPostDataSource {
         {
           model: LikeModel,
           as: "postLikes",
-          include: [{ model: UserModel, as: "userLikes" }],
+          include: [{ model: UserModel, as: "likeUser" }],
+        },
+      ],
+    });
+  }
+
+  async fetchAllPost(query: FindOptions<IPost>): Promise<IPost[]> {
+    return await PostModel.findAll({
+      include: [
+        { model: CommentModel, as: "postComments" },
+        {
+          model: LikeModel,
+          as: "postLikes",
+          include: [{ model: UserModel, as: "likeUser" }],
         },
       ],
     });

@@ -53,6 +53,11 @@ class PostService {
       await this.updatePost(postId, { likesCount: post.likesCount - 1 });
     }
   }
+
+  async getPosts(): Promise<IPost[]> {
+    const query = { where: {}, raw: true };
+    return this.postDataSource.fetchAllPost(query);
+  }
 }
 
 export default PostService;
