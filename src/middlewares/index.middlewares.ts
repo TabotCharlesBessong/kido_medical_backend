@@ -1,14 +1,13 @@
-import Jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
+import Jwt from "jsonwebtoken";
 import { Schema } from "yup";
-import Utility from "../utils/index.utils";
 import { ResponseCode } from "../interfaces/enum/code.enum";
+import { UserRoles } from "../interfaces/enum/user.enum";
 import { IUser } from "../interfaces/user.interfaces";
 import UserService from "../services/user.services";
-import UserDataSource from "../datasources/user.datasource";
-import { UserRoles } from "../interfaces/enum/user.enum";
+import Utility from "../utils/index.utils";
 
-const userService = new UserService(new UserDataSource());
+const userService = new UserService();
 
 export const validator = (schema: Schema<any>) => {
   return async (req: Request, res: Response, next: NextFunction) => {

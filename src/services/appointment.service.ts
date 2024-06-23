@@ -1,4 +1,5 @@
 import AppointmentDataSource from "../datasources/appointment.datasource";
+import NotificationDataSource from "../datasources/notification.datasource";
 import {
   IAppointmentCreationBody,
   IAppointment,
@@ -10,15 +11,13 @@ import { AppointmentStatus } from "../interfaces/enum/patient.enum";
 import { INotificationDataSource } from "../interfaces/notification.interface";
 
 class AppointmentService {
-  private appointmentDataSource: IAppointmentDataSource;
-  private notificationDataSource: INotificationDataSource;
+  private appointmentDataSource: AppointmentDataSource;
+  private notificationDataSource: NotificationDataSource;
 
   constructor(
-    appointmentDataSource: IAppointmentDataSource,
-    notificationDataSource: INotificationDataSource
   ) {
-    this.appointmentDataSource = appointmentDataSource;
-    this.notificationDataSource = notificationDataSource;
+    this.appointmentDataSource = new AppointmentDataSource();
+    this.notificationDataSource = new NotificationDataSource();
   }
 
   async createAppointment(

@@ -1,14 +1,12 @@
 import { Request, Response } from "express";
-import { IDoctorCreationBody } from "../interfaces/doctor.interface";
-import DoctorService from "../services/doctor.service";
-import UserService from "../services/user.services";
-import Utility from "../utils/index.utils";
+import sequelize from "../database";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import { UserRoles } from "../interfaces/enum/user.enum";
-import TimeSlotService from "../services/timeslot.service";
-import { ITimeSlotCreationBody } from "../interfaces/timeslot.interface";
 import AppointmentService from "../services/appointment.service";
-import sequelize from "../database";
+import DoctorService from "../services/doctor.service";
+import TimeSlotService from "../services/timeslot.service";
+import UserService from "../services/user.services";
+import Utility from "../utils/index.utils";
 
 class DoctorController {
   private doctorService: DoctorService;
@@ -16,16 +14,11 @@ class DoctorController {
   private timeSlotService: TimeSlotService;
   private appointmentService: AppointmentService;
 
-  constructor(
-    _doctorService: DoctorService,
-    _userService: UserService,
-    _timeSlotService: TimeSlotService,
-    _appointmentService: AppointmentService
-  ) {
-    this.doctorService = _doctorService;
-    this.userService = _userService;
-    this.timeSlotService = _timeSlotService;
-    this.appointmentService = _appointmentService;
+  constructor() {
+    this.doctorService = new DoctorService();
+    this.userService = new UserService();
+    this.timeSlotService = new TimeSlotService();
+    this.appointmentService = new AppointmentService();
   }
 
   async registerDoctor(req: Request, res: Response) {

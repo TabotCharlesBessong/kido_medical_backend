@@ -56,6 +56,7 @@ PostModel.hasMany(LikeModel, {
 
 LikeModel.belongsTo(PostModel, {
   foreignKey: "postId",
+  as:"likePost"
 });
 
 UserModel.hasOne(LikeModel, {
@@ -64,6 +65,7 @@ UserModel.hasOne(LikeModel, {
 });
 LikeModel.belongsTo(UserModel, {
   foreignKey: "userId",
+  as:"likeUser"
 });
 
 export default LikeModel;

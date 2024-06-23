@@ -69,7 +69,7 @@ class PostController {
       return Utility.handleSuccess(
         res,
         "Post updated successfully",
-        {post},
+        { post },
         ResponseCode.SUCCESS
       );
     } catch (error) {
@@ -122,7 +122,7 @@ class PostController {
   async addCommentToPost(req: Request, res: Response) {
     try {
       const postId = req.params.postId;
-      const userId = req.body.params.user.id;
+      const userId = req.body.user.id;
       const content = req.body.content;
       await this.postService.addCommentToPost(postId, userId, content);
       return Utility.handleSuccess(
@@ -143,7 +143,7 @@ class PostController {
   async addLikeToPost(req: Request, res: Response) {
     try {
       const postId = req.params.postId;
-      const userId = req.body.userId;
+      const userId = req.body.user.id;
       await this.postService.addLikeToPost(postId, userId);
       return Utility.handleSuccess(
         res,
@@ -169,6 +169,25 @@ class PostController {
         res,
         "Like removed successfully",
         {},
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getAllPosts(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      let posts = await this.postService.getPosts();
+      return Utility.handleSuccess(
+        res,
+        "Account fetched successfully",
+        { posts },
         ResponseCode.SUCCESS
       );
     } catch (error) {
