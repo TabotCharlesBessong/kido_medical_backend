@@ -69,3 +69,7 @@
 2024-06-23 10:48:30 error : Could not get patient 
 2024-06-23 11:03:49 error : Authorization failed 
 2024-06-23 11:22:27 error : Authorization failed 
+2024-06-23 16:29:25 error : Authorization failed 
+2024-06-23 16:29:46 error : Authorization failed 
+2024-06-23 16:30:52 error : WHERE parameter "id" has invalid "undefined" value 
+2024-06-23 16:44:05 error : WHERE parameter "id" has invalid "undefined" value 
