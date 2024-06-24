@@ -73,3 +73,13 @@
 2024-06-23 16:29:46 error : Authorization failed 
 2024-06-23 16:30:52 error : WHERE parameter "id" has invalid "undefined" value 
 2024-06-23 16:44:05 error : WHERE parameter "id" has invalid "undefined" value 
+2024-06-24 23:41:24 error : Authorization failed 
+2024-06-24 23:42:56 error : weight is a required field 
+2024-06-24 23:43:38 error : bloodPressure is a required field 
+2024-06-24 23:44:06 error : height must be a positive number 
+2024-06-24 23:46:31 error : respiratoryRate is a required field 
+2024-06-24 23:46:43 error : notNull Violation: VitalSignModel.patientId cannot be null,
+notNull Violation: VitalSignModel.appointmentId cannot be null 
+2024-06-24 23:48:48 error : insert or update on table "vitalsigns" violates foreign key constraint "vitalsigns_doctorId_fkey" 
+2024-06-24 23:49:20 error : insert or update on table "vitalsigns" violates foreign key constraint "vitalsigns_doctorId_fkey" 
+2024-06-24 23:50:49 error : insert or update on table "vitalsigns" violates foreign key constraint "vitalsigns_patientId_fkey" 

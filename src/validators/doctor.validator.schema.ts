@@ -57,9 +57,19 @@ const timeSlotSchema = yup.object({
 //   isAvailable: yup.boolean().default(true),
 // });
 
+const vitalSignSchema = yup.object().shape({
+  weight: yup.number().required().positive(),
+  height: yup.number().required().positive(),
+  bloodPressure: yup.string().required(),
+  pulse: yup.number().required().positive(),
+  respiratoryRate: yup.number().required().positive(),
+  temperature: yup.number().required().positive(),
+});
+
 const validationSchema = {
   doctorValidationSchema,
-  timeSlotSchema
+  timeSlotSchema,
+  vitalSignSchema
 }
 
 export default validationSchema

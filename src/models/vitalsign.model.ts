@@ -20,7 +20,7 @@ const VitalSignModel = Db.define<IVitalSignModel>(
       allowNull: false,
       references: {
         model: PatientModel,
-        key: "userId",
+        key: "id",
       },
     },
     doctorId: {
@@ -28,7 +28,7 @@ const VitalSignModel = Db.define<IVitalSignModel>(
       allowNull: false,
       references: {
         model: DoctorModel,
-        key: "id",
+        key: "userId",
       },
     },
     appointmentId: {

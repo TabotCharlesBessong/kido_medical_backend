@@ -53,6 +53,15 @@ const createDoctorRoute = () => {
     }
   );
 
+  router.post(
+    "/record/sign",
+    DoctorMiddleware(),
+    validator(validationSchema.vitalSignSchema),
+    (req: Request, res: Response) => {
+      doctorController.createVitalSing(req, res);
+    }
+  );
+
   return router;
 };
 

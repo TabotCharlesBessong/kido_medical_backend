@@ -7,18 +7,21 @@ import DoctorService from "../services/doctor.service";
 import TimeSlotService from "../services/timeslot.service";
 import UserService from "../services/user.services";
 import Utility from "../utils/index.utils";
+import VitalSignService from "../services/vitalsign.services";
 
 class DoctorController {
   private doctorService: DoctorService;
   private userService: UserService;
   private timeSlotService: TimeSlotService;
   private appointmentService: AppointmentService;
+  private vitalsignService: VitalSignService;
 
   constructor() {
     this.doctorService = new DoctorService();
     this.userService = new UserService();
     this.timeSlotService = new TimeSlotService();
     this.appointmentService = new AppointmentService();
+    this.vitalsignService = new VitalSignService();
   }
 
   async registerDoctor(req: Request, res: Response) {
@@ -153,6 +156,36 @@ class DoctorController {
       );
     } catch (error) {
       await transaction.rollback();
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async createVitalSing(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      const newSigns = {
+        doctorId: params.user.id,
+        patientId: params.patientId,
+        appointmentId: params.appointmentId,
+        weight: params.weight,
+        height: params.height,
+        bloodPressure: params.bloodPressure,
+        pulse: params.pulse,
+        respiratoryRate: params.respiratoryRate,
+        temperature: params.temperature,
+      };
+      const post = await this.vitalsignService.recordVitalSigns(newSigns);
+      return Utility.handleSuccess(
+        res,
+        "Vital signs created successfully",
+        { post },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
       return Utility.handleError(
         res,
         (error as TypeError).message,
