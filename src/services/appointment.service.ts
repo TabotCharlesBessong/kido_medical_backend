@@ -46,7 +46,7 @@ class AppointmentService {
   async approveAppointment(appointmentId: string): Promise<void> {
     const filter = { where: { id: appointmentId } };
     const update = {
-      status: AppointmentStatus.APPROVED,
+      staus: AppointmentStatus.APPROVED,
     } as Partial<IAppointment>;
     await this.appointmentDataSource.updateOne(update, filter);
 
@@ -64,7 +64,7 @@ class AppointmentService {
   async cancelAppointment(appointmentId: string): Promise<void> {
     const filter = { where: { id: appointmentId } };
     const update = {
-      status: AppointmentStatus.CANCELED,
+      staus: AppointmentStatus.CANCELED,
     } as Partial<IAppointment>;
     await this.appointmentDataSource.updateOne(update, filter);
 

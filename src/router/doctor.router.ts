@@ -38,15 +38,15 @@ const createDoctorRoute = () => {
   });
 
   router.put(
-    "/cancel/:appointmentId",
+    "/cancel/:id",
     DoctorMiddleware(),
     (req: Request, res: Response) => {
-      doctorController.approveAppointment(req, res);
+      doctorController.cancelAppointment(req, res);
     }
   );
 
   router.put(
-    "/approve/:appointmentId",
+    "/approve/:id",
     DoctorMiddleware(),
     (req: Request, res: Response) => {
       doctorController.approveAppointment(req, res);
