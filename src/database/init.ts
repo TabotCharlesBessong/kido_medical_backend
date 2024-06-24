@@ -9,6 +9,7 @@ import PostModel from "../models/post.model";
 import TimeSlotModel from "../models/timeslot.model";
 import TokenModel from "../models/token.model";
 import UserModel from "../models/user.model";
+import VitalSignModel from "../models/vitalsign.model";
 import Db from "./index";
 
 const DbInitialize = async () => {
@@ -26,6 +27,7 @@ const DbInitialize = async () => {
     AppointmentModel.sync({ alter: false });
     MessageModel.sync({ alter: false });
     NotificationModel.sync({ alter: false });
+    VitalSignModel.sync({ alter: false });
   } catch (error) {
     console.log("Unable to connect our database", error);
   }

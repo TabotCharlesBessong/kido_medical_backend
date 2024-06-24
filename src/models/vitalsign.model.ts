@@ -1,13 +1,13 @@
 import { DataTypes } from "sequelize";
 import Db from "../database";
-import { IAppointmentModel } from "../interfaces/appointment.interface";
+import { IVitalSign, IVitalSignModel } from "../interfaces/vitalsign.interface";
 import { v4 as uuidv4 } from "uuid";
 import PatientModel from "./patient.model";
 import DoctorModel from "./doctor.model";
-import { AppointmentStatus } from "../interfaces/enum/patient.enum";
+import AppointmentModel from "./appointment.model";
 
-const AppointmentModel = Db.define<IAppointmentModel>(
-  "AppointmentModel",
+const VitalSignModel = Db.define<IVitalSignModel>(
+  "VitalSignModel",
   {
     id: {
       type: DataTypes.UUID,
@@ -17,7 +17,7 @@ const AppointmentModel = Db.define<IAppointmentModel>(
     },
     patientId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: PatientModel,
         key: "userId",
@@ -25,28 +25,43 @@ const AppointmentModel = Db.define<IAppointmentModel>(
     },
     doctorId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: DoctorModel,
         key: "id",
       },
     },
-    timeslotId: {
+    appointmentId: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: AppointmentModel,
+        key: "id",
+      },
     },
-    date: {
-      type: DataTypes.DATE,
+    weight: {
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
-    reason: {
+    height: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    bloodPressure: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    staus: {
-      type: DataTypes.ENUM("PENDING", "APPROVED", "CANCELED"),
+    pulse: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: AppointmentStatus.PENDING,
+    },
+    respiratoryRate: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    temperature: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -61,26 +76,26 @@ const AppointmentModel = Db.define<IAppointmentModel>(
   },
   {
     timestamps: true,
-    tableName: "appointments",
+    tableName: "vitalsigns",
     createdAt: "createdAt",
     updatedAt: "updatedAt",
   }
 );
 
-PatientModel.hasMany(AppointmentModel, {
+PatientModel.hasMany(VitalSignModel, {
   foreignKey: "patientId",
-  as: "patientAppointments",
+  as: "patientVitalSigns",
 });
-AppointmentModel.belongsTo(PatientModel, {
+VitalSignModel.belongsTo(PatientModel, {
   foreignKey: "patientId",
 });
 
-DoctorModel.hasMany(AppointmentModel, {
+DoctorModel.hasMany(VitalSignModel, {
   foreignKey: "doctorId",
-  as: "doctorAppointments",
+  as: "doctorPatientsSigns",
 });
-AppointmentModel.belongsTo(DoctorModel, {
+VitalSignModel.belongsTo(DoctorModel, {
   foreignKey: "doctorId",
 });
 
-export default AppointmentModel;
+export default VitalSignModel;
