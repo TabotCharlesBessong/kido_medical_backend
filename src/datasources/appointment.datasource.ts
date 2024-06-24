@@ -32,7 +32,7 @@ class AppointmentDataSource implements IAppointmentDataSource {
     data: Partial<IAppointment>,
     query: IFindAppointmentQuery
   ): Promise<void> {
-    await AppointmentModel.update(data, query);
+    await AppointmentModel.update(data, { ...query, returning: true });
   }
 
   async fetchAll(query: FindOptions<IAppointment>): Promise<IAppointment[]> {
