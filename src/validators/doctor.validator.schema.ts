@@ -66,10 +66,23 @@ const vitalSignSchema = yup.object().shape({
   temperature: yup.number().required().positive(),
 });
 
+const consultationSchema = yup.object().shape({
+  // id: yup.string().required(),
+  // patientId: yup.string().required(),
+  // doctorId: yup.string().required(),
+  // appointmentId: yup.string().required(),
+  presentingComplaints: yup.string().required(),
+  pastHistory: yup.string().required(),
+  diagnosticImpression: yup.string().required(),
+  investigations: yup.string().required(),
+  treatment: yup.string().required()
+});
+
 const validationSchema = {
   doctorValidationSchema,
   timeSlotSchema,
-  vitalSignSchema
+  vitalSignSchema,
+  consultationSchema
 }
 
 export default validationSchema

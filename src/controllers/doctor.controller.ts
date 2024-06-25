@@ -313,92 +313,92 @@ class DoctorController {
     }
   }
 
-  // async getVitalsById(req: Request, res: Response) {
-  //   try {
-  //     const vitalId = req.params.vitalId;
-  //     const vital = await this.vitalsignService.getVitalSignsById(vitalId);
-  //     if (!vital) {
-  //       return Utility.handleError(
-  //         res,
-  //         "Vital signs not created yet",
-  //         ResponseCode.NOT_FOUND
-  //       );
-  //     }
-  //     return Utility.handleSuccess(
-  //       res,
-  //       "Post retrieved successfully",
-  //       { vital },
-  //       ResponseCode.SUCCESS
-  //     );
-  //   } catch (error) {
-  //     return Utility.handleError(
-  //       res,
-  //       (error as TypeError).message,
-  //       ResponseCode.SERVER_ERROR
-  //     );
-  //   }
-  // }
+  async getConsultationById(req: Request, res: Response) {
+    try {
+      const consultationId = req.params.consultationId;
+      const consultation = await this.consultationService.getConsultationById(consultationId);
+      if (!consultation) {
+        return Utility.handleError(
+          res,
+          "No existing consultation",
+          ResponseCode.NOT_FOUND
+        );
+      }
+      return Utility.handleSuccess(
+        res,
+        "Consultation retrieved successfully",
+        { consultation },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
 
-  // async updateVitals(req: Request, res: Response) {
-  //   try {
-  //     const vitalId = req.params.vitalId;
-  //     const data = { ...req.body };
-  //     const vitals = await this.vitalsignService.updateVitalSigns(
-  //       vitalId,
-  //       data
-  //     );
-  //     return Utility.handleSuccess(
-  //       res,
-  //       "Vitals updated successfully",
-  //       { vitals },
-  //       ResponseCode.SUCCESS
-  //     );
-  //   } catch (error) {
-  //     return Utility.handleError(
-  //       res,
-  //       (error as TypeError).message,
-  //       ResponseCode.SERVER_ERROR
-  //     );
-  //   }
-  // }
+  async updateConsultation(req: Request, res: Response) {
+    try {
+      const consultationId = req.params.consultationId;
+      const data = { ...req.body };
+      const consultations = await this.consultationService.updateConsultation(
+        consultationId,
+        data
+      );
+      return Utility.handleSuccess(
+        res,
+        "Vitals updated successfully",
+        { consultations },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
 
-  // async destroyVitals(req: Request, res: Response) {
-  //   try {
-  //     const vitalId = req.params.vitalId;
-  //     await this.vitalsignService.deleteVitalSigns(vitalId);
-  //     return Utility.handleSuccess(
-  //       res,
-  //       "Vitals deleted successfully",
-  //       {},
-  //       ResponseCode.SUCCESS
-  //     );
-  //   } catch (error) {
-  //     return Utility.handleError(
-  //       res,
-  //       (error as TypeError).message,
-  //       ResponseCode.SERVER_ERROR
-  //     );
-  //   }
-  // }
+  async destroyConsultation(req: Request, res: Response) {
+    try {
+      const consultationId = req.params.consultationId;
+      await this.consultationService.deleteConsultation(consultationId);
+      return Utility.handleSuccess(
+        res,
+        "Consulation deleted successfully",
+        {},
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
 
-  // async getAllVitals(req: Request, res: Response) {
-  //   try {
-  //     const params = { ...req.body };
-  //     let vitals = await this.vitalsignService.getVitalSigns();
-  //     return Utility.handleSuccess(
-  //       res,
-  //       "Account fetched successfully",
-  //       { vitals },
-  //       ResponseCode.SUCCESS
-  //     );
-  //   } catch (error) {
-  //     return Utility.handleError(
-  //       res,
-  //       (error as TypeError).message,
-  //       ResponseCode.SERVER_ERROR
-  //     );
-  //   }
-  // }
+  async getAllConsultations(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      let consultations = await this.consultationService.getConsultations();
+      return Utility.handleSuccess(
+        res,
+        "Account fetched successfully",
+        { consultations },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
 }
 
 export default DoctorController;
