@@ -83,3 +83,7 @@ notNull Violation: VitalSignModel.appointmentId cannot be null
 2024-06-24 23:48:48 error : insert or update on table "vitalsigns" violates foreign key constraint "vitalsigns_doctorId_fkey" 
 2024-06-24 23:49:20 error : insert or update on table "vitalsigns" violates foreign key constraint "vitalsigns_doctorId_fkey" 
 2024-06-24 23:50:49 error : insert or update on table "vitalsigns" violates foreign key constraint "vitalsigns_patientId_fkey" 
+2024-06-25 07:21:32 error : insert or update on table "vitalsigns" violates foreign key constraint "vitalsigns_patientId_fkey" 
+2024-06-25 07:48:50 error : invalid input syntax for type uuid: "all" 
+2024-06-25 08:11:15 error : WHERE parameter "id" has invalid "undefined" value 
+2024-06-25 08:20:24 error : WHERE parameter "id" has invalid "undefined" value 

@@ -62,6 +62,38 @@ const createDoctorRoute = () => {
     }
   );
 
+  router.get(
+    "/record/sign/all",
+    DoctorMiddleware(),
+    (req: Request, res: Response) => {
+      doctorController.getAllVitals(req, res);
+    }
+  );
+
+  router.get(
+    "/record/sign/:vitalId",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.getVitalsById(req, res);
+    }
+  );
+
+  router.put(
+    "/record/sign/:vitalId",
+    DoctorMiddleware(),
+    (req: Request, res: Response) => {
+      doctorController.updateVitals(req, res);
+    }
+  );
+
+  router.delete(
+    "/record/sign/:vitalId",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.destroyVitals(req, res);
+    }
+  );
+
   return router;
 };
 

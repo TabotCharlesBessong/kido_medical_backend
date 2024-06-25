@@ -193,6 +193,112 @@ class DoctorController {
       );
     }
   }
+
+  async getVitalsById(req: Request, res: Response) {
+    try {
+      const vitalId = req.params.vitalId;
+      const vital = await this.vitalsignService.getVitalSignsById(vitalId);
+      if (!vital) {
+        return Utility.handleError(
+          res,
+          "Vital signs not created yet",
+          ResponseCode.NOT_FOUND
+        );
+      }
+      return Utility.handleSuccess(
+        res,
+        "Post retrieved successfully",
+        { vital },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async updateVitals(req: Request, res: Response) {
+    try {
+      const vitalId = req.params.vitalId;
+      const data = { ...req.body };
+      const vitals = await this.vitalsignService.updateVitalSigns(
+        vitalId,
+        data
+      );
+      return Utility.handleSuccess(
+        res,
+        "Vitals updated successfully",
+        { vitals },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async destroyVitals(req: Request, res: Response) {
+    try {
+      const vitalId = req.params.vitalId;
+      await this.vitalsignService.deleteVitalSigns(vitalId);
+      return Utility.handleSuccess(
+        res,
+        "Vitals deleted successfully",
+        {},
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  // async getAllPostsByDoctor(req: Request, res: Response) {
+  //   try {
+  //     const doctorId = req.params.doctorId;
+  //     const posts = await this.postService.getAllPostsByDoctor(doctorId);
+  //     return Utility.handleSuccess(
+  //       res,
+  //       "Posts retrieved successfully",
+  //       { posts },
+  //       ResponseCode.SUCCESS
+  //     );
+  //   } catch (error) {
+  //     return Utility.handleError(
+  //       res,
+  //       (error as TypeError).message,
+  //       ResponseCode.SERVER_ERROR
+  //     );
+  //   }
+  // }
+
+  async getAllVitals(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      let vitals = await this.vitalsignService.getVitalSigns();
+      return Utility.handleSuccess(
+        res,
+        "Account fetched successfully",
+        { vitals },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
 }
 
 export default DoctorController;
