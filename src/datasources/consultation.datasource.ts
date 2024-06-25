@@ -38,6 +38,10 @@ class ConsultationDataSource implements IConsultationDataSource {
   async fetchAll(query: FindOptions<IConsultation>): Promise<IConsultation[]> {
     return await ConsultationModel.findAll(query);
   }
+
+  async deleteOne(searchBy: IFindConsultationQuery): Promise<void> {
+    await ConsultationModel.destroy(searchBy);
+  }
 }
 
 export default ConsultationDataSource;

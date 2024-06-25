@@ -32,6 +32,7 @@ export interface IConsultationDataSource {
     query: IFindConsultationQuery
   ): Promise<void>;
   fetchAll(query: FindOptions<IConsultation>): Promise<IConsultation[]>;
+  deleteOne(searchBy: IFindConsultationQuery): Promise<void>;
 }
 
 export interface IFindConsultationQuery {
