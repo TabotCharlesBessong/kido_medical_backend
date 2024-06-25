@@ -1,5 +1,6 @@
 import AppointmentModel from "../models/appointment.model";
 import CommentModel from "../models/comment.model";
+import ConsultationModel from "../models/consultation.model";
 import DoctorModel from "../models/doctor.model";
 import LikeModel from "../models/like.model";
 import MessageModel from "../models/message.model";
@@ -28,6 +29,7 @@ const DbInitialize = async () => {
     MessageModel.sync({ alter: false });
     NotificationModel.sync({ alter: false });
     VitalSignModel.sync({ alter: false });
+    ConsultationModel.sync({alter:false})
   } catch (error) {
     console.log("Unable to connect our database", error);
   }
