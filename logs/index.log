@@ -109,3 +109,5 @@ notNull Violation: VitalSignModel.appointmentId cannot be null
 2024-07-01 21:46:44 error : presentingComplaints is a required field 
 2024-07-01 21:47:22 error : notNull Violation: PrescriptionModel.consultationId cannot be null,
 notNull Violation: PrescriptionModel.medications cannot be null 
+2024-07-01 21:51:06 error : notNull Violation: PrescriptionModel.medications cannot be null 
+2024-07-01 21:54:18 error : notNull Violation: PrescriptionModel.medications cannot be null 
