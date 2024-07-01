@@ -22,6 +22,10 @@ const PrescriptionModel = Db.define<IPrescriptionModel>(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    medications: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

@@ -1,10 +1,12 @@
 import { FindOptions, Model, Optional, Transaction } from "sequelize";
+import { IMedication } from "./medication.interface";
 
 export interface IPrescription {
   id: string;
   consultationId: string;
   instructions?: string;
   investigation?:string
+  medications: string[]
   createdAt: Date;
   updatedAt: Date;
 }

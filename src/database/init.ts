@@ -31,7 +31,7 @@ const DbInitialize = async () => {
     NotificationModel.sync({ alter: false });
     VitalSignModel.sync({ alter: false });
     ConsultationModel.sync({ alter: false });
-    // PrescriptionModel.sync({ alter: false });
+    PrescriptionModel.sync({ alter: false });
   } catch (error) {
     console.log("Unable to connect our database", error);
   }
