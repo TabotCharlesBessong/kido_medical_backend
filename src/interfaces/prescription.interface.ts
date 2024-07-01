@@ -6,13 +6,13 @@ export interface IPrescription {
   consultationId: string;
   instructions?: string;
   investigation?:string
-  medications: string[]
+  medications: IMedication[]
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IPrescriptionCreationBody
-  extends Optional<IPrescription, "id" | "createdAt" | "updatedAt"> {}
+  extends Optional<IPrescription, "id" | "createdAt" | "updatedAt" | "consultationId" | "medications"> {}
 
 export interface IPrescriptionModel
   extends Model<IPrescription, IPrescriptionCreationBody>,
@@ -25,6 +25,7 @@ export interface IPrescriptionDataSource {
     data: Partial<IPrescription>,
     query: IFindPrescriptionQuery
   ): Promise<void>;
+  deleteOne(searchBy: IFindPrescriptionQuery): Promise<void>;
   fetchAll(query: FindOptions<IPrescription>): Promise<IPrescription[]>;
 }
 

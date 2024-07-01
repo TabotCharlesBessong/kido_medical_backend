@@ -100,3 +100,12 @@ notNull Violation: VitalSignModel.appointmentId cannot be null
 2024-06-28 15:31:11 error : User with email address already exists 
 2024-06-28 15:31:55 error : User with email address already exists 
 2024-06-30 14:52:02 error : Invalid login detail 
+2024-07-01 20:59:11 error : Authorization failed 
+2024-07-01 20:59:48 error : presentingComplaints is a required field 
+2024-07-01 21:04:46 error : diagnosticImpression is a required field 
+2024-07-01 21:06:16 error : investigations is a required field 
+2024-07-01 21:06:24 error : treatment is a required field 
+2024-07-01 21:17:18 error : Authorization failed 
+2024-07-01 21:46:44 error : presentingComplaints is a required field 
+2024-07-01 21:47:22 error : notNull Violation: PrescriptionModel.consultationId cannot be null,
+notNull Violation: PrescriptionModel.medications cannot be null 

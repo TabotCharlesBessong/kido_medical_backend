@@ -35,6 +35,10 @@ class PrescriptionDataSource implements IPrescriptionDataSource {
     await PrescriptionModel.update(data, { ...query, returning: true });
   }
 
+  async deleteOne(searchBy: IFindPrescriptionQuery): Promise<void> {
+    await PrescriptionModel.destroy(searchBy);
+  }
+
   async fetchAll(query: FindOptions<IPrescription>): Promise<IPrescription[]> {
     return await PrescriptionModel.findAll(query);
   }

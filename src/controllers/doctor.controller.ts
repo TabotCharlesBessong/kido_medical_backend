@@ -9,6 +9,7 @@ import UserService from "../services/user.services";
 import Utility from "../utils/index.utils";
 import VitalSignService from "../services/vitalsign.services";
 import ConsultationService from "../services/consultation.service";
+import PrescriptionService from "../services/prescription.service";
 
 class DoctorController {
   private doctorService: DoctorService;
@@ -17,6 +18,7 @@ class DoctorController {
   private appointmentService: AppointmentService;
   private vitalsignService: VitalSignService;
   private consultationService: ConsultationService;
+  private prescriptionService: PrescriptionService;
 
   constructor() {
     this.doctorService = new DoctorService();
@@ -25,6 +27,7 @@ class DoctorController {
     this.appointmentService = new AppointmentService();
     this.vitalsignService = new VitalSignService();
     this.consultationService = new ConsultationService();
+    this.prescriptionService = new PrescriptionService();
   }
 
   async registerDoctor(req: Request, res: Response) {
@@ -297,7 +300,9 @@ class DoctorController {
         investigations: params.investigations,
         treatment: params.treatment,
       };
-      const post = await this.consultationService.createConsultation(newConsultation);
+      const post = await this.consultationService.createConsultation(
+        newConsultation
+      );
       return Utility.handleSuccess(
         res,
         "Vital signs created successfully",
@@ -316,7 +321,9 @@ class DoctorController {
   async getConsultationById(req: Request, res: Response) {
     try {
       const consultationId = req.params.consultationId;
-      const consultation = await this.consultationService.getConsultationById(consultationId);
+      const consultation = await this.consultationService.getConsultationById(
+        consultationId
+      );
       if (!consultation) {
         return Utility.handleError(
           res,
@@ -389,6 +396,123 @@ class DoctorController {
         res,
         "Account fetched successfully",
         { consultations },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async createPrescription(req: Request, res: Response) {
+    const transaction = await sequelize.transaction();
+    try {
+      const { prescription, medications } = req.body;
+      const newPrescription = await this.prescriptionService.createPrescription(
+        prescription,
+        medications
+      );
+      await transaction.commit();
+      return Utility.handleSuccess(
+        res,
+        "Prescription created successfully",
+        { newPrescription },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      await transaction.rollback();
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getPrescriptionById(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const prescription = await this.prescriptionService.getPrescriptionById(
+        id
+      );
+      if (!prescription) {
+        return Utility.handleError(
+          res,
+          "Prescription not found",
+          ResponseCode.NOT_FOUND
+        );
+      }
+      return Utility.handleSuccess(
+        res,
+        "Prescription fetched successfully",
+        { prescription },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async updatePrescription(req: Request, res: Response) {
+    const transaction = await sequelize.transaction();
+    try {
+      const { id } = req.params;
+      const { prescription, medications } = req.body;
+      await this.prescriptionService.updatePrescription(
+        id,
+        prescription,
+        medications
+      );
+      await transaction.commit();
+      return Utility.handleSuccess(
+        res,
+        "Prescription updated successfully",
+        {},
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      await transaction.rollback();
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getPrescriptions(req: Request, res: Response) {
+    try {
+      const prescriptions = await this.prescriptionService.getPrescriptions();
+      return Utility.handleSuccess(
+        res,
+        "Prescriptions fetched successfully",
+        { prescriptions },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async destroyPrescription(req: Request, res: Response) {
+    try {
+      const prescriptionId = req.params.prescriptionId;
+      await this.prescriptionService.deletePrescription;
+      return Utility.handleSuccess(
+        res,
+        "Consulation deleted successfully",
+        {},
         ResponseCode.SUCCESS
       );
     } catch (error) {

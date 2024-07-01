@@ -131,6 +131,47 @@ const createDoctorRoute = () => {
     }
   );
 
+  router.post(
+    "/record/prescription",
+    DoctorMiddleware(),
+    validator(validationSchema.PrescriptionSchema),
+    (req: Request, res: Response) => {
+      doctorController.createPrescription(req, res);
+    }
+  );
+
+  router.get(
+    "/record/prescription/all",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.getPrescriptions(req, res);
+    }
+  );
+
+  router.get(
+    "/record/prescription/:id",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.getPrescriptionById(req, res);
+    }
+  );
+
+  router.put(
+    "/record/prescription/:id",
+    DoctorMiddleware(),
+    (req: Request, res: Response) => {
+      doctorController.updatePrescription(req, res);
+    }
+  );
+
+  router.delete(
+    "/record/prescription/:prescriptionId",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.destroyPrescription(req, res);
+    }
+  );
+
   return router;
 };
 

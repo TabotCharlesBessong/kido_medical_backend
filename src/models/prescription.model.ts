@@ -23,7 +23,7 @@ const PrescriptionModel = Db.define<IPrescriptionModel>(
       allowNull: true,
     },
     medications: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
+      type: DataTypes.JSON,
       allowNull: false,
     },
     createdAt: {
