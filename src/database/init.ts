@@ -7,6 +7,7 @@ import MessageModel from "../models/message.model";
 import NotificationModel from "../models/notification.model";
 import PatientModel from "../models/patient.model";
 import PostModel from "../models/post.model";
+import PrescriptionModel from "../models/prescription.model";
 import TimeSlotModel from "../models/timeslot.model";
 import TokenModel from "../models/token.model";
 import UserModel from "../models/user.model";
@@ -29,7 +30,8 @@ const DbInitialize = async () => {
     MessageModel.sync({ alter: false });
     NotificationModel.sync({ alter: false });
     VitalSignModel.sync({ alter: false });
-    ConsultationModel.sync({alter:false})
+    ConsultationModel.sync({ alter: false });
+    // PrescriptionModel.sync({ alter: false });
   } catch (error) {
     console.log("Unable to connect our database", error);
   }

@@ -48,7 +48,9 @@ export interface IFindConsultationQuery {
   transaction?: Transaction;
   returning?: boolean;
 }
+```
 
+``` ts prescription
 // interfaces/prescription.interface.ts
 export interface IPrescription {
   id: string;
@@ -87,7 +89,9 @@ export interface IFindPrescriptionQuery {
   transaction?: Transaction;
   returning?: boolean;
 }
+```
 
+``` ts sign and symptoms
 // interfaces/signs-and-symptoms.interface.ts
 export interface ISignsAndSymptoms {
   id: string;
@@ -185,7 +189,9 @@ const ConsultationModel = (sequelize: Sequelize) => {
 };
 
 export default ConsultationModel;
+```
 
+```ts
 // models/prescription.model.ts
 import { DataTypes, Sequelize } from "sequelize";
 import {
@@ -236,7 +242,9 @@ const PrescriptionModel = (sequelize: Sequelize) => {
 };
 
 export default PrescriptionModel;
+```
 
+```ts
 // models/signs-and-symptoms.model.ts
 import { DataTypes, Sequelize } from "sequelize";
 import {
@@ -314,7 +322,9 @@ class ConsultationDataSource implements IConsultationDataSource {
 }
 
 export default ConsultationDataSource;
+```
 
+```ts
 // datasources/prescription.datasource.ts
 import {
   IPrescription,
@@ -353,7 +363,9 @@ class PrescriptionDataSource implements IPrescriptionDataSource {
 }
 
 export default PrescriptionDataSource;
+```
 
+```ts
 // datasources/signs-and-symptoms.datasource.ts
 import {
   ISignsAndSymptoms,
