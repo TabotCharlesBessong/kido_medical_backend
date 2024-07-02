@@ -70,13 +70,9 @@ const createDoctorRoute = () => {
     }
   );
 
-  router.get(
-    "/record/sign/:vitalId",
-    Auth(),
-    (req: Request, res: Response) => {
-      doctorController.getVitalsById(req, res);
-    }
-  );
+  router.get("/record/sign/:vitalId", Auth(), (req: Request, res: Response) => {
+    doctorController.getVitalsById(req, res);
+  });
 
   router.put(
     "/record/sign/:vitalId",
@@ -91,6 +87,88 @@ const createDoctorRoute = () => {
     Auth(),
     (req: Request, res: Response) => {
       doctorController.destroyVitals(req, res);
+    }
+  );
+
+  router.post(
+    "/record/consultation",
+    DoctorMiddleware(),
+    validator(validationSchema.consultationSchema),
+    (req: Request, res: Response) => {
+      doctorController.createConsultation(req, res);
+    }
+  );
+
+  router.get(
+    "/record/consultation/all",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.getAllConsultations(req, res);
+    }
+  );
+
+  router.get(
+    "/record/consultation/:consultationId",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.getConsultationById(req, res);
+    }
+  );
+
+  router.put(
+    "/record/consultation/:consultationId",
+    DoctorMiddleware(),
+    (req: Request, res: Response) => {
+      doctorController.updateConsultation(req, res);
+    }
+  );
+
+  router.delete(
+    "/record/consultation/:consultationId",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.destroyConsultation(req, res);
+    }
+  );
+
+  router.post(
+    "/record/prescription",
+    DoctorMiddleware(),
+    validator(validationSchema.PrescriptionSchema),
+    (req: Request, res: Response) => {
+      doctorController.createPrescription(req, res);
+    }
+  );
+
+  router.get(
+    "/record/prescription/all",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.getPrescriptions(req, res);
+    }
+  );
+
+  router.get(
+    "/record/prescription/:id",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.getPrescriptionById(req, res);
+    }
+  );
+
+  router.put(
+    "/record/prescription/:id",
+    DoctorMiddleware(),
+    (req: Request, res: Response) => {
+      doctorController.updatePrescription(req, res);
+    }
+  );
+
+  router.delete(
+    "/record/prescription/:prescriptionId",
+    Auth(),
+    (req: Request, res: Response) => {
+      doctorController.destroyPrescription(req, res);
     }
   );
 

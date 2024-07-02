@@ -87,3 +87,27 @@ notNull Violation: VitalSignModel.appointmentId cannot be null
 2024-06-25 07:48:50 error : invalid input syntax for type uuid: "all" 
 2024-06-25 08:11:15 error : WHERE parameter "id" has invalid "undefined" value 
 2024-06-25 08:20:24 error : WHERE parameter "id" has invalid "undefined" value 
+2024-06-27 11:31:22 error : firstname is a required field 
+2024-06-27 11:39:48 error : firstname is a required field 
+2024-06-27 13:58:19 error : User with email address already exists 
+2024-06-27 14:01:28 error : User with email address already exists 
+2024-06-27 14:06:16 error : User with email address already exists 
+2024-06-27 14:34:53 error : User with email address already exists 
+2024-06-27 17:09:11 error : User with email address already exists 
+2024-06-27 17:11:38 error : Invalid login detail 
+2024-06-28 07:11:54 error : Invalid login detail 
+2024-06-28 11:37:25 error : We are sorry but you have already created a doctor account 
+2024-06-28 15:31:11 error : User with email address already exists 
+2024-06-28 15:31:55 error : User with email address already exists 
+2024-06-30 14:52:02 error : Invalid login detail 
+2024-07-01 20:59:11 error : Authorization failed 
+2024-07-01 20:59:48 error : presentingComplaints is a required field 
+2024-07-01 21:04:46 error : diagnosticImpression is a required field 
+2024-07-01 21:06:16 error : investigations is a required field 
+2024-07-01 21:06:24 error : treatment is a required field 
+2024-07-01 21:17:18 error : Authorization failed 
+2024-07-01 21:46:44 error : presentingComplaints is a required field 
+2024-07-01 21:47:22 error : notNull Violation: PrescriptionModel.consultationId cannot be null,
+notNull Violation: PrescriptionModel.medications cannot be null 
+2024-07-01 21:51:06 error : notNull Violation: PrescriptionModel.medications cannot be null 
+2024-07-01 21:54:18 error : notNull Violation: PrescriptionModel.medications cannot be null 

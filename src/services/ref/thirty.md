@@ -1,98 +1,24 @@
-You're right. To properly associate medications with prescriptions, we need to define the medications column in the prescription model. Here's the corrected implementation:
+To handle the prescription functionality with a relationship to the medication table, you'll need to establish a proper relationship between prescriptions and medications. This involves creating the necessary tables, defining the relationships, and implementing the services and controllers to handle CRUD operations.
 
-### Models
+### Step-by-Step Implementation
 
-#### prescription.model.ts
-```typescript
-import { Model, DataTypes } from 'sequelize';
-import sequelize from '../database';
-import { IPrescriptionModel } from '../interfaces/prescription.interface';
-import MedicationModel from './medication.model';
+1. **Define the Models and Interfaces**
+2. **Create the Data Sources**
+3. **Implement the Services**
+4. **Create the Controllers**
 
-const PrescriptionModel = sequelize.define<IPrescriptionModel>('Prescription', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
-  },
-  patientId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
-  doctorId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
-  date: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  medications: {
-    type: DataTypes.JSON,
-    allowNull: false,
-  },
-}, {
-  timestamps: true,
-});
-
-PrescriptionModel.hasMany(MedicationModel, { foreignKey: 'prescriptionId' });
-MedicationModel.belongsTo(PrescriptionModel, { foreignKey: 'prescriptionId' });
-
-export default PrescriptionModel;
-```
-
-#### medication.model.ts
-```typescript
-import { Model, DataTypes } from 'sequelize';
-import sequelize from '../database';
-import { IMedicationModel, Frequency } from '../interfaces/medication.interface';
-
-const MedicationModel = sequelize.define<IMedicationModel>('Medication', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
-  },
-  prescriptionId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  dosage: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  frequency: {
-    type: DataTypes.ENUM(Frequency.ONCE_A_DAY, Frequency.TWICE_A_DAY, Frequency.THRICE_A_DAY),
-    allowNull: false,
-  },
-  duration: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-}, {
-  timestamps: false,
-});
-
-export default MedicationModel;
-```
-
-### Interfaces
+### Step 1: Define the Models and Interfaces
 
 #### prescription.interface.ts
 ```typescript
 import { Model, Optional, Transaction } from "sequelize";
-import { IMedication } from "./medication.interface";
 
 export interface IPrescription {
   id: string;
   patientId: string;
   doctorId: string;
   date: Date;
-  medications: IMedication[]; // Array of medications
+  medications: IMedication[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -124,7 +50,36 @@ export interface IFindPrescriptionQuery {
 }
 ```
 
-### Data Sources
+#### medication.interface.ts
+```typescript
+import { Model, Optional } from "sequelize";
+
+export enum Frequency {
+  ONCE_A_DAY = "once_a_day",
+  TWICE_A_DAY = "twice_a_day",
+  THRICE_A_DAY = "thrice_a_day",
+}
+
+export interface IMedication {
+  id: string;
+  prescriptionId: string;
+  name: string;
+  dosage: string;
+  frequency: Frequency;
+  duration: number; // in days
+}
+
+export interface IMedicationCreationBody extends Optional<IMedication, "id"> {}
+
+export interface IMedicationModel extends Model<IMedication, IMedicationCreationBody>, IMedication {}
+
+export interface IMedicationDataSource {
+  create(record: IMedicationCreationBody): Promise<IMedication>;
+  fetchAll(query: FindOptions<IMedication>): Promise<IMedication[]>;
+}
+```
+
+### Step 2: Create the Data Sources
 
 #### prescription.datasource.ts
 ```typescript
@@ -167,7 +122,30 @@ class PrescriptionDataSource implements IPrescriptionDataSource {
 export default PrescriptionDataSource;
 ```
 
-### Services
+#### medication.datasource.ts
+```typescript
+import { FindOptions } from "sequelize";
+import {
+  IMedication,
+  IMedicationCreationBody,
+  IMedicationDataSource,
+} from "../interfaces/medication.interface";
+import MedicationModel from "../models/medication.model";
+
+class MedicationDataSource implements IMedicationDataSource {
+  async create(record: IMedicationCreationBody): Promise<IMedication> {
+    return await MedicationModel.create(record, { returning: true });
+  }
+
+  async fetchAll(query: FindOptions<IMedication>): Promise<IMedication[]> {
+    return await MedicationModel.findAll(query);
+  }
+}
+
+export default MedicationDataSource;
+```
+
+### Step 3: Implement the Services
 
 #### prescription.service.ts
 ```typescript
@@ -239,7 +217,7 @@ class PrescriptionService {
 export default PrescriptionService;
 ```
 
-### Controllers
+### Step 4: Create the Controllers
 
 #### prescription.controller.ts
 ```typescript
@@ -352,14 +330,91 @@ class PrescriptionController {
 export default PrescriptionController;
 ```
 
+### Models
+Ensure you have the Sequelize models defined for Prescription and Medication. Here are basic examples:
+
+#### prescription.model.ts
+```typescript
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../database';
+import { IPrescriptionModel } from '../interfaces/prescription.interface';
+
+const PrescriptionModel = sequelize.define<IPrescriptionModel>('Prescription', {
+  id: {
+    type: DataTypes.UUID
+
+,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  patientId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  doctorId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+}, {
+  timestamps: true,
+});
+
+export default PrescriptionModel;
+```
+
+#### medication.model.ts
+```typescript
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../database';
+import { IMedicationModel, Frequency } from '../interfaces/medication.interface';
+
+const MedicationModel = sequelize.define<IMedicationModel>('Medication', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  prescriptionId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  dosage: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  frequency: {
+    type: DataTypes.ENUM(Frequency.ONCE_A_DAY, Frequency.TWICE_A_DAY, Frequency.THRICE_A_DAY),
+    allowNull: false,
+  },
+  duration: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+}, {
+  timestamps: false,
+});
+
+MedicationModel.belongsTo(PrescriptionModel, { foreignKey: 'prescriptionId' });
+PrescriptionModel.hasMany(MedicationModel, { foreignKey: 'prescriptionId' });
+
+export default MedicationModel;
+```
+
 ### Routes
+Finally, set up the routes in your main server file to use the new controller methods.
 
 #### routes/prescription.routes.ts
 ```typescript
 import { Router } from 'express';
-import PrescriptionController from '../controllers
-
-/prescription.controller';
+import PrescriptionController from '../controllers/prescription.controller';
 
 const router = Router();
 const prescriptionController = new PrescriptionController();
@@ -391,4 +446,4 @@ app.listen(3000, () => {
 });
 ```
 
-This setup includes the medications column in the prescriptions model and ensures that medications are linked to prescriptions.
+This setup provides a full functionality for handling prescriptions with related medications, including creating, fetching, updating, and managing the relationships between prescriptions and medications.
