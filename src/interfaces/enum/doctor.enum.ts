@@ -8,3 +8,9 @@ export const PostStatus = {
   INACTIVE: "INACTIVE",
   DELETED: "DELETED",
 };
+
+export enum Frequency {
+  ONCE_A_DAY = "ONCE_A_DAY",
+  TWICE_A_DAY = "TWICE_A_DAY",
+  THRICE_A_DAY = "THRICE_A_DAY",
+}
