@@ -30,7 +30,7 @@ const createPostRoute = () => {
 
   router.put(
     "/:postId",
-    validator(validationSchema.updatePostSchema),
+    // validator(validationSchema.updatePostSchema),
     DoctorMiddleware(),
     (req: Request, res: Response) => {
       return postController.updatePost(req, res);

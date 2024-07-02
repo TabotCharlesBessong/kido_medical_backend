@@ -22,8 +22,6 @@ const AppointmentModel = Db.define<IAppointmentModel>(
         model: PatientModel,
         key: "userId",
       },
-      // onUpdate: "CASCADE",
-      // onDelete: "CASCADE",
     },
     doctorId: {
       type: DataTypes.UUID,
@@ -32,8 +30,6 @@ const AppointmentModel = Db.define<IAppointmentModel>(
         model: DoctorModel,
         key: "id",
       },
-      // onUpdate: "CASCADE",
-      // onDelete: "CASCADE",
     },
     timeslotId: {
       type: DataTypes.UUID,
@@ -74,25 +70,17 @@ const AppointmentModel = Db.define<IAppointmentModel>(
 PatientModel.hasMany(AppointmentModel, {
   foreignKey: "patientId",
   as: "patientAppointments",
-  // onUpdate: "CASCADE",
-  // onDelete: "CASCADE",
 });
 AppointmentModel.belongsTo(PatientModel, {
   foreignKey: "patientId",
-  // onUpdate: "CASCADE",
-  // onDelete: "CASCADE",
 });
 
 DoctorModel.hasMany(AppointmentModel, {
   foreignKey: "doctorId",
   as: "doctorAppointments",
-  // onUpdate: "CASCADE",
-  // onDelete: "CASCADE",
 });
 AppointmentModel.belongsTo(DoctorModel, {
   foreignKey: "doctorId",
-  // onUpdate: "CASCADE",
-  // onDelete: "CASCADE",
 });
 
 export default AppointmentModel;
