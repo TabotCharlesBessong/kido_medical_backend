@@ -1,391 +1,394 @@
-Sure, let's update the architecture to include the tests and their results, along with validation schemas and role-based access control. The structure will be similar to the existing code. We'll go through each part step-by-step:
-
-1. **Interfaces**
-2. **Enums**
-3. **Models**
-4. **DataSources**
-5. **Services**
-6. **Controllers**
-7. **Validation Schemas**
-8. **Routes**
-9. **Role-based Access Control**
-
-### Interfaces
-
-#### `test.interface.ts`
-
-```typescript
-// interfaces/test.interface.ts
-export interface ITest {
-  id: string;
-  consultationId: string;
-  name: string;
-  result?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-export interface ITestCreationBody {
-  consultationId: string;
-  name: string;
-  result?: string;
-}
-
-export interface ITestQuery {
-  id?: string;
-  consultationId?: string;
-  name?: string;
-}
-```
-
-### Enums
-
-#### `interfaces.enum.ts`
-
-```typescript
-// interfaces/interfaces.enum.ts
-export enum UserRole {
-  DOCTOR = "DOCTOR",
-  PATIENT = "PATIENT",
-  ADMIN = "ADMIN",
-}
-```
+You're right. To properly associate medications with prescriptions, we need to define the medications column in the prescription model. Here's the corrected implementation:
 
 ### Models
 
-#### `test.model.ts`
-
+#### prescription.model.ts
 ```typescript
-// models/test.model.ts
-import { DataTypes } from "sequelize";
-import Db from "../database";
-import { ITest } from "../interfaces/test.interface";
-import ConsultationModel from "./consultation.model";
-import { v4 as uuidv4 } from "uuid";
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../database';
+import { IPrescriptionModel } from '../interfaces/prescription.interface';
+import MedicationModel from './medication.model';
 
-const TestModel = Db.define<ITest>(
-  "TestModel",
-  {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: () => uuidv4(),
-      allowNull: false,
-      primaryKey: true,
-    },
-    consultationId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: ConsultationModel,
-        key: "id",
-      },
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    result: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
-    },
+const PrescriptionModel = sequelize.define<IPrescriptionModel>('Prescription', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
   },
-  {
-    timestamps: true,
-    tableName: "tests",
-    createdAt: "createdAt",
-    updatedAt: "updatedAt",
-  }
-);
-
-ConsultationModel.hasMany(TestModel, {
-  foreignKey: "consultationId",
-  as: "consultationTests",
+  patientId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  doctorId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  medications: {
+    type: DataTypes.JSON,
+    allowNull: false,
+  },
+}, {
+  timestamps: true,
 });
 
-TestModel.belongsTo(ConsultationModel, {
-  foreignKey: "consultationId",
-  as: "testConsultation",
-});
+PrescriptionModel.hasMany(MedicationModel, { foreignKey: 'prescriptionId' });
+MedicationModel.belongsTo(PrescriptionModel, { foreignKey: 'prescriptionId' });
 
-export default TestModel;
+export default PrescriptionModel;
 ```
 
-### DataSources
-
-#### `test.datasource.ts`
-
+#### medication.model.ts
 ```typescript
-// datasources/test.datasource.ts
-import { ITest, ITestCreationBody, ITestQuery } from "../interfaces/test.interface";
-import TestModel from "../models/test.model";
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../database';
+import { IMedicationModel, Frequency } from '../interfaces/medication.interface';
 
-class TestDataSource {
-  async create(record: ITestCreationBody): Promise<ITest> {
-    return await TestModel.create(record);
+const MedicationModel = sequelize.define<IMedicationModel>('Medication', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  prescriptionId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  dosage: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  frequency: {
+    type: DataTypes.ENUM(Frequency.ONCE_A_DAY, Frequency.TWICE_A_DAY, Frequency.THRICE_A_DAY),
+    allowNull: false,
+  },
+  duration: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+}, {
+  timestamps: false,
+});
+
+export default MedicationModel;
+```
+
+### Interfaces
+
+#### prescription.interface.ts
+```typescript
+import { Model, Optional, Transaction } from "sequelize";
+import { IMedication } from "./medication.interface";
+
+export interface IPrescription {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  date: Date;
+  medications: IMedication[]; // Array of medications
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IPrescriptionCreationBody extends Optional<IPrescription, "id" | "createdAt" | "updatedAt"> {}
+
+export interface IPrescriptionModel extends Model<IPrescription, IPrescriptionCreationBody>, IPrescription {}
+
+export interface IPrescriptionDataSource {
+  create(
+    record: IPrescriptionCreationBody,
+    options?: Partial<IFindPrescriptionQuery>
+  ): Promise<IPrescription>;
+  fetchOne(query: IFindPrescriptionQuery): Promise<IPrescription | null>;
+  updateOne(
+    data: Partial<IPrescription>,
+    query: IFindPrescriptionQuery
+  ): Promise<void>;
+  fetchAll(query: FindOptions<IPrescription>): Promise<IPrescription[]>;
+}
+
+export interface IFindPrescriptionQuery {
+  where: {
+    [key: string]: string;
+  };
+  raw?: boolean;
+  transaction?: Transaction;
+  returning?: boolean;
+}
+```
+
+### Data Sources
+
+#### prescription.datasource.ts
+```typescript
+import { FindOptions } from "sequelize";
+import {
+  IFindPrescriptionQuery,
+  IPrescription,
+  IPrescriptionCreationBody,
+  IPrescriptionDataSource,
+} from "../interfaces/prescription.interface";
+import PrescriptionModel from "../models/prescription.model";
+
+class PrescriptionDataSource implements IPrescriptionDataSource {
+  async create(
+    record: IPrescriptionCreationBody,
+    options?: Partial<IFindPrescriptionQuery>
+  ): Promise<IPrescription> {
+    return await PrescriptionModel.create(record, {
+      returning: true,
+      ...options,
+    });
   }
 
-  async fetchOne(query: ITestQuery): Promise<ITest | null> {
-    return await TestModel.findOne({ where: query });
+  async fetchOne(query: IFindPrescriptionQuery): Promise<IPrescription | null> {
+    return await PrescriptionModel.findOne(query);
   }
 
-  async fetchAll(query: ITestQuery): Promise<ITest[]> {
-    return await TestModel.findAll({ where: query });
+  async updateOne(
+    data: Partial<IPrescription>,
+    query: IFindPrescriptionQuery
+  ): Promise<void> {
+    await PrescriptionModel.update(data, query);
   }
 
-  async updateOne(id: string, data: Partial<ITest>): Promise<void> {
-    await TestModel.update(data, { where: { id } });
-  }
-
-  async deleteOne(id: string): Promise<void> {
-    await TestModel.destroy({ where: { id } });
+  async fetchAll(query: FindOptions<IPrescription>): Promise<IPrescription[]> {
+    return await PrescriptionModel.findAll(query);
   }
 }
 
-export default new TestDataSource();
+export default PrescriptionDataSource;
 ```
 
 ### Services
 
-#### `test.service.ts`
-
+#### prescription.service.ts
 ```typescript
-// services/test.service.ts
-import { ITest, ITestCreationBody, ITestQuery } from "../interfaces/test.interface";
-import TestDataSource from "../datasources/test.datasource";
+import PrescriptionDataSource from "../datasources/prescription.datasource";
+import MedicationDataSource from "../datasources/medication.datasource";
+import {
+  IPrescription,
+  IPrescriptionCreationBody,
+  IPrescriptionDataSource,
+  IFindPrescriptionQuery,
+} from "../interfaces/prescription.interface";
+import {
+  IMedication,
+  IMedicationCreationBody,
+  IMedicationDataSource,
+} from "../interfaces/medication.interface";
 
-class TestService {
-  async createTest(record: ITestCreationBody): Promise<ITest> {
-    return await TestDataSource.create(record);
+class PrescriptionService {
+  private prescriptionDataSource: IPrescriptionDataSource;
+  private medicationDataSource: IMedicationDataSource;
+
+  constructor() {
+    this.prescriptionDataSource = new PrescriptionDataSource();
+    this.medicationDataSource = new MedicationDataSource();
   }
 
-  async getTest(query: ITestQuery): Promise<ITest | null> {
-    return await TestDataSource.fetchOne(query);
+  async createPrescription(
+    prescriptionData: Partial<IPrescription>,
+    medications: IMedicationCreationBody[]
+  ): Promise<IPrescription> {
+    const prescription = await this.prescriptionDataSource.create(
+      prescriptionData
+    );
+
+    for (const medication of medications) {
+      medication.prescriptionId = prescription.id;
+      await this.medicationDataSource.create(medication);
+    }
+
+    return prescription;
   }
 
-  async getAllTests(query: ITestQuery): Promise<ITest[]> {
-    return await TestDataSource.fetchAll(query);
+  async getPrescriptionById(prescriptionId: string): Promise<IPrescription | null> {
+    return await this.prescriptionDataSource.fetchOne({
+      where: { id: prescriptionId },
+    });
   }
 
-  async updateTest(id: string, data: Partial<ITest>): Promise<void> {
-    await TestDataSource.updateOne(id, data);
+  async updatePrescription(
+    id: string,
+    data: Partial<IPrescription>,
+    medications: IMedicationCreationBody[]
+  ): Promise<void> {
+    const filter = { where: { id } } as IFindPrescriptionQuery;
+    await this.prescriptionDataSource.updateOne(data, filter);
+
+    for (const medication of medications) {
+      medication.prescriptionId = id;
+      await this.medicationDataSource.create(medication);
+    }
   }
 
-  async deleteTest(id: string): Promise<void> {
-    await TestDataSource.deleteOne(id);
+  async getPrescriptions(): Promise<IPrescription[]> {
+    const query = { where: {}, raw: true };
+    return this.prescriptionDataSource.fetchAll(query);
   }
 }
 
-export default new TestService();
+export default PrescriptionService;
 ```
 
 ### Controllers
 
-#### `test.controller.ts`
-
+#### prescription.controller.ts
 ```typescript
-// controllers/test.controller.ts
 import { Request, Response } from "express";
-import TestService from "../services/test.service";
+import sequelize from "../database";
+import { ResponseCode } from "../interfaces/enum/code.enum";
+import PrescriptionService from "../services/prescription.service";
+import Utility from "../utils/index.utils";
 
-class TestController {
-  async createTest(req: Request, res: Response) {
+class PrescriptionController {
+  private prescriptionService: PrescriptionService;
+
+  constructor() {
+    this.prescriptionService = new PrescriptionService();
+  }
+
+  async createPrescription(req: Request, res: Response) {
+    const transaction = await sequelize.transaction();
     try {
-      const test = await TestService.createTest(req.body);
-      res.status(201).json(test);
+      const { prescription, medications } = req.body;
+      const newPrescription = await this.prescriptionService.createPrescription(
+        prescription,
+        medications
+      );
+      await transaction.commit();
+      return Utility.handleSuccess(
+        res,
+        "Prescription created successfully",
+        { newPrescription },
+        ResponseCode.SUCCESS
+      );
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      await transaction.rollback();
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
     }
   }
 
-  async getTest(req: Request, res: Response) {
+  async getPrescriptionById(req: Request, res: Response) {
     try {
-      const test = await TestService.getTest({ id: req.params.id });
-      if (test) {
-        res.status(200).json(test);
-      } else {
-        res.status(404).json({ error: "Test not found" });
+      const { id } = req.params;
+      const prescription = await this.prescriptionService.getPrescriptionById(id);
+      if (!prescription) {
+        return Utility.handleError(
+          res,
+          "Prescription not found",
+          ResponseCode.NOT_FOUND
+        );
       }
+      return Utility.handleSuccess(
+        res,
+        "Prescription fetched successfully",
+        { prescription },
+        ResponseCode.SUCCESS
+      );
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
     }
   }
 
-  async getAllTests(req: Request, res: Response) {
+  async updatePrescription(req: Request, res: Response) {
+    const transaction = await sequelize.transaction();
     try {
-      const tests = await TestService.getAllTests({});
-      res.status(200).json(tests);
+      const { id } = req.params;
+      const { prescription, medications } = req.body;
+      await this.prescriptionService.updatePrescription(id, prescription, medications);
+      await transaction.commit();
+      return Utility.handleSuccess(
+        res,
+        "Prescription updated successfully",
+        {},
+        ResponseCode.SUCCESS
+      );
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      await transaction.rollback();
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
     }
   }
 
-  async updateTest(req: Request, res: Response) {
+  async getPrescriptions(req: Request, res: Response) {
     try {
-      await TestService.updateTest(req.params.id, req.body);
-      res.status(200).json({ message: "Test updated successfully" });
+      const prescriptions = await this.prescriptionService.getPrescriptions();
+      return Utility.handleSuccess(
+        res,
+        "Prescriptions fetched successfully",
+        { prescriptions },
+        ResponseCode.SUCCESS
+      );
     } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  async deleteTest(req: Request, res: Response) {
-    try {
-      await TestService.deleteTest(req.params.id);
-      res.status(204).json();
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
     }
   }
 }
 
-export default new TestController();
-```
-
-### Validation Schemas
-
-#### `validation/test.validation.ts`
-
-```typescript
-// validation/test.validation.ts
-import Joi from "joi";
-
-export const createTestSchema = Joi.object({
-  consultationId: Joi.string().uuid().required(),
-  name: Joi.string().required(),
-  result: Joi.string().optional(),
-});
-
-export const updateTestSchema = Joi.object({
-  name: Joi.string().optional(),
-  result: Joi.string().optional(),
-});
+export default PrescriptionController;
 ```
 
 ### Routes
 
-#### `test.routes.ts`
-
+#### routes/prescription.routes.ts
 ```typescript
-// routes/test.routes.ts
-import { Router } from "express";
-import TestController from "../controllers/test.controller";
-import { validate } from "../middleware/validate.middleware";
-import { createTestSchema, updateTestSchema } from "../validation/test.validation";
+import { Router } from 'express';
+import PrescriptionController from '../controllers
+
+/prescription.controller';
 
 const router = Router();
+const prescriptionController = new PrescriptionController();
 
-router.post("/", validate(createTestSchema), TestController.createTest);
-router.get("/:id", TestController.getTest);
-router.get("/", TestController.getAllTests);
-router.put("/:id", validate(updateTestSchema), TestController.updateTest);
-router.delete("/:id", TestController.deleteTest);
+router.post('/prescriptions', prescriptionController.createPrescription.bind(prescriptionController));
+router.get('/prescriptions', prescriptionController.getPrescriptions.bind(prescriptionController));
+router.get('/prescriptions/:id', prescriptionController.getPrescriptionById.bind(prescriptionController));
+router.put('/prescriptions/:id', prescriptionController.updatePrescription.bind(prescriptionController));
 
 export default router;
 ```
 
-### Integrating Routes in `app.ts`
-
-Finally, update the `app.ts` file to include the new routes:
-
+#### main server file (e.g., app.ts)
 ```typescript
-// app.ts
-import express from "express";
-import bodyParser from "body-parser";
-import vitalSignRoutes from "./routes/vitalSign.routes";
-import consultationRoutes from "./routes/consultation.routes";
-import prescriptionRoutes from "./routes/prescription.routes";
-import testRoutes from "./routes/test.routes";
+import express from 'express';
+import bodyParser from 'body-parser';
+import prescriptionRoutes from './routes/prescription.routes';
+// Other imports...
 
 const app = express();
 
 app.use(bodyParser.json());
 
-app.use("/api/vital-signs", vitalSignRoutes);
-app.use("/api/consultations", consultationRoutes);
-app.use("/api/prescriptions", prescriptionRoutes);
-app.use("/api/tests", testRoutes);
+app.use('/api', prescriptionRoutes);
+// Other routes...
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
 });
 ```
 
-### Role-Based Access Control
-
-To implement role-based access control, we'll update the middleware to check the user's role and ensure only the relevant users can perform specific actions. Here's an example middleware for role-based access control:
-
-#### `middleware/auth.middleware.ts`
-
-```typescript
-// middleware/auth.middleware.ts
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { UserRole } from "../interfaces/interfaces.enum";
-
-const authenticate = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
-
-  if (!token) {
-    return res.status(401).json({ error: "Access denied. No token provided." });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    res.status(400).json({ error: "Invalid token." });
-  }
-};
-
-const authorize = (roles: UserRole[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).
-
-json({ error: "Access denied." });
-    }
-    next();
-  };
-};
-
-export { authenticate, authorize };
-```
-
-#### Example Usage in Routes
-
-```typescript
-// routes/test.routes.ts
-import { Router } from "express";
-import TestController from "../controllers/test.controller";
-import { validate } from "../middleware/validate.middleware";
-import { authenticate, authorize } from "../middleware/auth.middleware";
-import { createTestSchema, updateTestSchema } from "../validation/test.validation";
-import { UserRole } from "../interfaces/interfaces.enum";
-
-const router = Router();
-
-router.post("/", authenticate, authorize([UserRole.DOCTOR]), validate(createTestSchema), TestController.createTest);
-router.get("/:id", authenticate, authorize([UserRole.DOCTOR, UserRole.PATIENT]), TestController.getTest);
-router.get("/", authenticate, authorize([UserRole.DOCTOR]), TestController.getAllTests);
-router.put("/:id", authenticate, authorize([UserRole.DOCTOR]), validate(updateTestSchema), TestController.updateTest);
-router.delete("/:id", authenticate, authorize([UserRole.DOCTOR]), TestController.deleteTest);
-
-export default router;
-```
-
-This implementation ensures that only authenticated and authorized users can perform certain actions, enforcing role-based access control.
-
-By completing these steps, we've added the test and results functionality to the existing application, including interfaces, enums, models, data sources, services, controllers, validation schemas, routes, and role-based access control. This provides a comprehensive system for managing medical consultations, prescriptions, and associated tests and results.
+This setup includes the medications column in the prescriptions model and ensures that medications are linked to prescriptions.
