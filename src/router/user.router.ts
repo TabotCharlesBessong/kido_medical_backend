@@ -38,6 +38,18 @@ const createUserRoute = () => {
     }
   );
 
+  router.post(
+    "/verify-account",
+    validator(validationSchema.verifyAccountSchema),
+    (req: Request, res: Response) => {
+      return userController.verifyAccount(req, res);
+    }
+  );
+
+  router.post("/logout", (req: Request, res: Response) => {
+    return userController.logout(req, res);
+  });
+
   return router;
 };
 

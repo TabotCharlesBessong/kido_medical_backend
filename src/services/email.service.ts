@@ -14,6 +14,12 @@ class EmailService {
     return this.sendMail(to, subject, message);
   }
 
+  static async sendVerificationMail(to: string, code: string) {
+    const subject = "Verify Account";
+    const message = `Your email verification code is <b>${code}</b>`;
+    return this.sendMail(to, subject, message);
+  }
+
   private static replaceTemplateConstant(
     _template: string,
     key: string,

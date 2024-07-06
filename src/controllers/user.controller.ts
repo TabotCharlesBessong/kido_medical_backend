@@ -49,9 +49,13 @@ class UserController {
         );
 
       let user = await this.userService.createUser(newUser);
+      const token = (await this.tokenService.createVerificationToken(
+        newUser.email
+      )) as IToken;
+      await EmailService.sendVerificationMail(newUser.email, token.code);
       return Utility.handleSuccess(
         res,
-        "User registered successfully",
+        "User registered successfully. Please check your email for verification code.",
         { user },
         ResponseCode.SUCCESS
       );
@@ -190,6 +194,87 @@ class UserController {
       return Utility.handleSuccess(
         res,
         "Password reset successfully",
+        {},
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async verifyAccount(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      let isValidToken = await this.tokenService.getTokenByField({
+        key: params.email,
+        code: params.code,
+        type: this.tokenService.TokenTypes.VERIFY_ACCOUNT,
+        status: this.tokenService.TokenStatus.NOTUSED,
+      });
+
+      if (!isValidToken) {
+        return Utility.handleError(
+          res,
+          "Token has expired or is invalid",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      if (
+        isValidToken &&
+        moment(isValidToken.expires).diff(moment(), "minute") <= 0
+      ) {
+        return Utility.handleError(
+          res,
+          "Token has expired",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      let user = await this.userService.getUserByField({ email: params.email });
+      if (!user) {
+        return Utility.handleError(
+          res,
+          "Invalid user records",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      await this.userService.updateRecord(
+        { id: user.id },
+        { isEmailVerified: EmailStatus.VERIFIED }
+      );
+
+      await this.tokenService.updateRecord(
+        { id: isValidToken.id },
+        { status: this.tokenService.TokenStatus.USED }
+      );
+      return Utility.handleSuccess(
+        res,
+        "Account verified successfully",
+        {},
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async logout(req: Request, res: Response) {
+    try {
+      const userId = req.body.userId;
+      await this.userService.logout(userId);
+      return Utility.handleSuccess(
+        res,
+        "Logout successful",
         {},
         ResponseCode.SUCCESS
       );
