@@ -22,6 +22,12 @@ class PatientController {
         userId: params.user.id,
         age: params.age,
         gender: params.gender,
+        address1: params.address1,
+        address2: params.address2,
+        occupation: params.occupation,
+        phoneNumber: params.phoneNumber,
+        tribe: params.tribe,
+        religion: params.religion,
       };
 
       // checkign if the patient already exist

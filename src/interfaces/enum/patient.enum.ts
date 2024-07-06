@@ -10,3 +10,10 @@ export const AppointmentStatus = {
   APPROVED: "APPROVED",
   CANCELED: "CANCELED"
 }
+
+export enum Religion {
+  CHRISTIAN = "christian",
+  MUSLIM = "muslim",
+  BUDDHIST = "buddhist",
+  HINDU = "hindu",
+}

@@ -111,3 +111,7 @@ notNull Violation: VitalSignModel.appointmentId cannot be null
 notNull Violation: PrescriptionModel.medications cannot be null 
 2024-07-01 21:51:06 error : notNull Violation: PrescriptionModel.medications cannot be null 
 2024-07-01 21:54:18 error : notNull Violation: PrescriptionModel.medications cannot be null 
+2024-07-06 18:52:57 error : User with email address already exists 
+2024-07-06 20:10:41 error : UserModel is associated to PatientModel using an alias. You've included an alias (user), but it does not match the alias(es) defined in your association (UserModel). 
+2024-07-06 20:16:22 error : UserModel is associated to PatientModel using an alias. You've included an alias (users), but it does not match the alias(es) defined in your association (UserModel). 
+2024-07-06 20:20:57 error : UserModel is associated to PatientModel using an alias. You've included an alias (users), but it does not match the alias(es) defined in your association (user). 
