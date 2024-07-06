@@ -38,6 +38,9 @@ class DoctorController {
         specialization: params.specialization,
         verificationStatus: params.verificationStatus,
         documents: params.documents,
+        fee: params.fee,
+        language: params.language,
+        experience: params.experience,
       };
       // checkign if the doctor already exist
       let doctorExists = await this.doctorService.getDoctorByUserId(

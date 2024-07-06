@@ -61,6 +61,7 @@ class PostDataSource implements IPostDataSource {
 
   async fetchAllPost(query: FindOptions<IPost>): Promise<IPost[]> {
     return await PostModel.findAll({
+      ...query,
       include: [
         { model: CommentModel, as: "postComments" },
         {

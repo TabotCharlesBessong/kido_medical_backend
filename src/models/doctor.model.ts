@@ -33,6 +33,18 @@ const DoctorModel = Db.define<IDoctorModel>(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    language: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    fee: {
+      type: DataTypes.DECIMAL,
+      allowNull: true,
+    },
+    experience: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
@@ -58,6 +70,7 @@ UserModel.hasOne(DoctorModel, {
 });
 DoctorModel.belongsTo(UserModel, {
   foreignKey: "userId",
+  as:"users"
 });
 
 export default DoctorModel;
