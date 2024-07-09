@@ -65,7 +65,34 @@ class DoctorController {
         ResponseCode.SUCCESS
       );
     } catch (error) {
-      return res.status(500).json({ error: "Server error" });
+      return res.status(ResponseCode.SERVER_ERROR).json((error as TypeError).message);
+    }
+  }
+
+  async getDoctorById(req: Request, res: Response) {
+    try {
+      const patient = await this.doctorService.getDoctorByUserId(
+        req.params.userId
+      );
+      if (!patient)
+        return Utility.handleError(
+          res,
+          "Could not get doctor",
+          ResponseCode.NOT_FOUND
+        );
+      else
+        return Utility.handleSuccess(
+          res,
+          "Doctor details fetched successfully",
+          { patient },
+          ResponseCode.SUCCESS
+        );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
     }
   }
 
