@@ -127,3 +127,4 @@ notNull Violation: PrescriptionModel.medications cannot be null
 2024-07-09 19:40:50 error : Invalid Login Detail 
 2024-07-09 19:41:22 error : Invalid Login Detail 
 2024-07-09 19:48:00 error : Authorization failed 
+2024-07-11 17:01:40 error : User with email address already exists 
