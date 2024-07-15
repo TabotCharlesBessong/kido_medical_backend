@@ -6,6 +6,7 @@ import {
   IPatientDataSource,
 } from "../interfaces/patient.interface";
 import PatientModel from "../models/patient.model";
+import UserModel from "../models/user.model";
 
 class PatientDataSource implements IPatientDataSource {
   async create(record: IPatientCreationBody): Promise<IPatient> {
@@ -13,7 +14,23 @@ class PatientDataSource implements IPatientDataSource {
   }
 
   async fetchOne(query: IFindPatientQuery): Promise<IPatient | null> {
-    return await PatientModel.findOne(query);
+    return await PatientModel.findOne({
+      ...query,
+      include: [
+        {
+          model: UserModel,
+          as: "users",
+          attributes: [
+            "username",
+            "firstname",
+            "lastname",
+            "email",
+            "accountStatus",
+            "role",
+          ],
+        },
+      ],
+    });
   }
 
   async updateOne(
@@ -24,7 +41,23 @@ class PatientDataSource implements IPatientDataSource {
   }
 
   async fetchAll(query: FindOptions<IPatient>): Promise<IPatient[]> {
-    return await PatientModel.findAll(query);
+    return await PatientModel.findAll({
+      ...query,
+      include: [
+        {
+          model: UserModel,
+          as: "user",
+          attributes: [
+            "username",
+            "firstname",
+            "lastname",
+            "email",
+            "accountStatus",
+            "role",
+          ],
+        },
+      ],
+    });
   }
 }
 

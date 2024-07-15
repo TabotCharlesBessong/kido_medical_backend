@@ -1,6 +1,7 @@
 import { FindOptions } from "sequelize";
 import { IDoctor, IDoctorCreationBody, IDoctorDataSource, IFindDoctorQuery } from "../interfaces/doctor.interface";
 import DoctorModel from "../models/doctor.model";
+import UserModel from "../models/user.model";
 
 
 class DoctorDataSource implements IDoctorDataSource {
@@ -9,7 +10,23 @@ class DoctorDataSource implements IDoctorDataSource {
   }
 
   async fetchOne(query: IFindDoctorQuery): Promise<IDoctor | null> {
-    return await DoctorModel.findOne(query);
+    return await DoctorModel.findOne({
+      ...query,
+      include: [
+        {
+          model: UserModel,
+          as: "users",
+          attributes: [
+            "username",
+            "firstname",
+            "lastname",
+            "email",
+            "accountStatus",
+            "role",
+          ],
+        },
+      ],
+    });
   }
 
   async updateOne(
@@ -20,7 +37,23 @@ class DoctorDataSource implements IDoctorDataSource {
   }
 
   async fetchAll(query: FindOptions<IDoctor>): Promise<IDoctor[]> {
-    return await DoctorModel.findAll(query);
+    return await DoctorModel.findAll({
+      ...query,
+      include: [
+        {
+          model: UserModel,
+          as: "users",
+          attributes: [
+            "username",
+            "firstname",
+            "lastname",
+            "email",
+            "accountStatus",
+            "role",
+          ],
+        },
+      ],
+    });
   }
 }
 

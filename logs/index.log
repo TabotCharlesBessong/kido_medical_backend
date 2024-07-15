@@ -111,3 +111,19 @@ notNull Violation: VitalSignModel.appointmentId cannot be null
 notNull Violation: PrescriptionModel.medications cannot be null 
 2024-07-01 21:51:06 error : notNull Violation: PrescriptionModel.medications cannot be null 
 2024-07-01 21:54:18 error : notNull Violation: PrescriptionModel.medications cannot be null 
+2024-07-06 18:52:57 error : User with email address already exists 
+2024-07-06 20:10:41 error : UserModel is associated to PatientModel using an alias. You've included an alias (user), but it does not match the alias(es) defined in your association (UserModel). 
+2024-07-06 20:16:22 error : UserModel is associated to PatientModel using an alias. You've included an alias (users), but it does not match the alias(es) defined in your association (UserModel). 
+2024-07-06 20:20:57 error : UserModel is associated to PatientModel using an alias. You've included an alias (users), but it does not match the alias(es) defined in your association (user). 
+2024-07-06 20:27:59 error : Could not get patient 
+2024-07-06 20:28:09 error : Could not get patient 
+2024-07-07 17:10:25 error : Authorization failed 
+2024-07-07 17:11:00 error : column Doctor.language does not exist 
+2024-07-07 17:12:02 error : column Doctor.language does not exist 
+2024-07-07 17:12:57 error : column postDoctor.language does not exist 
+2024-07-09 18:34:40 error : Authorization failed 
+2024-07-09 18:35:17 error : invalid input syntax for type uuid: "all-doctor" 
+2024-07-09 18:51:41 error : Authorization failed 
+2024-07-09 19:40:50 error : Invalid Login Detail 
+2024-07-09 19:41:22 error : Invalid Login Detail 
+2024-07-09 19:48:00 error : Authorization failed 

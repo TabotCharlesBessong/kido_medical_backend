@@ -6,6 +6,9 @@ export interface IDoctor {
   specialization: string;
   verificationStatus: string;
   documents: string;
+  fee:number
+  language:string
+  experience:number
   createdAt: Date;
   updatedAt: Date;
 }

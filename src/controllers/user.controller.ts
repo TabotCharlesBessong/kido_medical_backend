@@ -52,7 +52,7 @@ class UserController {
       const token = (await this.tokenService.createVerificationToken(
         newUser.email
       )) as IToken;
-      await EmailService.sendVerificationMail(newUser.email, token.code);
+      // await EmailService.sendVerificationMail(newUser.email, token.code);
       return Utility.handleSuccess(
         res,
         "User registered successfully. Please check your email for verification code.",

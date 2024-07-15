@@ -20,6 +20,10 @@ const createDoctorRoute = () => {
     }
   );
 
+  router.get("/:userId", Auth(), (req: Request, res: Response) => {
+    return doctorController.getDoctorById(req, res);
+  });
+
   router.get("/all-doctor", Auth(), (req: Request, res: Response) => {
     return doctorController.getAllDoctors(req, res);
   });
