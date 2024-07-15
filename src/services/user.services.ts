@@ -1,12 +1,15 @@
 // import { where } from "sequelize"
+import TokenDataSource from "../datasources/token.datasource";
 import UserDataSource from "../datasources/user.datasource";
 import { IFindUserQuery, IUser, IUserCreationBody, IUserDataSource } from "../interfaces/user.interfaces"
 // import { raw } from "express"
 
 class UserService {
   private userDataSource: UserDataSource;
+  private tokenDataSource: TokenDataSource;
   constructor() {
     this.userDataSource = new UserDataSource();
+    this.tokenDataSource = new TokenDataSource()
   }
 
   async getUserByField(record: Partial<IUser>): Promise<IUser | null> {
@@ -34,6 +37,14 @@ class UserService {
       }
     } catch (error) {
       throw new Error("Failed to update user role.");
+    }
+  }
+
+  async logout(userId: string): Promise<void> {
+    try {
+      // Invalidate the token in your preferred way, such as deleting it from a token store or setting a flag in the database
+    } catch (error) {
+      throw new Error("Failed to log out.");
     }
   }
 }

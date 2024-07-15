@@ -16,7 +16,7 @@ const PatientModel = Db.define<IPatientModel>(
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
-      unique:true,
+      unique: true,
       references: {
         model: UserModel,
         key: "id",
@@ -29,6 +29,30 @@ const PatientModel = Db.define<IPatientModel>(
     age: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    address1: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    address2: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    occupation: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    phoneNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    tribe: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    religion: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -55,6 +79,7 @@ UserModel.hasOne(PatientModel, {
 });
 PatientModel.belongsTo(UserModel, {
   foreignKey: "userId",
+  as:"users"
 });
 
 export default PatientModel;

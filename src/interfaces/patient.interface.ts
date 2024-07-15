@@ -5,6 +5,12 @@ export interface IPatient {
   userId: string;
   gender: string;
   age: number;
+  address1: string; // New field for city
+  address2: string; // New field for street
+  occupation: string; // New field for occupation
+  phoneNumber: string; // New field for phone number
+  tribe: string; // New field for tribe
+  religion: string; // New field for religion
   createdAt: Date;
   updatedAt: Date;
 }

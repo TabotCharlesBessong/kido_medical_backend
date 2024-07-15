@@ -12,6 +12,7 @@ class TokenService {
   private readonly tokenExpires: number = 5;
   public TokenTypes = {
     FORGOT_PASSWORD: "FORGOT_PASSWORD",
+    VERIFY_ACCOUNT: "VERIFY_ACCOUNT",
   };
   public TokenStatus = {
     NOTUSED: "NOTUSED",
@@ -31,6 +32,17 @@ class TokenService {
     const tokenData = {
       key: email,
       type: this.TokenTypes.FORGOT_PASSWORD,
+      expires: moment().add(this.tokenExpires, "minutes").toDate(),
+      status: this.TokenStatus.NOTUSED,
+    } as ITokenCreationBody;
+    let token = await this.createToken(tokenData);
+    return token;
+  }
+
+  async createVerificationToken(email: string): Promise<IToken | null> {
+    const tokenData = {
+      key: email,
+      type: this.TokenTypes.VERIFY_ACCOUNT,
       expires: moment().add(this.tokenExpires, "minutes").toDate(),
       status: this.TokenStatus.NOTUSED,
     } as ITokenCreationBody;

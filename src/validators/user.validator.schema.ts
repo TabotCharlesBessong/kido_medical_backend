@@ -28,12 +28,18 @@ const createMessageSchema = yup.object().shape({
   content: yup.string().required(),
 });
 
+const verifyAccountSchema = yup.object().shape({
+  email: yup.string().email("Invalid email").required("Email is required"),
+  code: yup.string().required("Code is required"),
+});
+
 const validationSchema = {
   registrationSchema,
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
-  createMessageSchema
+  createMessageSchema,
+  verifyAccountSchema
 }
 
 export default validationSchema
