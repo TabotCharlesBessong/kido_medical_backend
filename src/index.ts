@@ -12,6 +12,7 @@ import messageRouter from "./router/message.router";
 import callRouter from "./router/call.router";
 import {Server} from "socket.io"
 import MessageController from './controllers/message.controller';
+import rateLimit from 'express-rate-limit';
 
 //create an app
 const app = express();
@@ -36,6 +37,14 @@ app.use((err: TypeError, req: Request, res: Response, next: NextFunction) => {
         .json({ status: false, message: (err as TypeError).message });
     }
   } catch (e) {}
+});
+
+// api requests limit
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
 });
 
 app.use("/api/user", userRouter);
