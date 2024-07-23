@@ -24,7 +24,7 @@ const createDoctorRoute = () => {
     return doctorController.getDoctorById(req, res);
   });
 
-  router.get("/all-doctor", Auth(), (req: Request, res: Response) => {
+  router.get("/doctor/all", Auth(), (req: Request, res: Response) => {
     return doctorController.getAllDoctors(req, res);
   });
 
@@ -37,7 +37,7 @@ const createDoctorRoute = () => {
     }
   );
 
-  router.get("/all-time-slot", Auth(), (req: Request, res: Response) => {
+  router.get("/time/all", Auth(), (req: Request, res: Response) => {
     return doctorController.getAllTimeSlots(req, res);
   });
 

@@ -1,4 +1,5 @@
 import AppointmentModel from "../models/appointment.model";
+import CallModel from "../models/call.model";
 import CommentModel from "../models/comment.model";
 import ConsultationModel from "../models/consultation.model";
 import DoctorModel from "../models/doctor.model";
@@ -34,6 +35,7 @@ const DbInitialize = async () => {
     ConsultationModel.sync({ alter: false });
     PrescriptionModel.sync({ alter: false });
     MedicationModel.sync({ alter: false });
+    CallModel.sync({alter:false})
   } catch (error) {
     console.log("Unable to connect our database", error);
   }
