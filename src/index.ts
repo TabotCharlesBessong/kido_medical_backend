@@ -9,6 +9,7 @@ import doctorRouter from "./router/doctor.router";
 import postRouter from "./router/post.router";
 import patientRouter from "./router/patient.router";
 import messageRouter from "./router/message.router";
+import callRouter from "./router/call.router";
 import {Server} from "socket.io"
 import MessageController from './controllers/message.controller';
 
@@ -42,6 +43,7 @@ app.use("/api/doctor", doctorRouter);
 app.use("/api/posts", postRouter);
 app.use("/api/patient", patientRouter);
 app.use("/api/message", messageRouter);
+app.use("/api/call", callRouter);
 
 io.on("connection", (socket) => {
   console.log("A user connected");

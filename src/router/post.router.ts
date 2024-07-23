@@ -24,7 +24,7 @@ const createPostRoute = () => {
     return postController.getPostById(req, res);
   });
 
-  router.get("/all", Auth(), (req: Request, res: Response) => {
+  router.get("/post/all", Auth(), (req: Request, res: Response) => {
     return postController.getAllPosts(req, res);
   });
 

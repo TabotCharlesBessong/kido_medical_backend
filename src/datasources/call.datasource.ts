@@ -26,6 +26,10 @@ class CallDataSource implements ICallDataSource {
   async fetchAll(query: FindOptions<ICall>): Promise<ICall[]> {
     return await CallModel.findAll(query);
   }
+
+  async deleteOne(searchBy: IFindCallQuery): Promise<void> {
+    await CallModel.destroy(searchBy);
+  }
 }
 
 export default CallDataSource;

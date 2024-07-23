@@ -35,7 +35,7 @@ const DbInitialize = async () => {
     ConsultationModel.sync({ alter: false });
     PrescriptionModel.sync({ alter: false });
     MedicationModel.sync({ alter: false });
-    CallModel.sync({alter:true})
+    CallModel.sync({alter:false})
   } catch (error) {
     console.log("Unable to connect our database", error);
   }
