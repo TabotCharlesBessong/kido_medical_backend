@@ -15,7 +15,7 @@ export const makeCall = async (
 ): Promise<void> => {
   try {
     await client.calls.create({
-      url: `${process.env.BASE_URL}/twilio/voice?appointmentId=${appointmentId}`,
+      url: `${process.env.TWILIO_CALL_URL}/twilio/voice?appointmentId=${appointmentId}`,
       to,
       from: fromPhoneNumber,
     });

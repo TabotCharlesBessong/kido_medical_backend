@@ -24,7 +24,7 @@ class CallService {
     // }
 
     try {
-      await makeCall("00237673461722", record.appointmentId);
+      await makeCall("+237670203775", record.appointmentId);
       await this.callDataSource.updateOne(
         { where: { id: call.id } },
         { status: "COMPLETED" }
