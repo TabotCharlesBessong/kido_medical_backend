@@ -166,3 +166,5 @@ notNull Violation: CallModel.appointmentId cannot be null
 2024-07-23 22:23:19 error : The phone number you are attempting to call, 00237673461722, is not valid. 
 2024-07-23 22:24:16 error : The number +237673461722 is unverified. Trial accounts may only make calls to verified numbers. 
 2024-07-23 22:25:07 error : Account not authorized to call +237670203775. Perhaps you need to enable some international permissions: https://www.twilio.com/console/voice/calls/geo-permissions/low-risk 
+2024-07-23 22:54:24 error : Invalid religion 
+2024-07-23 23:03:53 error : insert or update on table "calls" violates foreign key constraint "calls_patientId_fkey" 
