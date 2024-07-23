@@ -165,3 +165,4 @@ notNull Violation: CallModel.appointmentId cannot be null
 2024-07-23 22:07:38 error : Url is not a valid URL: undefined/twilio/voice?appointmentId=9d74fdea-3cbc-40d4-9cf0-8bf68535c849 
 2024-07-23 22:23:19 error : The phone number you are attempting to call, 00237673461722, is not valid. 
 2024-07-23 22:24:16 error : The number +237673461722 is unverified. Trial accounts may only make calls to verified numbers. 
+2024-07-23 22:25:07 error : Account not authorized to call +237670203775. Perhaps you need to enable some international permissions: https://www.twilio.com/console/voice/calls/geo-permissions/low-risk 
