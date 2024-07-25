@@ -47,6 +47,11 @@ class UserService {
       throw new Error("Failed to log out.");
     }
   }
+
+  async getUsers():Promise<IUser[]> {
+    const query = {where:{},raw:true}
+    return this.userDataSource.fetchAll(query)
+  }
 }
 
 export default UserService

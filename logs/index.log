@@ -168,3 +168,21 @@ notNull Violation: CallModel.appointmentId cannot be null
 2024-07-23 22:25:07 error : Account not authorized to call +237670203775. Perhaps you need to enable some international permissions: https://www.twilio.com/console/voice/calls/geo-permissions/low-risk 
 2024-07-23 22:54:24 error : Invalid religion 
 2024-07-23 23:03:53 error : insert or update on table "calls" violates foreign key constraint "calls_patientId_fkey" 
+2024-07-24 09:59:46 error : jwt must be provided 
+2024-07-24 22:34:56 error : Invalid Login Detail 
+2024-07-24 22:35:09 error : Invalid login detail 
+2024-07-24 22:35:16 error : Invalid login detail 
+2024-07-24 22:35:26 error : Invalid login detail 
+2024-07-24 22:35:31 error : Invalid login detail 
+2024-07-24 22:35:43 error : Invalid login detail 
+2024-07-24 22:47:10 error : jwt malformed 
+2024-07-24 22:47:10 error : jwt malformed 
+2024-07-24 22:47:39 error : jwt malformed 
+2024-07-24 22:47:39 error : jwt malformed 
+2024-07-25 10:17:38 error : jwt expired 
+2024-07-25 10:20:07 error : insert or update on table "vitalsigns" violates foreign key constraint "vitalsigns_patientId_fkey" 
+2024-07-25 10:22:21 error : insert or update on table "vitalsigns" violates foreign key constraint "vitalsigns_patientId_fkey" 
+2024-07-25 10:24:45 error : notNull Violation: VitalSignModel.appointmentId cannot be null 
+2024-07-25 10:24:57 error : invalid input syntax for type uuid: "" 
+2024-07-25 13:13:27 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 13:13:43 error : Invalid time format. Expected format: HH:MI:SS 
