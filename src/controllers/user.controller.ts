@@ -52,7 +52,7 @@ class UserController {
       const token = (await this.tokenService.createVerificationToken(
         newUser.email
       )) as IToken;
-      // await EmailService.sendVerificationMail(newUser.email, token.code);
+      await EmailService.sendVerificationMail(newUser.email, token.code);
       return Utility.handleSuccess(
         res,
         "User registered successfully. Please check your email for verification code.",
@@ -276,6 +276,25 @@ class UserController {
         res,
         "Logout successful",
         {},
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getAllUsers(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      let users = await this.userService.getUsers()
+      return Utility.handleSuccess(
+        res,
+        "Account fetched successfully",
+        { users },
         ResponseCode.SUCCESS
       );
     } catch (error) {

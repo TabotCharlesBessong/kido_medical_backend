@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import UserController from "../controllers/user.controller";
-import { validator } from "../middlewares/index.middlewares";
+import { Auth, validator } from "../middlewares/index.middlewares";
 import validationSchema from "../validators/user.validator.schema";
 const createUserRoute = () => {
   const router = express.Router();
@@ -49,6 +49,10 @@ const createUserRoute = () => {
   router.post("/logout", (req: Request, res: Response) => {
     return userController.logout(req, res);
   });
+
+  router.get("/users/all",Auth(),(req:Request,res:Response) => {
+    return userController.getAllUsers(req,res)
+  })
 
   return router;
 };
