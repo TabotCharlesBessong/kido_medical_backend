@@ -186,3 +186,18 @@ notNull Violation: CallModel.appointmentId cannot be null
 2024-07-25 10:24:57 error : invalid input syntax for type uuid: "" 
 2024-07-25 13:13:27 error : Invalid time format. Expected format: HH:MI:SS 
 2024-07-25 13:13:43 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 16:33:41 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 16:35:12 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 16:37:10 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 16:44:25 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 16:54:28 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 16:54:31 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 16:56:20 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 16:59:30 error : startTime is a required field 
+2024-07-25 17:03:10 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 17:13:20 error : Invalid time format. Expected format: HH:MI:SS 
+2024-07-25 20:33:04 error : jwt expired 
+2024-07-25 20:34:22 error : jwt expired 
+2024-07-25 20:35:44 error : invalid input syntax for type uuid: "conversation" 
+2024-07-25 22:28:14 error : Authorization failed 
+2024-07-25 22:28:51 error : Authorization failed 
