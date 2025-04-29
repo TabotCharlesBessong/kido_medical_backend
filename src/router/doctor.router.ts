@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import DoctorController from "../controllers/doctor.controller";
 import {
   Auth,
@@ -15,45 +15,73 @@ const createDoctorRoute = () => {
     "/create",
     validator(validationSchema.doctorValidationSchema),
     Auth(),
-    (req: Request, res: Response) => {
-      return doctorController.registerDoctor(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.registerDoctor(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
-  router.get("/:userId", Auth(), (req: Request, res: Response) => {
-    return doctorController.getDoctorById(req, res);
+  router.get("/:userId", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await doctorController.getDoctorById(req, res);
+    } catch (error) {
+      next(error);
+    }
   });
 
-  router.get("/doctor/all", Auth(), (req: Request, res: Response) => {
-    return doctorController.getAllDoctors(req, res);
+  router.get("/doctor/all", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await doctorController.getAllDoctors(req, res);
+    } catch (error) {
+      next(error);
+    }
   });
 
   router.post(
     "/create-time-slot",
     validator(validationSchema.timeSlotSchema),
     DoctorMiddleware(),
-    (req: Request, res: Response) => {
-      return doctorController.createTimeSlot(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.createTimeSlot(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
-  router.get("/time/all", Auth(), (req: Request, res: Response) => {
-    return doctorController.getAllTimeSlots(req, res);
+  router.get("/time/all", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await doctorController.getAllTimeSlots(req, res);
+    } catch (error) {
+      next(error);
+    }
   });
 
   router.put(
     "/cancel/:id",
     DoctorMiddleware(),
-    (req: Request, res: Response) => {
-      doctorController.cancelAppointment(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.cancelAppointment(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.put(
     "/approve/:id",
     DoctorMiddleware(),
-    (req: Request, res: Response) => {
-      doctorController.approveAppointment(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.approveAppointment(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
@@ -61,36 +89,56 @@ const createDoctorRoute = () => {
     "/record/sign",
     DoctorMiddleware(),
     validator(validationSchema.vitalSignSchema),
-    (req: Request, res: Response) => {
-      doctorController.createVitalSing(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.createVitalSing(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.get(
     "/record/sign/all",
     DoctorMiddleware(),
-    (req: Request, res: Response) => {
-      doctorController.getAllVitals(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getAllVitals(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
-  router.get("/record/sign/:vitalId", Auth(), (req: Request, res: Response) => {
-    doctorController.getVitalsById(req, res);
+  router.get("/record/sign/:vitalId", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await doctorController.getVitalsById(req, res);
+    } catch (error) {
+      next(error);
+    }
   });
 
   router.put(
     "/record/sign/:vitalId",
     DoctorMiddleware(),
-    (req: Request, res: Response) => {
-      doctorController.updateVitals(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.updateVitals(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.delete(
     "/record/sign/:vitalId",
     Auth(),
-    (req: Request, res: Response) => {
-      doctorController.destroyVitals(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.destroyVitals(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
@@ -98,40 +146,60 @@ const createDoctorRoute = () => {
     "/record/consultation",
     DoctorMiddleware(),
     validator(validationSchema.consultationSchema),
-    (req: Request, res: Response) => {
-      doctorController.createConsultation(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.createConsultation(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.get(
     "/record/consultation/all",
     Auth(),
-    (req: Request, res: Response) => {
-      doctorController.getAllConsultations(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getAllConsultations(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.get(
     "/record/consultation/:consultationId",
     Auth(),
-    (req: Request, res: Response) => {
-      doctorController.getConsultationById(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getConsultationById(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.put(
     "/record/consultation/:consultationId",
     DoctorMiddleware(),
-    (req: Request, res: Response) => {
-      doctorController.updateConsultation(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.updateConsultation(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.delete(
     "/record/consultation/:consultationId",
     Auth(),
-    (req: Request, res: Response) => {
-      doctorController.destroyConsultation(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.destroyConsultation(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
@@ -139,40 +207,60 @@ const createDoctorRoute = () => {
     "/record/prescription",
     DoctorMiddleware(),
     validator(validationSchema.PrescriptionSchema),
-    (req: Request, res: Response) => {
-      doctorController.createPrescription(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.createPrescription(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.get(
     "/record/prescription/all",
     Auth(),
-    (req: Request, res: Response) => {
-      doctorController.getPrescriptions(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getPrescriptions(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.get(
     "/record/prescription/:id",
     Auth(),
-    (req: Request, res: Response) => {
-      doctorController.getPrescriptionById(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getPrescriptionById(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.put(
     "/record/prescription/:id",
     DoctorMiddleware(),
-    (req: Request, res: Response) => {
-      doctorController.updatePrescription(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.updatePrescription(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.delete(
     "/record/prescription/:prescriptionId",
     Auth(),
-    (req: Request, res: Response) => {
-      doctorController.destroyPrescription(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.destroyPrescription(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 

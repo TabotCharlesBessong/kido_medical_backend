@@ -10,22 +10,18 @@ import Utility from "../utils/index.utils";
 const userService = new UserService();
 
 export const validator = (schema: Schema<any>) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       await schema.validate(req.body, { abortEarly: false });
       next();
     } catch (error: any) {
-      return Utility.handleError(
-        res,
-        error.errors[0],
-        ResponseCode.BAD_REQUEST
-      );
+      Utility.handleError(res, error.errors[0], ResponseCode.BAD_REQUEST);
     }
   };
 };
 
 export const Auth = () => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       let token: string = req.headers.authorization ?? "";
       if (Utility.isEmpty(token)) {
@@ -47,17 +43,13 @@ export const Auth = () => {
         next();
       }
     } catch (error) {
-      return Utility.handleError(
-        res,
-        (error as TypeError).message,
-        ResponseCode.BAD_REQUEST
-      );
+      Utility.handleError(res, (error as TypeError).message, ResponseCode.BAD_REQUEST);
     }
   };
 };
 
 export const DoctorMiddleware = () => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       let token: string = req.headers.authorization ?? "";
       if (Utility.isEmpty(token)) throw new TypeError("Authorization failed");
@@ -74,11 +66,7 @@ export const DoctorMiddleware = () => {
       req.body.user = decode;
       next();
     } catch (error) {
-      return Utility.handleError(
-        res,
-        (error as TypeError).message,
-        ResponseCode.BAD_REQUEST
-      );
+      Utility.handleError(res, (error as TypeError).message, ResponseCode.BAD_REQUEST);
     }
   };
 };

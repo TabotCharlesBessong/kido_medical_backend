@@ -29,6 +29,7 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// @ts-ignore
 app.use((err: TypeError, req: Request, res: Response, next: NextFunction) => {
   try {
     if (err) {

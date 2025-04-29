@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import PatientController from "../controllers/patient.controller";
 import { Auth, validator } from "../middlewares/index.middlewares";
 import validationSchema from "../validators/patient.validator.schema";
@@ -11,21 +11,33 @@ const createPatientRoute = () => {
     "/create",
     Auth(),
     validator(validationSchema.createPatientSchema),
-    (req: Request, res: Response) => {
-      return patientController.createPatient(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await patientController.createPatient(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
-  router.get("/:userId", Auth(), (req: Request, res: Response) => {
-    return patientController.getPatientById(req, res);
+  router.get("/:userId", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await patientController.getPatientById(req, res);
+    } catch (error) {
+      next(error);
+    }
   });
 
   router.put(
     "/:userId",
     Auth(),
     // validator(validationSchema.createPatientSchema),
-    (req: Request, res: Response) => {
-      return patientController.updatePatient(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await patientController.updatePatient(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
@@ -33,8 +45,12 @@ const createPatientRoute = () => {
     "/appointment/create",
     Auth(),
     validator(validationSchema.bookAppointmentSchema),
-    (req: Request, res: Response) => {
-      return patientController.bookAppointment(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await patientController.bookAppointment(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
@@ -42,20 +58,32 @@ const createPatientRoute = () => {
     "/appointment/:appointmentId",
     Auth(),
     validator(validationSchema.bookAppointmentSchema),
-    (req: Request, res: Response) => {
-      return patientController.updateAppointment(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await patientController.updateAppointment(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
-  router.get("/appointment/all", Auth(), (req: Request, res: Response) => {
-    return patientController.getAllAppointments(req, res);
+  router.get("/appointment/all", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await patientController.getAllAppointments(req, res);
+    } catch (error) {
+      next(error);
+    }
   });
 
   router.get(
     "/appointment/:appointmentId",
     Auth(),
-    (req: Request, res: Response) => {
-      return patientController.getAppointmentById(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await patientController.getAppointmentById(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 

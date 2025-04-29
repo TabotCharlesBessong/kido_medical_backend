@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import PostController from "../controllers/post.controller";
 import {
   Auth,
@@ -15,63 +15,96 @@ const createPostRoute = () => {
     "/create",
     validator(validationSchema.createPostSchema),
     DoctorMiddleware(),
-    (req: Request, res: Response) => {
-      return postController.createPost(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await postController.createPost(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
-  router.get("/:postId", Auth(), (req: Request, res: Response) => {
-    return postController.getPostById(req, res);
+  router.get("/:postId", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await postController.getPostById(req, res);
+    } catch (error) {
+      next(error);
+    }
   });
 
-  router.get("/post/all", Auth(), (req: Request, res: Response) => {
-    return postController.getAllPosts(req, res);
+  router.get("/post/all", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await postController.getAllPosts(req, res);
+    } catch (error) {
+      next(error);
+    }
   });
 
   router.put(
     "/:postId",
-    // validator(validationSchema.updatePostSchema),
     DoctorMiddleware(),
-    (req: Request, res: Response) => {
-      return postController.updatePost(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await postController.updatePost(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.delete(
     "/:postId",
     DoctorMiddleware(),
-    (req: Request, res: Response) => {
-      return postController.deletePost(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await postController.deletePost(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
-  router.get("/doctor/:doctorId",Auth(), (req: Request, res: Response) => {
-    return postController.getAllPostsByDoctor(req, res);
+  router.get("/doctor/:doctorId", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await postController.getAllPostsByDoctor(req, res);
+    } catch (error) {
+      next(error);
+    }
   });
 
   router.post(
     "/:postId/comment",
     validator(validationSchema.createCommentSchema),
     Auth(),
-    (req: Request, res: Response) => {
-      return postController.addCommentToPost(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await postController.addCommentToPost(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.post(
     "/:postId/like",
-    // validator(validationSchema.addLikeSchema),
     Auth(),
-    (req: Request, res: Response) => {
-      return postController.addLikeToPost(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await postController.addLikeToPost(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
   router.delete(
     "/:postId/like",
-    // validator(validationSchema.removeLikeSchema),
-    (req: Request, res: Response) => {
-      return postController.removeLikeFromPost(req, res);
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await postController.removeLikeFromPost(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
   );
 
