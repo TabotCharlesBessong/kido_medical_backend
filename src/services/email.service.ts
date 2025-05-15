@@ -1,6 +1,11 @@
 const nodemailer = require("nodemailer");
 const fs = require("fs");
 const path = require("path");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+// console.log(process.env.MAILTRAP_USER)
 
 const emailTemplate = path.join(`${__dirname}`, "..", "template/email.html");
 const template = fs.readFileSync(emailTemplate, "utf8");
@@ -30,31 +35,60 @@ class EmailService {
   }
 
   private static async sendMail(to: string, subject: string, message: string) {
-    const appName = process.env.APPNAME as string;
-    const supportMail = process.env.VERIFICATION_EMAIL as string;
-    const name = to.split("@")[0];
-    let html = this.replaceTemplateConstant(template, "#APP_NAME#", appName);
-    html = this.replaceTemplateConstant(html, "#NAME#", name);
-    html = this.replaceTemplateConstant(html, "#MESSAGE#", message);
-    html = this.replaceTemplateConstant(html, "#SUPPORT_MAIL#", supportMail);
-    const transport = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.MAILTRAP_USER,
-        pass: process.env.MAILTRAP_PASS,
-      },
-    });
+    try {
+      const appName = process.env.APPNAME || "Kido Medical";
+      const supportMail = process.env.VERIFICATION_EMAIL || "charlesbessongtabot@gmail.com";
+      const name = to.split("@")[0];
+      let html = this.replaceTemplateConstant(template, "#APP_NAME#", appName);
+      html = this.replaceTemplateConstant(html, "#NAME#", name);
+      html = this.replaceTemplateConstant(html, "#MESSAGE#", message);
+      html = this.replaceTemplateConstant(html, "#SUPPORT_MAIL#", supportMail);
+      
+      const mailUser = process.env.MAILTRAP_USER as string;
+      const mailPass = process.env.MAILTRAP_PASS as string;
+      
+      // if (!mailUser || !mailPass) {
+      //   console.warn('Email credentials not configured. Email sending will be skipped.');
+      //   throw new Error('Email service not configured');
+      // }
+      
+      // // Check if we should use Gmail or Mailtrap
+      // const isGmail = mailUser.includes('@gmail.com');
+      // const transportConfig = isGmail ? 
+      //   {
+      //     service: "gmail",
+      //     auth: { user: mailUser, pass: mailPass }
+      //   } : 
+      //   {
+      //     host: process.env.MAILTRAP_HOST || "smtp.mailtrap.io",
+      //     port: parseInt(process.env.MAILTRAP_PORT || "2525"),
+      //     auth: { user: mailUser, pass: mailPass }
+      //   };
+      
+      const transport = nodemailer.createTransport({
+        service:"gmail",
+        auth:{
+          user:mailUser,
+          pass:mailPass
+        }
+      });
 
-    const mailOptions = {
-      from: process.env.MAILTRAP_USER,
-      to,
-      subject,
-      text: message,
-      html: html,
-    };
+      const mailOptions = {
+        from: mailUser,
+        to,
+        subject,
+        text: message,
+        html: html,
+      };
 
-    const infoMail = await transport.sendMail(mailOptions);
-    return infoMail;
+      console.log(`Attempting to send email to ${to} using Mailtrap`);
+      const infoMail = await transport.sendMail(mailOptions);
+      console.log(`Email sent to ${to}: ${infoMail.response}`);
+      return infoMail;
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      throw error;
+    }
   }
 }
 

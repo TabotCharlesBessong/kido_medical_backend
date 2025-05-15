@@ -186,3 +186,7 @@ notNull Violation: CallModel.appointmentId cannot be null
 2024-07-25 10:24:57 error : invalid input syntax for type uuid: "" 
 2024-07-25 13:13:27 error : Invalid time format. Expected format: HH:MI:SS 
 2024-07-25 13:13:43 error : Invalid time format. Expected format: HH:MI:SS 
+2025-05-13 17:02:18 error : firstname is a required field 
+2025-05-13 17:03:11 error : Missing credentials for "PLAIN" 
+2025-05-13 17:12:15 error : User with email address already exists 
+2025-05-13 17:12:41 error : Missing credentials for "PLAIN" 

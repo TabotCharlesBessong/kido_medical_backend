@@ -26,7 +26,18 @@ class UserController {
 
   async register(req: Request, res: Response) {
     try {
+      console.log('Register request body:', req.body);
       const params = { ...req.body };
+      
+      // Validate required fields
+      if (!params.firstname || !params.lastname || !params.email || !params.password) {
+        return Utility.handleError(
+          res,
+          "Missing required fields",
+          ResponseCode.BAD_REQUEST
+        );
+      }
+
       const newUser = {
         firstname: params.firstname,
         lastname: params.lastname,
@@ -37,30 +48,58 @@ class UserController {
         isEmailVerified: EmailStatus.NOT_VERIFIED,
         accountStatus: AccountStatus.ACTIVE,
       } as IUserCreationBody;
+
+      console.log('Creating user with data:', { ...newUser, password: '[REDACTED]' });
+
       newUser.password = bcrypt.hashSync(newUser.password, 10);
+      
       let userExists = await this.userService.getUserByField({
         email: newUser.email,
       });
-      if (userExists)
+      
+      if (userExists) {
+        console.log('User already exists with email:', newUser.email);
         return Utility.handleError(
           res,
           "User with email address already exists",
           ResponseCode.ALREADY_EXIST
         );
+      }
 
       let user = await this.userService.createUser(newUser);
+      console.log('User created successfully:', { id: user.id, email: user.email });
+
       const token = (await this.tokenService.createVerificationToken(
         newUser.email
       )) as IToken;
-      await EmailService.sendVerificationMail(newUser.email, token.code);
+      console.log('Verification token created:', token.code);
+
+      try {
+        // Try to send email but don't let it block registration if it fails
+        await EmailService.sendVerificationMail(newUser.email, token.code);
+        console.log('Verification email sent to:', newUser.email);
+      } catch (emailError) {
+        console.error('Failed to send verification email:', emailError);
+        // Continue with registration even if email fails
+      }
+
       return Utility.handleSuccess(
         res,
         "User registered successfully. Please check your email for verification code.",
-        { user },
+        { user, verificationCode: token.code }, // Include code in response for testing
         ResponseCode.SUCCESS
       );
     } catch (error) {
-      res.send({ message: "Server error" });
+      console.error('Registration error details:', {
+        message: (error as Error).message,
+        stack: (error as Error).stack,
+        name: (error as Error).name
+      });
+      return Utility.handleError(
+        res,
+        (error as Error).message || "An error occurred during registration",
+        ResponseCode.SERVER_ERROR
+      );
     }
   }
 

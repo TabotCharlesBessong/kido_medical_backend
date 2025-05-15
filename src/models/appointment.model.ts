@@ -20,7 +20,7 @@ const AppointmentModel = Db.define<IAppointmentModel>(
       allowNull: true,
       references: {
         model: PatientModel,
-        key: "userId",
+        key: "id",
       },
     },
     doctorId: {
@@ -69,18 +69,20 @@ const AppointmentModel = Db.define<IAppointmentModel>(
 
 PatientModel.hasMany(AppointmentModel, {
   foreignKey: "patientId",
-  as: "patientAppointments",
+  as: "appointments",
 });
 AppointmentModel.belongsTo(PatientModel, {
   foreignKey: "patientId",
+  as: "patient",
 });
 
 DoctorModel.hasMany(AppointmentModel, {
   foreignKey: "doctorId",
-  as: "doctorAppointments",
+  as: "appointments",
 });
 AppointmentModel.belongsTo(DoctorModel, {
   foreignKey: "doctorId",
+  as: "doctor",
 });
 
 export default AppointmentModel;
