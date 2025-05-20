@@ -34,9 +34,9 @@ class AppointmentService {
     // Notify the doctor
     await this.notificationDataSource.create({
       userId: createdAppointment.patientId,
-      appointmentId: createdAppointment.id,
       message: "Your appointment has been created",
-      type: NotificationType.APPOINTMENT_SCHEDULED,
+      type: NotificationType.APPOINTMENT,
+      referenceId: createdAppointment.id,
       read: false,
     });
 
@@ -46,7 +46,7 @@ class AppointmentService {
   async approveAppointment(appointmentId: string): Promise<void> {
     const filter = { where: { id: appointmentId } };
     const update = {
-      staus: AppointmentStatus.APPROVED,
+      status: AppointmentStatus.APPROVED,
     } as Partial<IAppointment>;
     await this.appointmentDataSource.updateOne(update, filter);
 
@@ -54,9 +54,9 @@ class AppointmentService {
     if (appointment) {
       await this.notificationDataSource.create({
         userId: appointment.patientId,
-        appointmentId: appointment.id,
         message: "Your appointment has been approved",
-        type: NotificationType.APPOINTMENT_APPROVED,
+        type: NotificationType.APPOINTMENT,
+        referenceId: appointment.id,
       });
     }
   }
@@ -64,7 +64,7 @@ class AppointmentService {
   async cancelAppointment(appointmentId: string): Promise<void> {
     const filter = { where: { id: appointmentId } };
     const update = {
-      staus: AppointmentStatus.CANCELED,
+      status: AppointmentStatus.CANCELED,
     } as Partial<IAppointment>;
     await this.appointmentDataSource.updateOne(update, filter);
 
@@ -72,9 +72,9 @@ class AppointmentService {
     if (appointment) {
       await this.notificationDataSource.create({
         userId: appointment.patientId,
-        appointmentId: appointment.id,
         message: "Your appointment has been canceled",
-        type: NotificationType.APPOINTMENT_CANCELLED,
+        type: NotificationType.APPOINTMENT,
+        referenceId: appointment.id,
       });
     }
   }

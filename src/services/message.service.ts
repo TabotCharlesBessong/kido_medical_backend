@@ -22,7 +22,7 @@ class MessageService {
     const message = await this.messageDataSource.create(record);
     await this.notificationDataSource.create({
       userId: record.receiverId,
-      messageId: message.id,
+      referenceId: message.id,
       message: `New message from ${record.senderId}`,
       read: false,
       type: NotificationType.MESSAGE,
