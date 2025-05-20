@@ -34,8 +34,9 @@ const DoctorModel = Db.define<IDoctorModel>(
       allowNull: true,
     },
     language: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+      defaultValue: [],
     },
     fee: {
       type: DataTypes.DECIMAL,

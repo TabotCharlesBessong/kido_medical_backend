@@ -18,7 +18,7 @@ const PostModel = Db.define<IPostModel>(
       allowNull: false,
       references: {
         model: DoctorModel,
-        key: "userId",
+        key: "id",
       },
     },
     title: {

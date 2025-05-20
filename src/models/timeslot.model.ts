@@ -17,7 +17,7 @@ const TimeSlotModel = Db.define<ITimeSlotModel>(
       allowNull: true,
       references: {
         model: DoctorModel,
-        key: "userId",
+        key: "id",
       },
     },
     startTime: {
