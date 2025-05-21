@@ -13,6 +13,7 @@ import callRouter from "./router/call.router";
 import {Server} from "socket.io"
 import MessageController from './controllers/message.controller';
 import rateLimit from 'express-rate-limit';
+import seedDatabase from './database/seeders';
 
 //create an app
 const app = express();
@@ -95,6 +96,9 @@ const Boostrap = async function () {
     app.listen(PORT, () => {
       console.log("Connection has been established successfully.");
     });
+
+    // run only once
+    await seedDatabase()
   } catch (error) {
     console.error("Unable to connect to the database:", error);
   }

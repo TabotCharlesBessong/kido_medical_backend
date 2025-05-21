@@ -16,8 +16,9 @@ import UserModel from "../models/user.model";
 import VitalSignModel from "../models/vitalsign.model";
 import Db from "./index";
 import { QueryTypes } from "sequelize";
+import seedDatabase from "./seeders";
 
-const DbInitialize = async () => {
+const DbInitialize = async (shouldSeed: boolean = false) => {
   try {
     await Db.authenticate();
     console.log("Connected to the database");
@@ -56,24 +57,29 @@ const DbInitialize = async () => {
     }
 
     // Then sync all models
-    await UserModel.sync({ alter: false });
-    await TokenModel.sync({ alter: false });
-    await DoctorModel.sync({ alter: false });
-    await PatientModel.sync({ alter: false });
-    await TimeSlotModel.sync({ alter: false });
-    await AppointmentModel.sync({ alter: false });
-    await PostModel.sync({ alter: false });
-    await CommentModel.sync({ alter: false });
-    await LikeModel.sync({ alter: false });
-    await MessageModel.sync({ alter: false });
-    await NotificationModel.sync({ alter: false });
-    await VitalSignModel.sync({ alter: false });
-    await ConsultationModel.sync({ alter: false });
-    await PrescriptionModel.sync({ alter: false });
-    await MedicationModel.sync({ alter: false });
-    await CallModel.sync({ alter: false });
+    await UserModel.sync({ force: true });
+    await TokenModel.sync({ force: true });
+    await DoctorModel.sync({ force: true });
+    await PatientModel.sync({ force: true });
+    await TimeSlotModel.sync({ force: true });
+    await AppointmentModel.sync({ force: true });
+    await PostModel.sync({ force: true });
+    await CommentModel.sync({ force: true });
+    await LikeModel.sync({ force: true });
+    await MessageModel.sync({ force: true });
+    await NotificationModel.sync({ force: true });
+    await VitalSignModel.sync({ force: true });
+    await ConsultationModel.sync({ force: true });
+    await PrescriptionModel.sync({ force: true });
+    await MedicationModel.sync({ force: true });
+    await CallModel.sync({ force: true });
 
     console.log("All models synchronized successfully");
+
+    // Seed the database if requested
+    if (shouldSeed) {
+      await seedDatabase();
+    }
   } catch (error) {
     console.log("Unable to connect to database", error);
     throw error;
