@@ -21,13 +21,24 @@ import { AppointmentStatus } from '../../interfaces/enum/patient.enum';
 import { NotificationType } from '../../interfaces/enum/notification.enum';
 import { Frequency } from '../../interfaces/enum/doctor.enum';
 import { IMedication } from '../../interfaces/medication.interface';
+import bcrypt from 'bcrypt';
+
+const hashPassword = async (password: string) : Promise<string> => {
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt) as string;
+}
 
 const seedDatabase = async () => {
+  const transaction = await Db.transaction();
+  
   try {
     console.log('Starting database seeding...');
 
     // Clear existing data
-    await Db.query('TRUNCATE TABLE "users" CASCADE', { type: QueryTypes.RAW });
+    await Db.query('TRUNCATE TABLE "users" CASCADE', { 
+      type: QueryTypes.RAW,
+      transaction 
+    });
     console.log('Cleared existing data');
 
     // Create users (50 total: 10 doctors, 40 patients)
@@ -37,16 +48,17 @@ const seedDatabase = async () => {
 
     // Create doctor users (all verified)
     for (let i = 0; i < 10; i++) {
+      const hashedPassword = await hashPassword('Password#123');
       const user = await UserModel.create({
         username: faker.internet.username(),
         email: faker.internet.email(),
-        password: 'password123', // You might want to hash this in production
+        password: hashedPassword,
         firstname: faker.person.firstName(),
         lastname: faker.person.lastName(),
         role: 'DOCTOR',
         isEmailVerified: EmailStatus.VERIFIED,
         accountStatus: AccountStatus.ACTIVE
-      });
+      }, { transaction });
       users.push(user);
       doctors.push(user);
 
@@ -59,21 +71,22 @@ const seedDatabase = async () => {
         language: faker.helpers.arrayElements(['English', 'French', 'Spanish', 'Arabic'], { min: 1, max: 3 }),
         fee: faker.number.float({ min: 50, max: 200, fractionDigits: 2 }),
         experience: faker.number.int({ min: 1, max: 30 })
-      });
+      }, { transaction });
     }
 
     // Create patient users (35 verified, 5 unverified)
     for (let i = 0; i < 40; i++) {
+      const hashedPassword = await hashPassword('Password#123');
       const user = await UserModel.create({
         username: faker.internet.username(),
         email: faker.internet.email(),
-        password: 'password123',
+        password: hashedPassword,
         firstname: faker.person.firstName(),
         lastname: faker.person.lastName(),
         role: 'PATIENT',
         isEmailVerified: i < 35 ? EmailStatus.VERIFIED : EmailStatus.NOT_VERIFIED,
         accountStatus: AccountStatus.ACTIVE
-      });
+      }, { transaction });
       users.push(user);
       patients.push(user);
 
@@ -88,14 +101,14 @@ const seedDatabase = async () => {
         phoneNumber: faker.phone.number(),
         tribe: faker.helpers.arrayElement(['Yoruba', 'Hausa', 'Igbo', 'Fulani', 'Edo']),
         religion: faker.helpers.arrayElement(['Christianity', 'Islam', 'Traditional', 'Other'])
-      });
+      }, { transaction });
     }
 
     console.log('Created users and their profiles');
 
     // Get all doctor and patient records from the database
-    const doctorRecords = await DoctorModel.findAll();
-    const patientRecords = await PatientModel.findAll();
+    const doctorRecords = await DoctorModel.findAll({ transaction });
+    const patientRecords = await PatientModel.findAll({ transaction });
 
     // Create time slots for doctors (3-7 per doctor)
     for (const doctor of doctorRecords) {
@@ -114,7 +127,7 @@ const seedDatabase = async () => {
           startTime: startDate,
           endTime: endDate,
           isAvailable: true
-        });
+        }, { transaction });
       }
     }
 
@@ -128,7 +141,10 @@ const seedDatabase = async () => {
       for (const doctor of selectedDoctors) {
         const numAppointments = faker.number.int({ min: 5, max: 13 });
         for (let i = 0; i < numAppointments; i++) {
-          const timeSlot = await TimeSlotModel.findOne({ where: { doctorId: doctor.id } });
+          const timeSlot = await TimeSlotModel.findOne({ 
+            where: { doctorId: doctor.id },
+            transaction 
+          });
           if (timeSlot) {
             await AppointmentModel.create({
               doctorId: doctor.id,
@@ -141,7 +157,7 @@ const seedDatabase = async () => {
                 AppointmentStatus.APPROVED,
                 AppointmentStatus.CANCELED
               ])
-            });
+            }, { transaction });
           }
         }
       }
@@ -160,14 +176,14 @@ const seedDatabase = async () => {
           description: faker.lorem.paragraphs(3),
           likesCount: 0,
           status: 'ACTIVE'
-        });
+        }, { transaction });
       }
     }
 
     console.log('Created posts');
 
     // Create comments on posts (2-10 comments per post)
-    const posts = await PostModel.findAll();
+    const posts = await PostModel.findAll({ transaction });
     for (const post of posts) {
       const numComments = faker.number.int({ min: 2, max: 10 });
       for (let i = 0; i < numComments; i++) {
@@ -176,7 +192,7 @@ const seedDatabase = async () => {
           postId: post.id,
           userId: commenter.id,
           content: faker.lorem.paragraph()
-        });
+        }, { transaction });
       }
     }
 
@@ -190,10 +206,10 @@ const seedDatabase = async () => {
         await LikeModel.create({
           postId: post.id,
           userId: liker.id
-        });
+        }, { transaction });
       }
       // Update post likes count
-      await post.update({ likesCount: numLikes });
+      await post.update({ likesCount: numLikes }, { transaction });
     }
 
     console.log('Created likes');
@@ -211,7 +227,7 @@ const seedDatabase = async () => {
             receiverId: isFromDoctor ? patient.userId : doctor.userId,
             content: faker.lorem.paragraph(),
             read: faker.datatype.boolean()
-          });
+          }, { transaction });
         }
       }
     }
@@ -232,7 +248,7 @@ const seedDatabase = async () => {
             NotificationType.PRESCRIPTION
           ]),
           referenceId: faker.string.uuid()
-        });
+        }, { transaction });
       }
     }
 
@@ -244,7 +260,8 @@ const seedDatabase = async () => {
       for (let i = 0; i < numRecords; i++) {
         const doctor = faker.helpers.arrayElement(doctorRecords);
         const appointment = await AppointmentModel.findOne({
-          where: { patientId: patient.id, doctorId: doctor.id }
+          where: { patientId: patient.id, doctorId: doctor.id },
+          transaction
         });
         if (appointment) {
           await VitalSignModel.create({
@@ -257,7 +274,7 @@ const seedDatabase = async () => {
             pulse: faker.number.int({ min: 60, max: 100 }),
             respiratoryRate: faker.number.int({ min: 12, max: 20 }),
             temperature: faker.number.float({ min: 36.1, max: 37.2, fractionDigits: 1 })
-          });
+          }, { transaction });
         }
       }
     }
@@ -269,7 +286,8 @@ const seedDatabase = async () => {
       const numConsultations = faker.number.int({ min: 2, max: 8 });
       for (let i = 0; i < numConsultations; i++) {
         const appointment = await AppointmentModel.findOne({
-          where: { patientId: patient.id }
+          where: { patientId: patient.id },
+          transaction
         });
         if (appointment) {
           await ConsultationModel.create({
@@ -279,7 +297,7 @@ const seedDatabase = async () => {
             diagnosticImpression: faker.lorem.paragraph(),
             investigations: faker.lorem.paragraph(),
             treatment: faker.lorem.paragraph()
-          });
+          }, { transaction });
         }
       }
     }
@@ -287,7 +305,7 @@ const seedDatabase = async () => {
     console.log('Created consultations');
 
     // Create prescriptions
-    const consultations = await ConsultationModel.findAll();
+    const consultations = await ConsultationModel.findAll({ transaction });
     for (const consultation of consultations) {
       // Create prescription first
       const prescription = await PrescriptionModel.create({
@@ -295,7 +313,7 @@ const seedDatabase = async () => {
         instructions: faker.lorem.paragraph(),
         investigation: faker.lorem.paragraph(),
         medications: [] // Initialize with empty array
-      });
+      }, { transaction });
 
       // Create medications for this prescription
       const numMedications = faker.number.int({ min: 1, max: 4 });
@@ -310,7 +328,7 @@ const seedDatabase = async () => {
             Frequency.THRICE_A_DAY
           ]),
           duration: faker.number.int({ min: 5, max: 14 })
-        });
+        }, { transaction });
       }
     }
 
@@ -322,7 +340,8 @@ const seedDatabase = async () => {
       for (let i = 0; i < numCalls; i++) {
         const doctor = faker.helpers.arrayElement(doctorRecords);
         const appointment = await AppointmentModel.findOne({
-          where: { patientId: patient.id, doctorId: doctor.id }
+          where: { patientId: patient.id, doctorId: doctor.id },
+          transaction
         });
         if (appointment) {
           await CallModel.create({
@@ -330,14 +349,19 @@ const seedDatabase = async () => {
             patientId: patient.id,
             appointmentId: appointment.id,
             status: faker.helpers.arrayElement(['PENDING', 'COMPLETED', 'FAILED'])
-          });
+          }, { transaction });
         }
       }
     }
 
     console.log('Created calls');
+    
+    // Commit the transaction
+    await transaction.commit();
     console.log('Database seeding completed successfully!');
   } catch (error) {
+    // Rollback the transaction in case of error
+    await transaction.rollback();
     console.error('Error seeding database:', error);
     throw error;
   }

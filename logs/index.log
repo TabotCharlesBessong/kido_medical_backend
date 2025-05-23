@@ -190,3 +190,18 @@ notNull Violation: CallModel.appointmentId cannot be null
 2025-05-13 17:03:11 error : Missing credentials for "PLAIN" 
 2025-05-13 17:12:15 error : User with email address already exists 
 2025-05-13 17:12:41 error : Missing credentials for "PLAIN" 
+2025-05-21 16:05:29 error : jwt malformed 
+2025-05-21 16:05:29 error : jwt malformed 
+2025-05-21 16:16:14 error : Cannot set properties of undefined (setting 'user') 
+2025-05-21 16:16:14 error : Cannot set properties of undefined (setting 'user') 
+2025-05-21 16:44:56 error : Authorization failed 
+2025-05-21 16:45:25 error : Cannot set properties of undefined (setting 'user') 
+2025-05-21 16:48:23 error : Cannot set properties of undefined (setting 'user') 
+2025-05-21 17:39:14 error : Cannot set properties of undefined (setting 'user') 
+2025-05-21 17:46:12 error : Cannot set properties of undefined (setting 'user') 
+2025-05-21 17:49:05 error : Authorization failed 
+2025-05-21 17:50:17 error : Cannot set properties of undefined (setting 'user') 
+2025-05-21 18:05:05 error : Cannot set properties of undefined (setting 'user') 
+2025-05-21 18:12:36 error : startTime is a required field 
+2025-05-21 18:15:34 error : Invalid time format. Expected format: HH:MI:SS 
+2025-05-21 18:18:08 error : Invalid time format. Expected format: HH:MI:SS 

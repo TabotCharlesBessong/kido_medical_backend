@@ -13,8 +13,8 @@ class DoctorService {
     return this.doctorDatasource.create(record);
   }
 
-  async getDoctorByUserId(userId: string): Promise<IDoctor | null> {
-    const query = { where: { userId }, raw: true, returning: true };
+  async getDoctorByUserId(id: string): Promise<IDoctor | null> {
+    const query = { where: { id }, raw: true, returning: true };
     return this.doctorDatasource.fetchOne(query);
   }
 

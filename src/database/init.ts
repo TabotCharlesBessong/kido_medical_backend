@@ -56,23 +56,23 @@ const DbInitialize = async (shouldSeed: boolean = false) => {
       console.log('Error during enum migration:', error);
     }
 
-    // Then sync all models
-    await UserModel.sync({ force: true });
-    await TokenModel.sync({ force: true });
-    await DoctorModel.sync({ force: true });
-    await PatientModel.sync({ force: true });
-    await TimeSlotModel.sync({ force: true });
-    await AppointmentModel.sync({ force: true });
-    await PostModel.sync({ force: true });
-    await CommentModel.sync({ force: true });
-    await LikeModel.sync({ force: true });
-    await MessageModel.sync({ force: true });
-    await NotificationModel.sync({ force: true });
-    await VitalSignModel.sync({ force: true });
-    await ConsultationModel.sync({ force: true });
-    await PrescriptionModel.sync({ force: true });
-    await MedicationModel.sync({ force: true });
-    await CallModel.sync({ force: true });
+    // Then sync all models without force
+    await UserModel.sync();
+    await TokenModel.sync();
+    await DoctorModel.sync();
+    await PatientModel.sync();
+    await TimeSlotModel.sync();
+    await AppointmentModel.sync();
+    await PostModel.sync();
+    await CommentModel.sync();
+    await LikeModel.sync();
+    await MessageModel.sync();
+    await NotificationModel.sync();
+    await VitalSignModel.sync();
+    await ConsultationModel.sync();
+    await PrescriptionModel.sync();
+    await MedicationModel.sync();
+    await CallModel.sync();
 
     console.log("All models synchronized successfully");
 
