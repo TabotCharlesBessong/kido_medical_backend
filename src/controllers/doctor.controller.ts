@@ -118,10 +118,25 @@ class DoctorController {
   async getAllTimeSlots(req: Request, res: Response) {
     try {
       const params = { ...req.body };
-      let timeslots = await this.timeSlotService.getTimeSlots();
+      
+      // First get the doctor using the user ID
+      const doctor = await this.doctorService.getDoctorByUserId(params.user.id);
+      
+      if (!doctor) {
+        return Utility.handleError(
+          res,
+          "Doctor not found",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      // Get timeslots for this specific doctor
+      const query = { where: { doctorId: doctor.id }, raw: true };
+      let timeslots = await this.timeSlotService.getTimeSlots(query);
+      
       return Utility.handleSuccess(
         res,
-        "Account fetched successfully",
+        "Time slots fetched successfully",
         { timeslots },
         ResponseCode.SUCCESS
       );
@@ -137,8 +152,20 @@ class DoctorController {
   async createTimeSlot(req: Request, res: Response) {
     try {
       const params = { ...req.body };
+      
+      // First get the doctor using the user ID
+      const doctor = await this.doctorService.getDoctorByUserId(params.user.id);
+      
+      if (!doctor) {
+        return Utility.handleError(
+          res,
+          "Doctor not found",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
       const newTimeSlot = {
-        doctorId: params.user.id,
+        doctorId: doctor.id, // Use the doctor's ID instead of user's ID
         startTime: params.startTime,
         endTime: params.endTime,
         isAvailable: params.isAvailable,
@@ -147,12 +174,16 @@ class DoctorController {
       const timeSlot = await this.timeSlotService.createTimeSlot(newTimeSlot);
       return Utility.handleSuccess(
         res,
-        "Doctor created successfully",
+        "Time slot created successfully",
         { timeSlot },
         ResponseCode.SUCCESS
       );
     } catch (error) {
-      res.status(ResponseCode.SERVER_ERROR).json((error as TypeError).message);
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
     }
   }
 

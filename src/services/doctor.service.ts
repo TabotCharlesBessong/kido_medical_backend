@@ -14,7 +14,7 @@ class DoctorService {
   }
 
   async getDoctorByUserId(id: string): Promise<IDoctor | null> {
-    const query = { where: { id }, raw: true, returning: true };
+    const query = { where: { userId: id }, raw: true, returning: true };
     return this.doctorDatasource.fetchOne(query);
   }
 

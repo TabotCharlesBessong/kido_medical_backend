@@ -205,3 +205,11 @@ notNull Violation: CallModel.appointmentId cannot be null
 2025-05-21 18:12:36 error : startTime is a required field 
 2025-05-21 18:15:34 error : Invalid time format. Expected format: HH:MI:SS 
 2025-05-21 18:18:08 error : Invalid time format. Expected format: HH:MI:SS 
+2025-05-24 15:45:44 error : Invalid Login Detail 
+2025-05-24 16:25:52 error : Invalid time format. Expected format: HH:MI:SS 
+2025-05-24 16:27:25 error : Invalid time format. Expected format: HH:MI:SS 
+2025-05-24 16:49:59 error : Doctor not found 
+2025-05-24 16:57:41 error : Cannot set properties of undefined (setting 'user') 
+2025-05-24 17:01:36 error : Cannot set properties of undefined (setting 'user') 
+2025-05-24 17:01:41 error : Cannot set properties of undefined (setting 'user') 
+2025-05-24 17:05:29 error : Authorization failed 

@@ -12,9 +12,8 @@ class TimeSlotService {
     return this.timeSlotDatasource.create(record);
   }
 
-  async getTimeSlots(): Promise<ITimeSlot[]> {
-    const query = { where: {}, raw: true };
-    return this.timeSlotDatasource.fetchAll(query);
+  async getTimeSlots(query?: any): Promise<ITimeSlot[]> {
+    return this.timeSlotDatasource.fetchAll(query || { where: {}, raw: true });
   }
 }
 
