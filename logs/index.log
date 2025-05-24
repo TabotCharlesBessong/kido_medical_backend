@@ -213,3 +213,5 @@ notNull Violation: CallModel.appointmentId cannot be null
 2025-05-24 17:01:36 error : Cannot set properties of undefined (setting 'user') 
 2025-05-24 17:01:41 error : Cannot set properties of undefined (setting 'user') 
 2025-05-24 17:05:29 error : Authorization failed 
+2025-05-24 17:53:37 error : insert or update on table "notifications" violates foreign key constraint "notifications_userId_fkey" 
+2025-05-24 17:54:59 error : insert or update on table "notifications" violates foreign key constraint "notifications_userId_fkey" 
