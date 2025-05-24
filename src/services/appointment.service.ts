@@ -11,6 +11,7 @@ import {
 import { NotificationType } from "../interfaces/enum/notification.enum";
 import { AppointmentStatus } from "../interfaces/enum/patient.enum";
 import { INotificationDataSource } from "../interfaces/notification.interface";
+import { FindOptions } from "sequelize";
 
 class AppointmentService {
   private appointmentDataSource: AppointmentDataSource;
@@ -125,6 +126,15 @@ class AppointmentService {
 
   async getAppointments(): Promise<IAppointment[]> {
     const query = { where: {}, raw: true };
+    return this.appointmentDataSource.fetchAll(query);
+  }
+
+  async getAppointmentsByPatient(patientId: string): Promise<IAppointment[]> {
+    const query: FindOptions<IAppointment> = { 
+      where: { patientId },
+      raw: true,
+      order: [['createdAt', 'DESC']] // Most recent first
+    };
     return this.appointmentDataSource.fetchAll(query);
   }
 }

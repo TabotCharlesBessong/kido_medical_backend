@@ -215,3 +215,7 @@ notNull Violation: CallModel.appointmentId cannot be null
 2025-05-24 17:05:29 error : Authorization failed 
 2025-05-24 17:53:37 error : insert or update on table "notifications" violates foreign key constraint "notifications_userId_fkey" 
 2025-05-24 17:54:59 error : insert or update on table "notifications" violates foreign key constraint "notifications_userId_fkey" 
+2025-05-24 18:40:51 error : invalid input syntax for type uuid: "appointments" 
+2025-05-24 18:43:27 error : invalid input syntax for type uuid: "time" 
+2025-05-24 18:57:31 error : invalid input syntax for type uuid: "appointments" 
+2025-05-24 18:59:05 error : invalid input syntax for type uuid: "appointments" 
