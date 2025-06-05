@@ -219,3 +219,39 @@ notNull Violation: CallModel.appointmentId cannot be null
 2025-05-24 18:43:27 error : invalid input syntax for type uuid: "time" 
 2025-05-24 18:57:31 error : invalid input syntax for type uuid: "appointments" 
 2025-05-24 18:59:05 error : invalid input syntax for type uuid: "appointments" 
+2025-05-24 20:40:09 error : jwt malformed 
+2025-05-24 20:40:09 error : jwt malformed 
+2025-05-24 20:40:42 error : jwt malformed 
+2025-05-24 20:40:42 error : jwt malformed 
+2025-05-24 20:44:06 error : Authorization failed 
+2025-05-25 17:26:20 error : Authorization failed 
+2025-05-25 17:27:46 error : presentingComplaints is a required field 
+2025-05-25 17:35:51 error : diagnosticImpression is a required field 
+2025-05-25 17:36:24 error : investigations is a required field 
+2025-05-25 17:37:09 error : investigations is a required field 
+2025-05-25 17:37:15 error : treatment is a required field 
+2025-05-25 17:37:36 error : notNull Violation: ConsultationModel.appointmentId cannot be null 
+2025-05-25 17:52:43 error : Authorization failed 
+2025-05-26 05:22:58 error : insert or update on table "posts" violates foreign key constraint "posts_doctorId_fkey" 
+2025-05-26 05:52:31 error : invalid input syntax for type uuid: "doctore9221072-e711-4742-8767-bb17ebc77dc3" 
+2025-05-26 06:23:51 error : Cannot read properties of undefined (reading 'userId') 
+2025-05-26 06:26:28 error : WHERE parameter "userId" has invalid "undefined" value 
+2025-05-26 06:27:19 error : Cannot read properties of undefined (reading 'userId') 
+2025-05-26 06:31:04 error : Cannot read properties of undefined (reading 'user') 
+2025-05-27 15:07:39 error : Authorization failed 
+2025-05-27 15:09:18 error : insert or update on table "messages" violates foreign key constraint "messages_receiverId_fkey" 
+2025-05-27 15:12:46 error : Receiver not found 
+2025-05-27 15:13:24 error : Receiver not found 
+2025-05-27 15:21:26 error : Receiver not found 
+2025-05-27 15:21:57 error : Receiver not found 
+2025-05-27 15:22:52 error : Receiver not found 
+2025-05-27 15:27:40 error : Receiver not found 
+2025-05-27 15:33:56 error : Receiver not found 
+2025-05-27 15:37:55 error : Receiver not found 
+2025-06-05 07:53:34 error : notNull Violation: PrescriptionModel.consultationId cannot be null,
+notNull Violation: PrescriptionModel.medications cannot be null 
+2025-06-05 07:57:53 error : Cannot read properties of undefined (reading 'consultationId') 
+2025-06-05 07:59:10 error : notNull Violation: PrescriptionModel.medications cannot be null 
+2025-06-05 08:04:41 error : notNull Violation: PrescriptionModel.medications cannot be null 
+2025-06-05 08:38:07 error : null value in column "medications" of relation "prescriptions" violates not-null constraint 
+2025-06-05 08:49:05 error : null value in column "medications" of relation "prescriptions" violates not-null constraint 
