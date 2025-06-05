@@ -3,6 +3,7 @@ import NotificationDataSource from "../datasources/notification.datasource";
 import DoctorService from "./doctor.service";
 import PatientService from "./patient.service";
 import EmailService from "./email.service";
+import UserService from "./user.services";
 import {
   IAppointmentCreationBody,
   IAppointment,
@@ -19,7 +20,8 @@ class AppointmentService {
   private notificationDataSource: NotificationDataSource;
   private doctorService: DoctorService;
   private patientService: PatientService;
-  private emailService: EmailService;
+  private emailService: typeof EmailService;
+  private userService: UserService;
 
   constructor() {
     this.appointmentDataSource = new AppointmentDataSource();
@@ -27,6 +29,7 @@ class AppointmentService {
     this.doctorService = new DoctorService();
     this.patientService = new PatientService();
     this.emailService = EmailService;
+    this.userService = new UserService();
   }
 
   async createAppointment(
@@ -46,8 +49,8 @@ class AppointmentService {
 
     if (doctor && patient) {
       // Get user details for email
-      const doctorUser = await this.doctorService.getUserById(doctor.userId);
-      const patientUser = await this.patientService.getUserById(patient.userId);
+      const doctorUser = await this.userService.getUserByField({id: doctor.userId});
+      const patientUser = await this.userService.getUserByField({id: patient.userId});
 
       if (doctorUser && patientUser) {
         // Send email to doctor
@@ -98,8 +101,8 @@ class AppointmentService {
 
       if (doctor && patient) {
         // Get user details for email
-        const doctorUser = await this.doctorService.getUserById(doctor.userId);
-        const patientUser = await this.patientService.getUserById(patient.userId);
+        const doctorUser = await this.userService.getUserByField({id: doctor.userId});
+        const patientUser = await this.userService.getUserByField({id: patient.userId});
 
         if (doctorUser && patientUser) {
           // Send email to patient
@@ -140,8 +143,8 @@ class AppointmentService {
 
       if (doctor && patient) {
         // Get user details for email
-        const doctorUser = await this.doctorService.getUserById(doctor.userId);
-        const patientUser = await this.patientService.getUserById(patient.userId);
+        const doctorUser = await this.userService.getUserByField({id: doctor.userId});
+        const patientUser = await this.userService.getUserByField({id: patient.userId});
 
         if (doctorUser && patientUser) {
           // Send email to patient

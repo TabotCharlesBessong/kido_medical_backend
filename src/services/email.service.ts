@@ -1,4 +1,4 @@
-import SibApiV3Sdk from '@getbrevo/brevo';
+import { TransactionalEmailsApi, Configuration, TransactionalEmailsApiApiKeys } from '@getbrevo/brevo';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
@@ -9,9 +9,13 @@ const brevoApiKey = process.env.BREVO_API_KEY as string;
 const frontendUrl = process.env.FRONTEND_URL as string;
 const apiUrl = process.env.API_URL as string;
 
+if (!brevoApiKey) {
+  throw new Error('BREVO_API_KEY is not set in environment variables');
+}
+
 const sender = {
   name: 'Kido Medical',
-  email: 'noreply@kidomedical.com'
+  email: 'ebezebeatrice@gmail.com'
 };
 
 // Load email templates
@@ -28,11 +32,11 @@ const templates = {
 };
 
 class EmailService {
-  private apiInstance: SibApiV3Sdk.TransactionalEmailsApi;
+  private apiInstance: TransactionalEmailsApi;
 
   constructor() {
-    this.apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-    this.apiInstance.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, brevoApiKey);
+    this.apiInstance = new TransactionalEmailsApi();
+    this.apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, brevoApiKey);
   }
 
   private replaceTemplateConstant(template: string, key: string, data: string) {
