@@ -61,6 +61,14 @@ const createDoctorRoute = () => {
     }
   });
 
+  router.get("/time", DoctorMiddleware(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await doctorController.getDoctorTimeSlots(req, res);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.put(
     "/cancel/:id",
     DoctorMiddleware(),

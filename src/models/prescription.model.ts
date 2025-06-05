@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import Db from "../database"
 import { IPrescriptionModel } from "../interfaces/prescription.interface"
+import ConsultationModel from "./consultation.model"
 
 const PrescriptionModel = Db.define<IPrescriptionModel>(
   "PrescriptionModel",
@@ -13,6 +14,10 @@ const PrescriptionModel = Db.define<IPrescriptionModel>(
     consultationId: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: ConsultationModel,
+        key: "id"
+      }
     },
     instructions: {
       type: DataTypes.TEXT,
@@ -21,10 +26,6 @@ const PrescriptionModel = Db.define<IPrescriptionModel>(
     investigation: {
       type: DataTypes.TEXT,
       allowNull: true,
-    },
-    medications: {
-      type: DataTypes.JSON,
-      allowNull: false,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -44,5 +45,16 @@ const PrescriptionModel = Db.define<IPrescriptionModel>(
     updatedAt: "updatedAt",
   }
 );
+
+// Set up the relationship with consultation
+ConsultationModel.hasMany(PrescriptionModel, {
+  foreignKey: "consultationId",
+  as: "prescriptions"
+});
+
+PrescriptionModel.belongsTo(ConsultationModel, {
+  foreignKey: "consultationId",
+  as: "consultation"
+});
 
 export default PrescriptionModel

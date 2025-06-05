@@ -1,7 +1,8 @@
-import MedicationDataSource from "../datasources/medication.datasource";
-import PrescriptionDataSource from "../datasources/prescription.datasource";
+import { IPrescription, IPrescriptionCreationBody } from "../interfaces/prescription.interface";
 import { IMedicationCreationBody } from "../interfaces/medication.interface";
-import { IFindPrescriptionQuery, IPrescription } from "../interfaces/prescription.interface";
+import PrescriptionDataSource from "../datasources/prescription.datasource";
+import MedicationDataSource from "../datasources/medication.datasource";
+import sequelize from "../database";
 
 class PrescriptionService {
   private prescriptionDataSource: PrescriptionDataSource;
@@ -16,48 +17,121 @@ class PrescriptionService {
     prescriptionData: Partial<IPrescription>,
     medications: IMedicationCreationBody[]
   ): Promise<IPrescription> {
-    const prescription = await this.prescriptionDataSource.create(
-      prescriptionData
-    );
-
-    for (const medication of medications) {
-      medication.prescriptionId = prescription.id;
-      await this.medicationDataSource.create(medication);
+    if (!prescriptionData.consultationId) {
+      throw new Error("consultationId is required");
     }
 
-    return prescription;
+    if (!medications || !Array.isArray(medications) || medications.length === 0) {
+      throw new Error("medications array is required and must not be empty");
+    }
+
+    const transaction = await sequelize.transaction();
+
+    try {
+      // Create prescription
+      const prescription = await this.prescriptionDataSource.create({
+        consultationId: prescriptionData.consultationId,
+        instructions: prescriptionData.instructions,
+        investigation: prescriptionData.investigation
+      }, { transaction });
+
+      // Create medications in bulk
+      const medicationsWithPrescriptionId = medications.map(medication => ({
+        ...medication,
+        prescriptionId: prescription.id
+      }));
+
+      await this.medicationDataSource.bulkCreate(medicationsWithPrescriptionId, { transaction });
+
+      await transaction.commit();
+
+      // Return prescription with medications
+      const createdPrescription = await this.getPrescriptionById(prescription.id);
+      if (!createdPrescription) {
+        throw new Error("Failed to create prescription");
+      }
+      return createdPrescription;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
-  async getPrescriptionById(
-    prescriptionId: string
-  ): Promise<IPrescription | null> {
-    return await this.prescriptionDataSource.fetchOne({
-      where: { id: prescriptionId },
+  async getPrescriptionById(id: string): Promise<IPrescription | null> {
+    return await this.prescriptionDataSource.fetchById(id, {
+      include: [{
+        association: 'medications',
+        required: false
+      }]
     });
   }
 
   async updatePrescription(
     id: string,
-    data: Partial<IPrescription>,
+    prescriptionData: Partial<IPrescription>,
     medications: IMedicationCreationBody[]
   ): Promise<void> {
-    const filter = { where: { id } } as IFindPrescriptionQuery;
-    await this.prescriptionDataSource.updateOne(data, filter);
+    const transaction = await sequelize.transaction();
 
-    for (const medication of medications) {
-      medication.prescriptionId = id;
-      await this.medicationDataSource.create(medication);
+    try {
+      // Update prescription
+      await this.prescriptionDataSource.updateOne(prescriptionData, {
+        where: { id },
+        transaction
+      });
+
+      // Delete existing medications
+      await this.medicationDataSource.deleteMany({
+        where: { prescriptionId: id },
+        transaction
+      });
+
+      // Create new medications in bulk
+      const medicationsWithPrescriptionId = medications.map(medication => ({
+        ...medication,
+        prescriptionId: id
+      }));
+
+      await this.medicationDataSource.bulkCreate(medicationsWithPrescriptionId, { transaction });
+
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
   }
 
   async getPrescriptions(): Promise<IPrescription[]> {
-    const query = { where: {}, raw: true };
-    return this.prescriptionDataSource.fetchAll(query);
+    return await this.prescriptionDataSource.fetchAll({
+      include: [{
+        association: 'medications',
+        required: false
+      }]
+    });
   }
 
-  async deletePrescription(postId: string): Promise<void> {
-    await this.prescriptionDataSource.deleteOne({ where: { id: postId } });
+  async deletePrescription(id: string): Promise<void> {
+    const transaction = await sequelize.transaction();
+
+    try {
+      // Delete medications first
+      await this.medicationDataSource.deleteMany({
+        where: { prescriptionId: id },
+        transaction
+      });
+
+      // Then delete prescription
+      await this.prescriptionDataSource.deleteOne({ 
+        where: { id },
+        transaction
+      });
+
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 }
 
-export default PrescriptionService
+export default PrescriptionService;

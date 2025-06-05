@@ -13,8 +13,16 @@ class UserService {
   }
 
   async getUserByField(record: Partial<IUser>): Promise<IUser | null> {
-    const query = { where: { ...record }, raw: true } as IFindUserQuery;
-    return this.userDataSource.fetchOne(query);
+    try {
+      console.log('Searching for user with criteria:', record);
+      const query = { where: { ...record }, raw: true } as IFindUserQuery;
+      const user = await this.userDataSource.fetchOne(query);
+      console.log('User search result:', user ? 'Found' : 'Not found');
+      return user;
+    } catch (error) {
+      console.error('Error in getUserByField:', error);
+      throw error;
+    }
   }
 
   async createUser(record: IUserCreationBody) {
