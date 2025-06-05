@@ -118,6 +118,25 @@ class DoctorController {
   async getAllTimeSlots(req: Request, res: Response) {
     try {
       const params = { ...req.body };
+      let timeslots = await this.timeSlotService.getTimeSlots();
+      return Utility.handleSuccess(
+        res,
+        "All time slots fetched successfully",
+        { timeslots },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getDoctorTimeSlots(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
       
       // First get the doctor using the user ID
       const doctor = await this.doctorService.getDoctorByUserId(params.user.id);
@@ -130,13 +149,10 @@ class DoctorController {
         );
       }
 
-      // Get timeslots for this specific doctor
-      const query = { where: { doctorId: doctor.id }, raw: true };
-      let timeslots = await this.timeSlotService.getTimeSlots(query);
-      
+      const timeslots = await this.timeSlotService.getTimeSlotsByDoctor(doctor.id);
       return Utility.handleSuccess(
         res,
-        "Time slots fetched successfully",
+        "Doctor time slots fetched successfully",
         { timeslots },
         ResponseCode.SUCCESS
       );
@@ -471,9 +487,21 @@ class DoctorController {
   async createPrescription(req: Request, res: Response) {
     const transaction = await sequelize.transaction();
     try {
-      const { prescription, medications } = req.body;
+      const body = req.body;
+      let prescriptionData, medications;
+
+      // Handle both structured and flat request body formats
+      if (body.prescription && body.medications) {
+        prescriptionData = body.prescription;
+        medications = body.medications;
+      } else {
+        // If the body is flat, use the entire body as prescription data
+        prescriptionData = body;
+        medications = body.medications || [];
+      }
+
       const newPrescription = await this.prescriptionService.createPrescription(
-        prescription,
+        prescriptionData,
         medications
       );
       await transaction.commit();

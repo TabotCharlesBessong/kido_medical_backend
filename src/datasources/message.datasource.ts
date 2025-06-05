@@ -9,7 +9,15 @@ import UserModel from "../models/user.model";
 
 class MessageDataSource implements IMessageDataSource {
   async create(record: IMessageCreationBody): Promise<IMessage> {
-    return await MessageModel.create(record);
+    console.log('Creating message in database with record:', record);
+    try {
+      const message = await MessageModel.create(record);
+      console.log('Message created successfully:', message.id);
+      return message;
+    } catch (error) {
+      console.error('Error creating message:', error);
+      throw error;
+    }
   }
 
   async fetchAllByUserId(userId: string): Promise<IMessage[]> {
