@@ -487,9 +487,21 @@ class DoctorController {
   async createPrescription(req: Request, res: Response) {
     const transaction = await sequelize.transaction();
     try {
-      const { prescription, medications } = req.body;
+      const body = req.body;
+      let prescriptionData, medications;
+
+      // Handle both structured and flat request body formats
+      if (body.prescription && body.medications) {
+        prescriptionData = body.prescription;
+        medications = body.medications;
+      } else {
+        // If the body is flat, use the entire body as prescription data
+        prescriptionData = body;
+        medications = body.medications || [];
+      }
+
       const newPrescription = await this.prescriptionService.createPrescription(
-        prescription,
+        prescriptionData,
         medications
       );
       await transaction.commit();
