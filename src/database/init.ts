@@ -1,5 +1,4 @@
 import { Sequelize, Dialect } from "sequelize";
-import config from "../../config/config.json";
 import UserModel from "../models/user.model";
 import TokenModel from "../models/token.model";
 import DoctorModel from "../models/doctor.model";
@@ -18,12 +17,12 @@ import MedicationModel from "../models/medication.model";
 import CallModel from "../models/call.model";
 
 const sequelize = new Sequelize(
-  config.development.database,
-  config.development.username,
-  config.development.password,
+  process.env.DB_NAME as string,
+  process.env.DB_USERNAME as string,
+  process.env.DB_PASSWORD as string,
   {
-    host: config.development.host,
-    dialect: config.development.dialect as Dialect,
+    host: process.env.DB_HOST as string,
+    dialect: (process.env.DB_DIALECT as Dialect) ?? "postgres",
     logging: false,
   }
 );
