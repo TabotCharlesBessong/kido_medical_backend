@@ -18,6 +18,16 @@ class MedicationDataSource implements IMedicationDataSource {
     });
   }
 
+  async bulkCreate(
+    records: IMedicationCreationBody[],
+    options?: Partial<IFindMedicationQuery>
+  ): Promise<IMedication[]> {
+    return await MedicationModel.bulkCreate(records, {
+      returning: true,
+      ...options,
+    });
+  }
+
   async fetchOne(query: IFindMedicationQuery): Promise<IMedication | null> {
     return await MedicationModel.findOne(query);
   }

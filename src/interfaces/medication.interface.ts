@@ -24,6 +24,10 @@ export interface IMedicationDataSource {
     record: IMedicationCreationBody,
     options?: Partial<IFindMedicationQuery>
   ): Promise<IMedication>;
+  bulkCreate(
+    records: IMedicationCreationBody[],
+    options?: Partial<IFindMedicationQuery>
+  ): Promise<IMedication[]>;
   fetchOne(query: IFindMedicationQuery): Promise<IMedication | null>;
   fetchById(MedicationId: string): Promise<IMedication | null>;
   updateOne(

@@ -28,13 +28,10 @@ class PrescriptionDataSource implements IPrescriptionDataSource {
     });
   }
 
-  async fetchById(PrescriptionId: string): Promise<IPrescription | null> {
+  async fetchById(id: string, options?: FindOptions<IPrescription>): Promise<IPrescription | null> {
     return await PrescriptionModel.findOne({
-      where: { id: PrescriptionId },
-      include: [{
-        association: 'medications',
-        required: false
-      }]
+      where: { id },
+      ...options,
     });
   }
 
@@ -47,6 +44,12 @@ class PrescriptionDataSource implements IPrescriptionDataSource {
 
   async deleteOne(searchBy: IFindPrescriptionQuery): Promise<void> {
     await PrescriptionModel.destroy(searchBy);
+  }
+
+  async deleteMany(searchBy: Partial<IFindPrescriptionQuery>): Promise<void> {
+    await PrescriptionModel.destroy({
+      where: searchBy.where
+    });
   }
 
   async fetchAll(query: FindOptions<IPrescription>): Promise<IPrescription[]> {

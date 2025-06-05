@@ -4,20 +4,23 @@
     "password": "Charles#123",
     "database": "kido_medical",
     "host": "localhost",
-    "dialect": "postgres"
+    "dialect": "postgres",
+    "migrations-path": "./src/database/migrations"
   },
   "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "username": "postgres",
+    "password": "Charles#123",
+    "database": "kido_medical_test",
+    "host": "localhost",
+    "dialect": "postgres",
+    "migrations-path": "./src/database/migrations"
   },
   "production": {
     "username": "postgres",
     "password": "Charles#123",
-    "database": "kido_medical",
+    "database": "kido_medical_prod",
     "host": "localhost",
-    "dialect": "postgres"
+    "dialect": "postgres",
+    "migrations-path": "./src/database/migrations"
   }
 }
