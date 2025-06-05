@@ -307,29 +307,34 @@ const seedDatabase = async () => {
     // Create prescriptions
     const consultations = await ConsultationModel.findAll({ transaction });
     for (const consultation of consultations) {
-      // Create prescription first
+      // Create prescription
       const prescription = await PrescriptionModel.create({
         consultationId: consultation.id,
-        instructions: faker.lorem.paragraph(),
-        investigation: faker.lorem.paragraph(),
-        medications: [] // Initialize with empty array
-      }, { transaction });
+        instructions: "Take after meals",
+        investigation: "Blood test required"
+      } as any, { transaction });
 
-      // Create medications for this prescription
-      const numMedications = faker.number.int({ min: 1, max: 4 });
-      for (let i = 0; i < numMedications; i++) {
-        await MedicationModel.create({
+      // Create medications in bulk for better performance
+      await MedicationModel.bulkCreate([
+        {
           prescriptionId: prescription.id,
-          name: faker.helpers.arrayElement(['Amoxicillin', 'Ibuprofen', 'Paracetamol', 'Omeprazole', 'Metformin']),
-          dosage: faker.helpers.arrayElement(['500mg', '1000mg', '250mg']),
-          frequency: faker.helpers.arrayElement([
-            Frequency.ONCE_A_DAY,
-            Frequency.TWICE_A_DAY,
-            Frequency.THRICE_A_DAY
-          ]),
-          duration: faker.number.int({ min: 5, max: 14 })
-        }, { transaction });
-      }
+          name: "Amoxicillin",
+          dosage: "500mg",
+          frequency: Frequency.THRICE_A_DAY,
+          duration: 7
+        },
+        {
+          prescriptionId: prescription.id,
+          name: "Paracetamol",
+          dosage: "650mg",
+          frequency: Frequency.TWICE_A_DAY,
+          duration: 5
+        }
+      ], { 
+        transaction,
+        returning: true,
+        validate: true
+      });
     }
 
     console.log('Created prescriptions and medications');

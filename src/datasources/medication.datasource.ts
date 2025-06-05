@@ -35,6 +35,16 @@ class MedicationDataSource implements IMedicationDataSource {
     await MedicationModel.update(data, { ...query, returning: true });
   }
 
+  async deleteOne(searchBy: IFindMedicationQuery): Promise<void> {
+    await MedicationModel.destroy(searchBy);
+  }
+
+  async deleteMany(searchBy: Partial<IFindMedicationQuery>): Promise<void> {
+    await MedicationModel.destroy({
+      where: searchBy.where
+    });
+  }
+
   async fetchAll(query: FindOptions<IMedication>): Promise<IMedication[]> {
     return await MedicationModel.findAll(query);
   }
