@@ -2,6 +2,7 @@ import AppointmentDataSource from "../datasources/appointment.datasource";
 import NotificationDataSource from "../datasources/notification.datasource";
 import DoctorService from "./doctor.service";
 import PatientService from "./patient.service";
+import EmailService from "./email.service";
 import {
   IAppointmentCreationBody,
   IAppointment,
@@ -18,12 +19,14 @@ class AppointmentService {
   private notificationDataSource: NotificationDataSource;
   private doctorService: DoctorService;
   private patientService: PatientService;
+  private emailService: EmailService;
 
   constructor() {
     this.appointmentDataSource = new AppointmentDataSource();
     this.notificationDataSource = new NotificationDataSource();
     this.doctorService = new DoctorService();
     this.patientService = new PatientService();
+    this.emailService = EmailService;
   }
 
   async createAppointment(
@@ -42,23 +45,39 @@ class AppointmentService {
     const patient = await this.patientService.getPatientById(createdAppointment.patientId);
 
     if (doctor && patient) {
-      // Notify the doctor
-      await this.notificationDataSource.create({
-        userId: doctor.userId, // Use the doctor's user ID
-        message: "New appointment request received",
-        type: NotificationType.APPOINTMENT,
-        referenceId: createdAppointment.id,
-        read: false,
-      });
+      // Get user details for email
+      const doctorUser = await this.doctorService.getUserById(doctor.userId);
+      const patientUser = await this.patientService.getUserById(patient.userId);
 
-      // Notify the patient
-      await this.notificationDataSource.create({
-        userId: patient.userId, // Use the patient's user ID
-        message: "Your appointment request has been sent",
-        type: NotificationType.APPOINTMENT,
-        referenceId: createdAppointment.id,
-        read: false,
-      });
+      if (doctorUser && patientUser) {
+        // Send email to doctor
+        await this.emailService.sendAppointmentBookingEmail({
+          patientEmail: doctorUser.email,
+          patientName: `${patientUser.firstname} ${patientUser.lastname}`,
+          doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
+          reason: createdAppointment.reason,
+          time: createdAppointment.date.toLocaleString(),
+          appointmentId: createdAppointment.id
+        });
+
+        // Notify the doctor
+        await this.notificationDataSource.create({
+          userId: doctor.userId,
+          message: "New appointment request received",
+          type: NotificationType.APPOINTMENT,
+          referenceId: createdAppointment.id,
+          read: false,
+        });
+
+        // Notify the patient
+        await this.notificationDataSource.create({
+          userId: patient.userId,
+          message: "Your appointment request has been sent",
+          type: NotificationType.APPOINTMENT,
+          referenceId: createdAppointment.id,
+          read: false,
+        });
+      }
     }
 
     return createdAppointment;
@@ -68,20 +87,40 @@ class AppointmentService {
     const filter = { where: { id: appointmentId } };
     const update = {
       status: AppointmentStatus.APPROVED,
-    } as Partial<IAppointment>;
+    };
     await this.appointmentDataSource.updateOne(update, filter);
-
     const appointment = await this.getAppointmentById(appointmentId);
+
     if (appointment) {
+      // Get doctor and patient records
+      const doctor = await this.doctorService.getDoctorByField({ id: appointment.doctorId });
       const patient = await this.patientService.getPatientById(appointment.patientId);
-      if (patient) {
-        await this.notificationDataSource.create({
-          userId: patient.userId, // Use the patient's user ID
-          message: "Your appointment has been approved",
-          type: NotificationType.APPOINTMENT,
-          referenceId: appointment.id,
-          read: false,
-        });
+
+      if (doctor && patient) {
+        // Get user details for email
+        const doctorUser = await this.doctorService.getUserById(doctor.userId);
+        const patientUser = await this.patientService.getUserById(patient.userId);
+
+        if (doctorUser && patientUser) {
+          // Send email to patient
+          await this.emailService.sendAppointmentStatusEmail({
+            patientEmail: patientUser.email,
+            patientName: `${patientUser.firstname} ${patientUser.lastname}`,
+            doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
+            reason: appointment.reason,
+            time: appointment.date.toLocaleString(),
+            status: 'APPROVED'
+          });
+
+          // Create notification
+          await this.notificationDataSource.create({
+            userId: patient.userId,
+            message: "Your appointment has been approved",
+            type: NotificationType.APPOINTMENT_APPROVED,
+            referenceId: appointment.id,
+            read: false,
+          });
+        }
       }
     }
   }
@@ -90,20 +129,40 @@ class AppointmentService {
     const filter = { where: { id: appointmentId } };
     const update = {
       status: AppointmentStatus.CANCELED,
-    } as Partial<IAppointment>;
+    };
     await this.appointmentDataSource.updateOne(update, filter);
-
     const appointment = await this.getAppointmentById(appointmentId);
+
     if (appointment) {
+      // Get doctor and patient records
+      const doctor = await this.doctorService.getDoctorByField({ id: appointment.doctorId });
       const patient = await this.patientService.getPatientById(appointment.patientId);
-      if (patient) {
-        await this.notificationDataSource.create({
-          userId: patient.userId, // Use the patient's user ID
-          message: "Your appointment has been canceled",
-          type: NotificationType.APPOINTMENT,
-          referenceId: appointment.id,
-          read: false,
-        });
+
+      if (doctor && patient) {
+        // Get user details for email
+        const doctorUser = await this.doctorService.getUserById(doctor.userId);
+        const patientUser = await this.patientService.getUserById(patient.userId);
+
+        if (doctorUser && patientUser) {
+          // Send email to patient
+          await this.emailService.sendAppointmentStatusEmail({
+            patientEmail: patientUser.email,
+            patientName: `${patientUser.firstname} ${patientUser.lastname}`,
+            doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
+            reason: appointment.reason,
+            time: appointment.date.toLocaleString(),
+            status: 'CANCELED'
+          });
+
+          // Create notification
+          await this.notificationDataSource.create({
+            userId: patient.userId,
+            message: "Your appointment has been canceled",
+            type: NotificationType.APPOINTMENT_CANCELED,
+            referenceId: appointment.id,
+            read: false,
+          });
+        }
       }
     }
   }

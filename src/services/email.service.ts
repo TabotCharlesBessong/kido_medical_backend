@@ -1,95 +1,213 @@
-const nodemailer = require("nodemailer");
-const fs = require("fs");
-const path = require("path");
-const dotenv = require("dotenv");
+import SibApiV3Sdk from '@getbrevo/brevo';
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
-// console.log(process.env.MAILTRAP_USER)
+const brevoApiKey = process.env.BREVO_API_KEY as string;
+const frontendUrl = process.env.FRONTEND_URL as string;
+const apiUrl = process.env.API_URL as string;
 
-const emailTemplate = path.join(`${__dirname}`, "..", "template/email.html");
-const template = fs.readFileSync(emailTemplate, "utf8");
+const sender = {
+  name: 'Kido Medical',
+  email: 'noreply@kidomedical.com'
+};
+
+// Load email templates
+const emailTemplate = path.join(__dirname, '..', 'template', 'email.html');
+const appointmentBookingTemplate = path.join(__dirname, '..', 'template', 'appointment-booking.html');
+const appointmentStatusTemplate = path.join(__dirname, '..', 'template', 'appointment-status.html');
+const prescriptionTemplate = path.join(__dirname, '..', 'template', 'prescription.html');
+
+const templates = {
+  default: fs.readFileSync(emailTemplate, 'utf8'),
+  appointmentBooking: fs.readFileSync(appointmentBookingTemplate, 'utf8'),
+  appointmentStatus: fs.readFileSync(appointmentStatusTemplate, 'utf8'),
+  prescription: fs.readFileSync(prescriptionTemplate, 'utf8')
+};
 
 class EmailService {
-  constructor() {}
+  private apiInstance: SibApiV3Sdk.TransactionalEmailsApi;
 
-  static async sendForgotPasswordMail(to: string, code: string) {
-    const subject = "Forgot Password";
-    const message = `Your email verification code is <b>${code}</b>`;
-    return this.sendMail(to, subject, message);
+  constructor() {
+    this.apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+    this.apiInstance.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, brevoApiKey);
   }
 
-  static async sendVerificationMail(to: string, code: string) {
-    const subject = "Verify Account";
-    const message = `Your email verification code is <b>${code}</b>`;
-    return this.sendMail(to, subject, message);
+  private replaceTemplateConstant(template: string, key: string, data: string) {
+    const regex = new RegExp(key, 'g');
+    return template.replace(regex, data);
   }
 
-  private static replaceTemplateConstant(
-    _template: string,
-    key: string,
-    data: string
-  ) {
-    const regex = new RegExp(key, "g");
-    return _template.replace(regex, data);
-  }
-
-  private static async sendMail(to: string, subject: string, message: string) {
+  private async sendEmail(to: string, subject: string, htmlContent: string) {
     try {
-      const appName = process.env.APPNAME || "Kido Medical";
-      const supportMail = process.env.VERIFICATION_EMAIL || "charlesbessongtabot@gmail.com";
-      const name = to.split("@")[0];
-      let html = this.replaceTemplateConstant(template, "#APP_NAME#", appName);
-      html = this.replaceTemplateConstant(html, "#NAME#", name);
-      html = this.replaceTemplateConstant(html, "#MESSAGE#", message);
-      html = this.replaceTemplateConstant(html, "#SUPPORT_MAIL#", supportMail);
-      
-      const mailUser = "a9953a79a6707c";
-      const mailPass = "78b7106da0be5f";
-      
-      // if (!mailUser || !mailPass) {
-      //   console.warn('Email credentials not configured. Email sending will be skipped.');
-      //   throw new Error('Email service not configured');
-      // }
-      
-      // // Check if we should use Gmail or Mailtrap
-      // const isGmail = mailUser.includes('@gmail.com');
-      // const transportConfig = isGmail ? 
-      //   {
-      //     service: "gmail",
-      //     auth: { user: mailUser, pass: mailPass }
-      //   } : 
-      //   {
-      //     host: process.env.MAILTRAP_HOST || "smtp.mailtrap.io",
-      //     port: parseInt(process.env.MAILTRAP_PORT || "2525"),
-      //     auth: { user: mailUser, pass: mailPass }
-      //   };
-      
-      const transport = nodemailer.createTransport({
-        service:"gmail",
-        auth:{
-          user:mailUser,
-          pass:mailPass
-        }
-      });
-
-      const mailOptions = {
-        from: mailUser,
-        to,
+      const sendSmtpEmail = {
+        sender,
+        to: [{ email: to }],
         subject,
-        text: message,
-        html: html,
+        htmlContent
       };
 
-      console.log(`Attempting to send email to ${to} using Mailtrap`);
-      const infoMail = await transport.sendMail(mailOptions);
-      console.log(`Email sent to ${to}: ${infoMail.response}`);
-      return infoMail;
+      const result = await this.apiInstance.sendTransacEmail(sendSmtpEmail);
+      console.log(`Email sent successfully to ${to}`);
+      return result;
     } catch (error) {
       console.error('Failed to send email:', error);
       throw error;
     }
   }
+
+  async sendVerificationMail(to: string, code: string) {
+    const subject = 'Verify Account';
+    const message = `Your email verification code is <b>${code}</b>`;
+    return this.sendMail(to, subject, message);
+  }
+
+  async sendForgotPasswordMail(to: string, code: string) {
+    const subject = 'Forgot Password';
+    const message = `Your password reset code is <b>${code}</b>`;
+    return this.sendMail(to, subject, message);
+  }
+
+  private async sendMail(to: string, subject: string, message: string) {
+    try {
+      const appName = process.env.APPNAME || 'Kido Medical';
+      const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+      const name = to.split('@')[0];
+      
+      let html = this.replaceTemplateConstant(templates.default, '#APP_NAME#', appName);
+      html = this.replaceTemplateConstant(html, '#NAME#', name);
+      html = this.replaceTemplateConstant(html, '#MESSAGE#', message);
+      html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+      
+      return this.sendEmail(to, subject, html);
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      throw error;
+    }
+  }
+
+  async sendAppointmentBookingEmail({
+    patientEmail,
+    patientName,
+    doctorName,
+    reason,
+    time,
+    appointmentId
+  }: {
+    patientEmail: string;
+    patientName: string;
+    doctorName: string;
+    reason: string;
+    time: string;
+    appointmentId: string;
+  }) {
+    try {
+      const appName = process.env.APPNAME || 'Kido Medical';
+      const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+      const approveUrl = `${apiUrl}/appointments/${appointmentId}/approve`;
+      const cancelUrl = `${apiUrl}/appointments/${appointmentId}/cancel`;
+
+      let html = this.replaceTemplateConstant(templates.appointmentBooking, '#APP_NAME#', appName);
+      html = this.replaceTemplateConstant(html, '#NAME#', patientName);
+      html = this.replaceTemplateConstant(html, '#PATIENT_NAME#', patientName);
+      html = this.replaceTemplateConstant(html, '#DOCTOR_NAME#', doctorName);
+      html = this.replaceTemplateConstant(html, '#REASON#', reason);
+      html = this.replaceTemplateConstant(html, '#TIME#', time);
+      html = this.replaceTemplateConstant(html, '#APPROVE_URL#', approveUrl);
+      html = this.replaceTemplateConstant(html, '#CANCEL_URL#', cancelUrl);
+      html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+
+      return this.sendEmail(patientEmail, 'Appointment Booking Confirmation', html);
+    } catch (error) {
+      console.error('Failed to send appointment booking email:', error);
+      throw error;
+    }
+  }
+
+  async sendAppointmentStatusEmail({
+    patientEmail,
+    patientName,
+    doctorName,
+    reason,
+    time,
+    status
+  }: {
+    patientEmail: string;
+    patientName: string;
+    doctorName: string;
+    reason: string;
+    time: string;
+    status: 'APPROVED' | 'CANCELED';
+  }) {
+    try {
+      const appName = process.env.APPNAME || 'Kido Medical';
+      const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+      const statusClass = status === 'APPROVED' ? 'status-approved' : 'status-canceled';
+
+      let html = this.replaceTemplateConstant(templates.appointmentStatus, '#APP_NAME#', appName);
+      html = this.replaceTemplateConstant(html, '#NAME#', patientName);
+      html = this.replaceTemplateConstant(html, '#PATIENT_NAME#', patientName);
+      html = this.replaceTemplateConstant(html, '#DOCTOR_NAME#', doctorName);
+      html = this.replaceTemplateConstant(html, '#REASON#', reason);
+      html = this.replaceTemplateConstant(html, '#TIME#', time);
+      html = this.replaceTemplateConstant(html, '#STATUS#', status);
+      html = this.replaceTemplateConstant(html, '#STATUS_CLASS#', statusClass);
+      html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+
+      return this.sendEmail(patientEmail, `Appointment ${status}`, html);
+    } catch (error) {
+      console.error('Failed to send appointment status email:', error);
+      throw error;
+    }
+  }
+
+  async sendPrescriptionEmail({
+    patientEmail,
+    patientName,
+    doctorName,
+    instructions,
+    medications,
+    date
+  }: {
+    patientEmail: string;
+    patientName: string;
+    doctorName: string;
+    instructions: string;
+    medications: { name: string; dosage: string; frequency: string; duration: string; notes?: string }[];
+    date: string;
+  }) {
+    try {
+      const appName = process.env.APPNAME || 'Kido Medical';
+      const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+
+      // Generate medication cards HTML
+      const medicationsHtml = medications.map(med => `
+        <div class="medication-card">
+          <h4>${med.name}</h4>
+          <p><strong>Dosage:</strong> ${med.dosage}</p>
+          <p><strong>Frequency:</strong> ${med.frequency}</p>
+          <p><strong>Duration:</strong> ${med.duration}</p>
+          ${med.notes ? `<p><strong>Notes:</strong> ${med.notes}</p>` : ''}
+        </div>
+      `).join('');
+
+      let html = this.replaceTemplateConstant(templates.prescription, '#APP_NAME#', appName);
+      html = this.replaceTemplateConstant(html, '#NAME#', patientName);
+      html = this.replaceTemplateConstant(html, '#PATIENT_NAME#', patientName);
+      html = this.replaceTemplateConstant(html, '#DOCTOR_NAME#', doctorName);
+      html = this.replaceTemplateConstant(html, '#DATE#', date);
+      html = this.replaceTemplateConstant(html, '#INSTRUCTIONS#', instructions);
+      html = this.replaceTemplateConstant(html, '#MEDICATIONS#', medicationsHtml);
+      html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+
+      return this.sendEmail(patientEmail, 'Your Prescription', html);
+    } catch (error) {
+      console.error('Failed to send prescription email:', error);
+      throw error;
+    }
+  }
 }
 
-export default EmailService;
+export default new EmailService();
