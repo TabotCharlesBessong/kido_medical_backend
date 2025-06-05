@@ -39,6 +39,9 @@ export const Auth = () => {
           throw new TypeError("Authorization failed");
         }
 
+        if (!req.body) {
+          req.body = {};
+        }
         req.body.user = decoded;
         next();
       }
@@ -62,6 +65,9 @@ export const DoctorMiddleware = () => {
           throw new TypeError("Authorization failed");
         if (user.accountStatus == "DELETED")
           throw new TypeError("Account does not exist");
+      }
+      if (!req.body) {
+        req.body = {};
       }
       req.body.user = decode;
       next();
