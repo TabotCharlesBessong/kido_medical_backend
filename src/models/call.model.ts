@@ -20,7 +20,7 @@ const CallModel = Db.define<ICallModel>(
       allowNull: false,
       references: {
         model: DoctorModel,
-        key: "userId",
+        key: "id",
       },
     },
     patientId: {

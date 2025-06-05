@@ -21,11 +21,11 @@ const TimeSlotModel = Db.define<ITimeSlotModel>(
       },
     },
     startTime: {
-      type: DataTypes.TIME,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     endTime: {
-      type: DataTypes.TIME,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     isAvailable: {

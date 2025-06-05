@@ -8,7 +8,7 @@ import TimeSlotModel from "./timeslot.model";
 import { AppointmentStatus } from "../interfaces/enum/patient.enum";
 
 const AppointmentModel = Db.define<IAppointmentModel>(
-  "AppointmentModel",
+  "Appointment",
   {
     id: {
       type: DataTypes.UUID,
@@ -18,7 +18,7 @@ const AppointmentModel = Db.define<IAppointmentModel>(
     },
     patientId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: PatientModel,
         key: "id",
@@ -26,7 +26,7 @@ const AppointmentModel = Db.define<IAppointmentModel>(
     },
     doctorId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: DoctorModel,
         key: "id",
@@ -45,11 +45,11 @@ const AppointmentModel = Db.define<IAppointmentModel>(
       allowNull: false,
     },
     reason: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     status: {
-      type: DataTypes.ENUM("PENDING", "APPROVED", "CANCELED"),
+      type: DataTypes.ENUM(...Object.values(AppointmentStatus)),
       allowNull: false,
       defaultValue: AppointmentStatus.PENDING,
     },
