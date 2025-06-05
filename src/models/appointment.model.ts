@@ -4,10 +4,11 @@ import { IAppointmentModel } from "../interfaces/appointment.interface";
 import { v4 as uuidv4 } from "uuid";
 import PatientModel from "./patient.model";
 import DoctorModel from "./doctor.model";
+import TimeSlotModel from "./timeslot.model";
 import { AppointmentStatus } from "../interfaces/enum/patient.enum";
 
 const AppointmentModel = Db.define<IAppointmentModel>(
-  "AppointmentModel",
+  "Appointment",
   {
     id: {
       type: DataTypes.UUID,
@@ -17,7 +18,7 @@ const AppointmentModel = Db.define<IAppointmentModel>(
     },
     patientId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: PatientModel,
         key: "id",
@@ -25,7 +26,7 @@ const AppointmentModel = Db.define<IAppointmentModel>(
     },
     doctorId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: DoctorModel,
         key: "id",
@@ -34,17 +35,21 @@ const AppointmentModel = Db.define<IAppointmentModel>(
     timeslotId: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: TimeSlotModel,
+        key: "id",
+      },
     },
     date: {
       type: DataTypes.DATE,
       allowNull: false,
     },
     reason: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
-    staus: {
-      type: DataTypes.ENUM("PENDING", "APPROVED", "CANCELED"),
+    status: {
+      type: DataTypes.ENUM(...Object.values(AppointmentStatus)),
       allowNull: false,
       defaultValue: AppointmentStatus.PENDING,
     },
@@ -83,6 +88,15 @@ DoctorModel.hasMany(AppointmentModel, {
 AppointmentModel.belongsTo(DoctorModel, {
   foreignKey: "doctorId",
   as: "doctor",
+});
+
+TimeSlotModel.hasMany(AppointmentModel, {
+  foreignKey: "timeslotId",
+  as: "appointments",
+});
+AppointmentModel.belongsTo(TimeSlotModel, {
+  foreignKey: "timeslotId",
+  as: "timeslot",
 });
 
 export default AppointmentModel;

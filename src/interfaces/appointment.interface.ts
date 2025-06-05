@@ -8,7 +8,7 @@ export interface IAppointment {
   timeslotId: string;
   date: Date;
   reason: string;
-  staus: string;
+  status: string;
   createdAt: Date;
   updatedAt: Date;
 }

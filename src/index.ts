@@ -13,6 +13,7 @@ import callRouter from "./router/call.router";
 import {Server} from "socket.io"
 import MessageController from './controllers/message.controller';
 import rateLimit from 'express-rate-limit';
+import seedDatabase from './database/seeders';
 
 //create an app
 const app = express();

@@ -5,11 +5,10 @@ import { NotificationType } from "./enum/notification.enum";
 export interface INotification {
   id: string;
   userId: string;
-  messageId?: string;
-  appointmentId?: string;
   message: string;
   read: boolean;
   type: NotificationType;
+  referenceId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,7 +16,7 @@ export interface INotification {
 export interface INotificationCreationBody
   extends Optional<
     INotification,
-    "id" | "createdAt" | "updatedAt" | "read" | "messageId" | "appointmentId"
+    "id" | "createdAt" | "updatedAt" | "read" | "referenceId"
   > {}
 
 export interface INotificationModel

@@ -17,15 +17,15 @@ const TimeSlotModel = Db.define<ITimeSlotModel>(
       allowNull: true,
       references: {
         model: DoctorModel,
-        key: "userId",
+        key: "id",
       },
     },
     startTime: {
-      type: DataTypes.TIME,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     endTime: {
-      type: DataTypes.TIME,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     isAvailable: {

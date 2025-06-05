@@ -44,8 +44,8 @@ class EmailService {
       html = this.replaceTemplateConstant(html, "#MESSAGE#", message);
       html = this.replaceTemplateConstant(html, "#SUPPORT_MAIL#", supportMail);
       
-      const mailUser = process.env.MAILTRAP_USER as string;
-      const mailPass = process.env.MAILTRAP_PASS as string;
+      const mailUser = "a9953a79a6707c";
+      const mailPass = "78b7106da0be5f";
       
       // if (!mailUser || !mailPass) {
       //   console.warn('Email credentials not configured. Email sending will be skipped.');

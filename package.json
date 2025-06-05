@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "seed": "ts-node src/database/seeders/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +37,7 @@
     "yup": "^1.6.1"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
     "@types/bcrypt": "^5.0.2",
     "@types/chalk": "^2.2.0",
     "@types/cors": "^2.8.17",
