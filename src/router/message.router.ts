@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import MessageController from "../controllers/message.controller";
 import { Auth, validator } from "../middlewares/index.middlewares";
-import validationSchema from "../validators/user.validator.schema";
+import validationSchema from "../validators/message.validator.schema";
 
 const router = express.Router();
 const messageController = new MessageController();
@@ -29,6 +29,7 @@ router.get("/:userId", Auth(), async (req: Request, res: Response, next: NextFun
 
 router.get(
   "/conversation/:senderId/:receiverId",
+  Auth(),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       await messageController.getConversation(req, res);
