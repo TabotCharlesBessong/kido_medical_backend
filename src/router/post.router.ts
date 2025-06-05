@@ -99,6 +99,7 @@ const createPostRoute = () => {
 
   router.delete(
     "/:postId/like",
+    Auth(),
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         await postController.removeLikeFromPost(req, res);

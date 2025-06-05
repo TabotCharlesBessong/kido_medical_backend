@@ -104,24 +104,41 @@ class PatientController {
   async bookAppointment(req: Request, res: Response) {
     try {
       const params = { ...req.body };
+      
+      // First get the patient using the user ID
+      const patient = await this.patientService.getPatientById(params.user.id);
+      
+      if (!patient) {
+        return Utility.handleError(
+          res,
+          "Patient not found",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
       const newAppointment = {
-        patientId: params.user.id,
+        patientId: patient.id, // Use the patient's ID instead of user's ID
         doctorId: params.doctorId,
         timeslotId: params.timeslotId,
         date: params.date,
         reason: params.reason,
       };
+
       const appointment = await this.appointmentService.createAppointment(
         newAppointment
       );
       return Utility.handleSuccess(
         res,
-        "Doctor created successfully",
+        "Appointment booked successfully",
         { appointment },
         ResponseCode.SUCCESS
       );
     } catch (error) {
-      res.status(ResponseCode.SERVER_ERROR).json((error as TypeError).message);
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
     }
   }
 
@@ -158,7 +175,36 @@ class PatientController {
       let appointments = await this.appointmentService.getAppointments();
       return Utility.handleSuccess(
         res,
-        "Account fetched successfully",
+        "Appointments fetched successfully",
+        { appointments },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getPatientAppointments(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      const patient = await this.patientService.getPatientById(params.user.id);
+      
+      if (!patient) {
+        return Utility.handleError(
+          res,
+          "Patient not found",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      const appointments = await this.appointmentService.getAppointmentsByPatient(patient.id);
+      return Utility.handleSuccess(
+        res,
+        "Patient appointments fetched successfully",
         { appointments },
         ResponseCode.SUCCESS
       );

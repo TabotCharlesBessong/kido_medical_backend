@@ -2,23 +2,39 @@ import { Request, Response } from "express";
 import Utility from "../utils/index.utils";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import PostService from "../services/post.service";
+import DoctorService from "../services/doctor.service";
 
 class PostController {
   private postService: PostService;
+  private doctorService: DoctorService;
 
   constructor() {
     this.postService = new PostService();
+    this.doctorService = new DoctorService();
   }
 
   async createPost(req: Request, res: Response) {
     try {
       const params = { ...req.body };
+      
+      // First, get the doctor record using the user ID
+      const doctor = await this.doctorService.getDoctorByUserId(params.user.id);
+      
+      if (!doctor) {
+        return Utility.handleError(
+          res,
+          "User is not a registered doctor",
+          ResponseCode.BAD_REQUEST
+        );
+      }
+
       const newPost = {
-        doctorId: params.user.id,
+        doctorId: doctor.id, // Use the doctor's ID instead of user ID
         title: params.title,
         image: params.image,
         description: params.description,
       };
+      
       const post = await this.postService.createPost(newPost);
       return Utility.handleSuccess(
         res,
@@ -65,6 +81,11 @@ class PostController {
     try {
       const postId = req.params.postId;
       const data = { ...req.body };
+      
+      // Remove doctorId from update data if it exists
+      // This prevents changing the post's doctor
+      delete data.doctorId;
+      
       const post = await this.postService.updatePost(postId, data);
       return Utility.handleSuccess(
         res,
@@ -163,7 +184,7 @@ class PostController {
   async removeLikeFromPost(req: Request, res: Response) {
     try {
       const postId = req.params.postId;
-      const userId = req.body.userId;
+      const userId = req.body.user.id;
       await this.postService.removeLikeFromPost(postId, userId);
       return Utility.handleSuccess(
         res,
