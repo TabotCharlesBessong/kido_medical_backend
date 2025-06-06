@@ -23,12 +23,14 @@ const emailTemplate = path.join(__dirname, '..', 'template', 'email.html');
 const appointmentBookingTemplate = path.join(__dirname, '..', 'template', 'appointment-booking.html');
 const appointmentStatusTemplate = path.join(__dirname, '..', 'template', 'appointment-status.html');
 const prescriptionTemplate = path.join(__dirname, '..', 'template', 'prescription.html');
+const verificationStatusTemplate = path.join(__dirname, '..', 'template', 'verification-status.html');
 
 const templates = {
   default: fs.readFileSync(emailTemplate, 'utf8'),
   appointmentBooking: fs.readFileSync(appointmentBookingTemplate, 'utf8'),
   appointmentStatus: fs.readFileSync(appointmentStatusTemplate, 'utf8'),
-  prescription: fs.readFileSync(prescriptionTemplate, 'utf8')
+  prescription: fs.readFileSync(prescriptionTemplate, 'utf8'),
+  verificationStatus: fs.readFileSync(verificationStatusTemplate, 'utf8')
 };
 
 class EmailService {
@@ -143,12 +145,14 @@ class EmailService {
     doctorName: string;
     reason: string;
     time: string;
-    status: 'APPROVED' | 'CANCELED';
+    status: 'PENDING' | 'APPROVED' | 'CANCELED';
   }) {
     try {
       const appName = process.env.APPNAME || 'Kido Medical';
       const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
-      const statusClass = status === 'APPROVED' ? 'status-approved' : 'status-canceled';
+      const statusClass = status === 'APPROVED' ? 'status-approved' : 
+                         status === 'PENDING' ? 'status-pending' : 
+                         'status-canceled';
 
       let html = this.replaceTemplateConstant(templates.appointmentStatus, '#APP_NAME#', appName);
       html = this.replaceTemplateConstant(html, '#NAME#', patientName);
@@ -209,6 +213,37 @@ class EmailService {
       return this.sendEmail(patientEmail, 'Your Prescription', html);
     } catch (error) {
       console.error('Failed to send prescription email:', error);
+      throw error;
+    }
+  }
+
+  async sendVerificationStatusEmail({
+    doctorEmail,
+    doctorName,
+    isVerified,
+    verificationNotes
+  }: {
+    doctorEmail: string;
+    doctorName: string;
+    isVerified: boolean;
+    verificationNotes?: string;
+  }) {
+    try {
+      const appName = process.env.APPNAME || 'Kido Medical';
+      const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+      const status = isVerified ? 'VERIFIED' : 'REJECTED';
+      const statusClass = isVerified ? 'status-approved' : 'status-canceled';
+
+      let html = this.replaceTemplateConstant(templates.verificationStatus, '#APP_NAME#', appName);
+      html = this.replaceTemplateConstant(html, '#NAME#', doctorName);
+      html = this.replaceTemplateConstant(html, '#STATUS#', status);
+      html = this.replaceTemplateConstant(html, '#STATUS_CLASS#', statusClass);
+      html = this.replaceTemplateConstant(html, '#NOTES#', verificationNotes || 'No additional notes provided.');
+      html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+
+      return this.sendEmail(doctorEmail, `Account ${status}`, html);
+    } catch (error) {
+      console.error('Failed to send verification status email:', error);
       throw error;
     }
   }

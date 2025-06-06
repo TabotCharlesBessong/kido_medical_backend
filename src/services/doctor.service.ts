@@ -30,6 +30,29 @@ class DoctorService {
     const query = { where: {}, raw: true };
     return this.doctorDatasource.fetchAll(query);
   }
+
+  async updateDoctorVerification(
+    doctorId: string,
+    updateData: {
+      isVerified: boolean;
+      verificationNotes?: string;
+      verifiedAt?: Date | null;
+    }
+  ): Promise<IDoctor | null> {
+    const filter = { where: { id: doctorId } };
+    await this.doctorDatasource.updateOne(filter, {
+      isVerified: updateData.isVerified,
+      verificationNotes: updateData.verificationNotes,
+      verifiedAt: updateData.verifiedAt
+    });
+    return this.getDoctorByField({ where: { id: doctorId } });
+  }
+
+  async updateDoctor(doctorId: string, updateData: Partial<IDoctor>): Promise<IDoctor | null> {
+    const filter = { where: { id: doctorId } };
+    await this.doctorDatasource.updateOne(filter, updateData);
+    return this.getDoctorByField({ where: { id: doctorId } });
+  }
 }
 
 export default DoctorService

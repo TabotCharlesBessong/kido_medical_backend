@@ -20,8 +20,10 @@ class PatientService {
     return await this.patientDataSource.fetchOne({ where: { userId } });
   }
 
-  async updatePatient(userId: string, data: Partial<IPatient>): Promise<void> {
-    await this.patientDataSource.updateOne({ where: { userId } }, data);
+  async updatePatient(patientId: string, updateData: Partial<IPatient>): Promise<IPatient | null> {
+    const filter = { where: { id: patientId } };
+    await this.patientDataSource.updateOne(filter, updateData);
+    return this.getPatientById(patientId);
   }
 }
 

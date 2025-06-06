@@ -83,19 +83,32 @@ class PatientController {
 
   async updatePatient(req: Request, res: Response) {
     try {
-      const patientId = req.params.userId;
-      const data = { ...req.body };
-      const patient = await this.patientService.updatePatient(patientId, data);
+      const { patientId } = req.params;
+      const updateData = req.body;
+
+      // Remove sensitive fields that shouldn't be updated directly
+      delete updateData.userId;
+
+      const patient = await this.patientService.updatePatient(patientId, updateData);
+
+      if (!patient) {
+        return Utility.handleError(
+          res,
+          'Patient not found',
+          ResponseCode.NOT_FOUND
+        );
+      }
+
       return Utility.handleSuccess(
         res,
-        "Post updated successfully",
+        'Patient information updated successfully',
         { patient },
         ResponseCode.SUCCESS
       );
     } catch (error) {
       return Utility.handleError(
         res,
-        (error as TypeError).message,
+        (error as Error).message,
         ResponseCode.SERVER_ERROR
       );
     }

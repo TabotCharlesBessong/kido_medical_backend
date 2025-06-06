@@ -255,3 +255,7 @@ notNull Violation: PrescriptionModel.medications cannot be null
 2025-06-05 08:04:41 error : notNull Violation: PrescriptionModel.medications cannot be null 
 2025-06-05 08:38:07 error : null value in column "medications" of relation "prescriptions" violates not-null constraint 
 2025-06-05 08:49:05 error : null value in column "medications" of relation "prescriptions" violates not-null constraint 
+2025-06-06 15:57:56 error : specialization is a required field 
+2025-06-06 16:01:29 error : specialization is a required field 
+2025-06-06 16:13:39 error : documents is a required field 
+2025-06-06 16:33:07 error : Invalid religion 

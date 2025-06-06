@@ -63,6 +63,16 @@ class AppointmentService {
           appointmentId: createdAppointment.id
         });
 
+        // Send email to patient
+        await this.emailService.sendAppointmentStatusEmail({
+          patientEmail: patientUser.email,
+          patientName: `${patientUser.firstname} ${patientUser.lastname}`,
+          doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
+          reason: createdAppointment.reason,
+          time: createdAppointment.date.toLocaleString(),
+          status: 'PENDING'
+        });
+
         // Notify the doctor
         await this.notificationDataSource.create({
           userId: doctor.userId,

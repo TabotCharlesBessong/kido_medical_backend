@@ -10,6 +10,8 @@ import Utility from "../utils/index.utils";
 import VitalSignService from "../services/vitalsign.services";
 import ConsultationService from "../services/consultation.service";
 import PrescriptionService from "../services/prescription.service";
+import EmailService from "../services/email.service";
+import UploadService from "../services/upload.service";
 
 class DoctorController {
   private doctorService: DoctorService;
@@ -19,6 +21,8 @@ class DoctorController {
   private vitalsignService: VitalSignService;
   private consultationService: ConsultationService;
   private prescriptionService: PrescriptionService;
+  private emailService: typeof EmailService;
+  private uploadService: typeof UploadService;
 
   constructor() {
     this.doctorService = new DoctorService();
@@ -28,11 +32,20 @@ class DoctorController {
     this.vitalsignService = new VitalSignService();
     this.consultationService = new ConsultationService();
     this.prescriptionService = new PrescriptionService();
+    this.emailService = EmailService;
+    this.uploadService = UploadService;
   }
 
   async registerDoctor(req: Request, res: Response) {
     try {
       const params = { ...req.body };
+      const file = req.file;
+
+      if (file) {
+        const fileUrl = await this.uploadService.uploadFile(file);
+        params.documents = fileUrl;
+      }
+
       const newDoctor = {
         userId: params.user.id,
         specialization: params.specialization,
@@ -41,6 +54,7 @@ class DoctorController {
         fee: params.fee,
         language: params.language,
         experience: params.experience,
+        isVerified: false // Default value for new doctors
       };
       // checkign if the doctor already exist
       let doctorExists = await this.doctorService.getDoctorByUserId(
@@ -608,6 +622,92 @@ class DoctorController {
       return Utility.handleError(
         res,
         (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async updateVerificationStatus(req: Request, res: Response) {
+    try {
+      const { doctorId } = req.params;
+      const { isVerified, verificationNotes } = req.body;
+
+      const doctor = await this.doctorService.updateDoctorVerification(doctorId, {
+        isVerified,
+        verificationNotes,
+        verifiedAt: isVerified ? new Date() : null
+      });
+
+      if (!doctor) {
+        return Utility.handleError(
+          res,
+          'Doctor not found',
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      // Get doctor's user details for email notification
+      const doctorUser = await this.userService.getUserByField({ id: doctor.userId });
+      if (doctorUser) {
+        await this.emailService.sendVerificationStatusEmail({
+          doctorEmail: doctorUser.email,
+          doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
+          isVerified,
+          verificationNotes
+        });
+      }
+
+      return Utility.handleSuccess(
+        res,
+        'Doctor verification status updated successfully',
+        { doctor },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as Error).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async updateDoctor(req: Request, res: Response) {
+    try {
+      const { doctorId } = req.params;
+      const updateData = { ...req.body };
+      const file = req.file;
+
+      if (file) {
+        const fileUrl = await this.uploadService.uploadFile(file);
+        updateData.documents = fileUrl;
+      }
+
+      // Remove sensitive fields that shouldn't be updated directly
+      delete updateData.userId;
+      delete updateData.isVerified;
+      delete updateData.verifiedAt;
+
+      const doctor = await this.doctorService.updateDoctor(doctorId, updateData);
+
+      if (!doctor) {
+        return Utility.handleError(
+          res,
+          'Doctor not found',
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      return Utility.handleSuccess(
+        res,
+        'Doctor information updated successfully',
+        { doctor },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as Error).message,
         ResponseCode.SERVER_ERROR
       );
     }

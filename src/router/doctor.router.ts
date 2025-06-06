@@ -6,6 +6,7 @@ import {
   validator,
 } from "../middlewares/index.middlewares";
 import validationSchema from "../validators/doctor.validator.schema";
+import UploadService from "../services/upload.service";
 
 const createDoctorRoute = () => {
   const router = express.Router();
@@ -13,6 +14,7 @@ const createDoctorRoute = () => {
 
   router.post(
     "/create",
+    UploadService.getUploadMiddleware(),
     validator(validationSchema.doctorValidationSchema),
     Auth(),
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -266,6 +268,19 @@ const createDoctorRoute = () => {
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         await doctorController.destroyPrescription(req, res);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  router.put(
+    "/:doctorId",
+    UploadService.getUploadMiddleware(),
+    Auth(),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.updateDoctor(req, res);
       } catch (error) {
         next(error);
       }
