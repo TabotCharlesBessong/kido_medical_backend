@@ -46,6 +46,10 @@ const DoctorModel = Db.define<IDoctorModel>(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    isVerified:{
+      type:DataTypes.BOOLEAN,
+      defaultValue:false
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

@@ -86,6 +86,7 @@ const seedDatabase = async () => {
           verificationStatus: 'VERIFIED',
           documents: faker.image.url(),
           language: faker.helpers.arrayElements(['English', 'French', 'Spanish', 'Arabic'], { min: 1, max: 3 }),
+          isVerified:true,
           fee: faker.number.float({ min: 50, max: 200, fractionDigits: 2 }),
           experience: faker.number.int({ min: 1, max: 30 })
         }, { transaction });
