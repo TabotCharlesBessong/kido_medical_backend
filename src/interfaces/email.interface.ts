@@ -28,7 +28,7 @@ export interface IEmailService {
   sendVerificationStatusEmail(params: {
     doctorEmail: string;
     doctorName: string;
-    isVerified: boolean;
+    status: 'APPROVED' | 'REJECTED';
     verificationNotes?: string;
   }): Promise<any>;
   sendDoctorVerificationRequestEmail(params: {

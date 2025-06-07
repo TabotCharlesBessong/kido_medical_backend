@@ -225,28 +225,28 @@ class EmailService implements IEmailService {
   async sendVerificationStatusEmail({
     doctorEmail,
     doctorName,
-    isVerified,
+    status,
     verificationNotes
   }: {
     doctorEmail: string;
     doctorName: string;
-    isVerified: boolean;
+    status: 'APPROVED' | 'REJECTED';
     verificationNotes?: string;
   }) {
     try {
       const appName = process.env.APPNAME || 'Kido Medical';
       const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
-      const status = isVerified ? 'VERIFIED' : 'REJECTED';
-      const statusClass = isVerified ? 'status-approved' : 'status-canceled';
+      const statusText = status === 'APPROVED' ? 'VERIFIED' : 'REJECTED';
+      const statusClass = status === 'APPROVED' ? 'status-approved' : 'status-canceled';
 
       let html = this.replaceTemplateConstant(templates.verificationStatus, '#APP_NAME#', appName);
       html = this.replaceTemplateConstant(html, '#NAME#', doctorName);
-      html = this.replaceTemplateConstant(html, '#STATUS#', status);
+      html = this.replaceTemplateConstant(html, '#STATUS#', statusText);
       html = this.replaceTemplateConstant(html, '#STATUS_CLASS#', statusClass);
       html = this.replaceTemplateConstant(html, '#NOTES#', verificationNotes || 'No additional notes provided.');
       html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
 
-      return this.sendEmail(doctorEmail, `Account ${status}`, html);
+      return this.sendEmail(doctorEmail, `Account ${statusText}`, html);
     } catch (error) {
       console.error('Failed to send verification status email:', error);
       throw error;
