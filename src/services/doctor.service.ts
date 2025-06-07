@@ -2,6 +2,7 @@ import { IDoctor, IDoctorCreationBody, IDoctorDataSource, IFindDoctorQuery } fro
 import { IEmailService } from "../interfaces/email.interface";
 import UserService from "./user.services";
 import { UserTypes } from "../enums/user.types";
+import { DoctorVerificationStatus } from "../interfaces/enum/doctor.enum";
 
 export class DoctorService {
   private doctorDataSource: IDoctorDataSource;
@@ -111,5 +112,21 @@ export class DoctorService {
       isVerified: status === 'APPROVED',
       verificationNotes: notes
     });
+  }
+
+  async getDoctorByEmail(email: string): Promise<IDoctor | null> {
+    const user = await this.userService.getUserByField({ email });
+    if (!user) {
+      return null;
+    }
+    return this.getDoctorByField({ where: { userId: user.id } });
+  }
+
+  async getDoctorsByVerificationStatus(status: DoctorVerificationStatus): Promise<IDoctor[]> {
+    const query = { 
+      where: { verificationStatus: status },
+      raw: true 
+    };
+    return this.doctorDataSource.fetchAll(query);
   }
 }

@@ -33,7 +33,9 @@ const templates = {
   appointmentStatus: fs.readFileSync(appointmentStatusTemplate, 'utf8'),
   prescription: fs.readFileSync(prescriptionTemplate, 'utf8'),
   verificationStatus: fs.readFileSync(verificationStatusTemplate, 'utf8'),
-  doctorVerificationRequest: fs.readFileSync(doctorVerificationRequestTemplate, 'utf8')
+  doctorVerificationRequest: fs.readFileSync(doctorVerificationRequestTemplate, 'utf8'),
+  'doctor-verification-approved': fs.readFileSync(path.join(__dirname, '..', 'template', 'doctor-verification-approved.html'), 'utf8'),
+  'doctor-verification-rejected': fs.readFileSync(path.join(__dirname, '..', 'template', 'doctor-verification-rejected.html'), 'utf8')
 };
 
 class EmailService implements IEmailService {
@@ -293,6 +295,32 @@ class EmailService implements IEmailService {
       console.error('Failed to send doctor verification request email:', error);
       throw error;
     }
+  }
+
+  async sendDoctorVerificationApprovedEmail(data: {
+    doctorEmail: string;
+    doctorName: string;
+  }) {
+    const appName = process.env.APPNAME || 'Kido Medical';
+    const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+    let html = this.replaceTemplateConstant(templates['doctor-verification-approved'], '#DOCTOR_NAME#', data.doctorName);
+    html = this.replaceTemplateConstant(html, '#APP_NAME#', appName);
+    html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+    await this.sendEmail(data.doctorEmail, 'Doctor Verification Approved', html);
+  }
+
+  async sendDoctorVerificationRejectedEmail(data: {
+    doctorEmail: string;
+    doctorName: string;
+    reason: string;
+  }) {
+    const appName = process.env.APPNAME || 'Kido Medical';
+    const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+    let html = this.replaceTemplateConstant(templates['doctor-verification-rejected'], '#DOCTOR_NAME#', data.doctorName);
+    html = this.replaceTemplateConstant(html, '#APP_NAME#', appName);
+    html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+    html = this.replaceTemplateConstant(html, '#REJECTION_REASON#', data.reason);
+    await this.sendEmail(data.doctorEmail, 'Doctor Verification Rejected', html);
   }
 }
 

@@ -1,6 +1,6 @@
 import AppointmentDataSource from "../datasources/appointment.datasource";
 import NotificationDataSource from "../datasources/notification.datasource";
-import DoctorService from "./doctor.service";
+import { DoctorService } from "./doctor.service";
 import PatientService from "./patient.service";
 import EmailService from "./email.service";
 import UserService from "./user.services";
@@ -14,6 +14,7 @@ import { NotificationType } from "../interfaces/enum/notification.enum";
 import { AppointmentStatus } from "../interfaces/enum/patient.enum";
 import { INotificationDataSource } from "../interfaces/notification.interface";
 import { FindOptions } from "sequelize";
+import DoctorDataSource from "../datasources/doctor.datasource";
 
 class AppointmentService {
   private appointmentDataSource: AppointmentDataSource;
@@ -26,7 +27,11 @@ class AppointmentService {
   constructor() {
     this.appointmentDataSource = new AppointmentDataSource();
     this.notificationDataSource = new NotificationDataSource();
-    this.doctorService = new DoctorService();
+    this.doctorService = new DoctorService(
+      new DoctorDataSource(),
+      EmailService,
+      new UserService()
+    );
     this.patientService = new PatientService();
     this.emailService = EmailService;
     this.userService = new UserService();
@@ -44,7 +49,7 @@ class AppointmentService {
     );
 
     // Get doctor and patient records to get their user IDs
-    const doctor = await this.doctorService.getDoctorByField({ id: createdAppointment.doctorId });
+    const doctor = await this.doctorService.getDoctorByField({ where: { id: createdAppointment.doctorId } });
     const patient = await this.patientService.getPatientById(createdAppointment.patientId);
 
     if (doctor && patient) {
@@ -106,7 +111,7 @@ class AppointmentService {
 
     if (appointment) {
       // Get doctor and patient records
-      const doctor = await this.doctorService.getDoctorByField({ id: appointment.doctorId });
+      const doctor = await this.doctorService.getDoctorByField({ where: { id: appointment.doctorId } });
       const patient = await this.patientService.getPatientById(appointment.patientId);
 
       if (doctor && patient) {
@@ -148,7 +153,7 @@ class AppointmentService {
 
     if (appointment) {
       // Get doctor and patient records
-      const doctor = await this.doctorService.getDoctorByField({ id: appointment.doctorId });
+      const doctor = await this.doctorService.getDoctorByField({ where: { id: appointment.doctorId } });
       const patient = await this.patientService.getPatientById(appointment.patientId);
 
       if (doctor && patient) {

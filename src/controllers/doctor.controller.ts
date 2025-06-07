@@ -582,7 +582,7 @@ export class DoctorController {
         status: 'error',
         message: (error as Error).message
       });
-    }
+      }
   }
 
   async approveDoctor(req: Request, res: Response) {
