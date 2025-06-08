@@ -1,4 +1,4 @@
-import { Model, Optional } from "sequelize";
+import { FindOptions, Model, Optional } from "sequelize";
 
 export interface IAppointment {
   id: string;
@@ -22,7 +22,7 @@ export interface IFindAppointmentQuery {
     doctorId?: string;
     patientId?: string;
     timeSlotId?: string;
-    status?: string;
+    status?: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
   };
 }
 
@@ -30,6 +30,6 @@ export interface IAppointmentDataSource {
   create(record: IAppointmentCreationBody): Promise<IAppointment>;
   fetchOne(query: IFindAppointmentQuery): Promise<IAppointment | null>;
   updateOne(searchBy: IFindAppointmentQuery, data: Partial<IAppointment>): Promise<void>;
-  fetchAll(query: any): Promise<IAppointment[]>;
+  fetchAll(query: FindOptions<IAppointment>): Promise<IAppointment[]>;
   deleteOne(searchBy: IFindAppointmentQuery): Promise<void>;
 }

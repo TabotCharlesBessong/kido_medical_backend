@@ -109,6 +109,17 @@ export class StreamService {
       throw error;
     }
   }
+
+  async updateChannelMetadata(channelId: string, metadata: Record<string, any>) {
+    try {
+      const channel = this.serverClient.channel('messaging', channelId);
+      await channel.update(metadata);
+      return channel;
+    } catch (error) {
+      console.error('Error updating channel metadata:', error);
+      throw error;
+    }
+  }
 }
 
 export default new StreamService(); 
