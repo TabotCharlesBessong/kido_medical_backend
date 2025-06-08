@@ -4,7 +4,8 @@ exports.NotificationType = void 0;
 var NotificationType;
 (function (NotificationType) {
     NotificationType["MESSAGE"] = "MESSAGE";
-    NotificationType["APPOINTMENT_SCHEDULED"] = "APPOINTMENT_SCHEDULED";
+    NotificationType["APPOINTMENT"] = "APPOINTMENT";
+    NotificationType["PRESCRIPTION"] = "PRESCRIPTION";
     NotificationType["APPOINTMENT_APPROVED"] = "APPOINTMENT_APPROVED";
-    NotificationType["APPOINTMENT_CANCELLED"] = "APPOINTMENT_CANCELLED";
+    NotificationType["APPOINTMENT_CANCELED"] = "APPOINTMENT_CANCELED";
 })(NotificationType || (exports.NotificationType = NotificationType = {}));

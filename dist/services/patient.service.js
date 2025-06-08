@@ -27,9 +27,11 @@ class PatientService {
             return yield this.patientDataSource.fetchOne({ where: { userId } });
         });
     }
-    updatePatient(userId, data) {
+    updatePatient(patientId, updateData) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.patientDataSource.updateOne({ where: { userId } }, data);
+            const filter = { where: { id: patientId } };
+            yield this.patientDataSource.updateOne(filter, updateData);
+            return this.getPatientById(patientId);
         });
     }
 }

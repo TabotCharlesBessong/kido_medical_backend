@@ -8,20 +8,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const notification_enum_1 = require("../interfaces/enum/notification.enum");
+const user_services_1 = __importDefault(require("./user.services"));
 class MessageService {
     constructor(messageDataSource, notificationDataSource) {
         this.messageDataSource = messageDataSource;
         this.notificationDataSource = notificationDataSource;
+        this.userService = new user_services_1.default();
     }
     createMessage(record) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('Creating message with record:', record);
+            // First verify the receiver exists
+            const receiver = yield this.userService.getUserByField({ id: record.receiverId });
+            console.log('Receiver lookup result:', receiver ? 'Found' : 'Not found');
+            if (!receiver) {
+                throw new Error("Receiver not found");
+            }
+            // Then verify the sender exists
+            const sender = yield this.userService.getUserByField({ id: record.senderId });
+            console.log('Sender lookup result:', sender ? 'Found' : 'Not found');
+            if (!sender) {
+                throw new Error("Sender not found");
+            }
+            // Create the message
             const message = yield this.messageDataSource.create(record);
+            // Create notification
             yield this.notificationDataSource.create({
                 userId: record.receiverId,
-                messageId: message.id,
-                message: `New message from ${record.senderId}`,
+                referenceId: message.id,
+                message: `New message from ${sender.firstname} ${sender.lastname}`,
                 read: false,
                 type: notification_enum_1.NotificationType.MESSAGE,
             });

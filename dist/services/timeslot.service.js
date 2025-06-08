@@ -22,9 +22,18 @@ class TimeSlotService {
             return this.timeSlotDatasource.create(record);
         });
     }
-    getTimeSlots() {
+    getTimeSlots(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            const query = { where: {}, raw: true };
+            return this.timeSlotDatasource.fetchAll(query || { where: {}, raw: true });
+        });
+    }
+    getTimeSlotsByDoctor(doctorId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const query = {
+                where: { doctorId },
+                raw: true,
+                order: [['startTime', 'ASC']] // Order by start time
+            };
             return this.timeSlotDatasource.fetchAll(query);
         });
     }
