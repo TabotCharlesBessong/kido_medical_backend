@@ -15,6 +15,8 @@ import { AppointmentStatus } from "../interfaces/enum/patient.enum";
 import { INotificationDataSource } from "../interfaces/notification.interface";
 import { FindOptions } from "sequelize";
 import DoctorDataSource from "../datasources/doctor.datasource";
+import TimeSlotDataSource from "../datasources/timeslot.datasource";
+import streamService from "./stream.service";
 
 class AppointmentService {
   private appointmentDataSource: AppointmentDataSource;
@@ -23,6 +25,7 @@ class AppointmentService {
   private patientService: PatientService;
   private emailService: typeof EmailService;
   private userService: UserService;
+  private timeSlotDataSource: TimeSlotDataSource;
 
   constructor() {
     this.appointmentDataSource = new AppointmentDataSource();
@@ -35,6 +38,7 @@ class AppointmentService {
     this.patientService = new PatientService();
     this.emailService = EmailService;
     this.userService = new UserService();
+    this.timeSlotDataSource = new TimeSlotDataSource();
   }
 
   async createAppointment(
@@ -44,8 +48,33 @@ class AppointmentService {
       ...record,
       status: AppointmentStatus.PENDING,
     } as IAppointmentCreationBody;
+
+    // Get the time slot to get the start time
+    const timeSlot = await this.timeSlotDataSource.fetchOne({
+      where: { id: record.timeSlotId },
+    });
+
+    if (!timeSlot) {
+      throw new Error("Time slot not found");
+    }
+
+    // Create the appointment
     const createdAppointment = await this.appointmentDataSource.create(
       appointment
+    );
+
+    // Create Stream channel for the appointment
+    const streamChannel = await streamService.createAppointmentChannel(
+      createdAppointment.id,
+      createdAppointment.doctorId,
+      createdAppointment.patientId,
+      timeSlot.startTime
+    );
+
+    // Update appointment with Stream channel ID
+    await this.appointmentDataSource.updateOne(
+      { where: { id: createdAppointment.id } },
+      { streamChannelId: streamChannel.channelId }
     );
 
     // Get doctor and patient records to get their user IDs
@@ -98,7 +127,10 @@ class AppointmentService {
       }
     }
 
-    return createdAppointment;
+    return {
+      ...createdAppointment,
+      streamChannelId: streamChannel.channelId,
+    };
   }
 
   async approveAppointment(appointmentId: string): Promise<void> {
@@ -213,6 +245,22 @@ class AppointmentService {
       order: [['createdAt', 'DESC']] // Most recent first
     };
     return this.appointmentDataSource.fetchAll(query);
+  }
+
+  async updateAppointmentStatus(
+    appointmentId: string,
+    status: IAppointment["status"]
+  ): Promise<void> {
+    await this.appointmentDataSource.updateOne(
+      { where: { id: appointmentId } },
+      { status }
+    );
+  }
+
+  async deleteAppointment(appointmentId: string): Promise<void> {
+    await this.appointmentDataSource.deleteOne({
+      where: { id: appointmentId },
+    });
   }
 }
 
