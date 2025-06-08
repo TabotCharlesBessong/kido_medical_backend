@@ -225,6 +225,27 @@ class AppointmentService {
       where: { id: appointmentId },
     });
   }
+
+  async updateAppointment(appointmentId: string, data: Partial<IAppointment>): Promise<IAppointment> {
+    await this.appointmentDataSource.updateOne(
+      { where: { id: appointmentId } },
+      data
+    );
+
+    const appointment = await this.getAppointmentById(appointmentId);
+    if (!appointment) {
+      throw new Error("Failed to retrieve updated appointment");
+    }
+
+    // If status is being updated, update Stream channel metadata
+    if (data.status && appointment.streamChannelId) {
+      await streamService.updateChannelMetadata(appointment.streamChannelId, {
+        status: data.status,
+      });
+    }
+
+    return appointment;
+  }
 }
 
 export default AppointmentService;
