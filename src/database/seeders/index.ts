@@ -83,7 +83,7 @@ const seedDatabase = async () => {
         await DoctorModel.create({
           userId: user.id,
           specialization: faker.helpers.arrayElement(['Cardiology', 'Neurology', 'Pediatrics', 'Dermatology', 'Orthopedics']),
-          verificationStatus: 'VERIFIED',
+          verificationStatus: 'APPROVED',
           documents: faker.image.url(),
           language: faker.helpers.arrayElements(['English', 'French', 'Spanish', 'Arabic'], { min: 1, max: 3 }),
           fee: faker.number.float({ min: 50, max: 200, fractionDigits: 2 }),
@@ -91,6 +91,20 @@ const seedDatabase = async () => {
         }, { transaction });
       }
       console.log('Created doctor users and profiles');
+
+      // Create admin user
+      const adminPassword = await hashPassword('Admin#123');
+      const adminUser = await UserModel.create({
+        username: 'charlesbessong',
+        email: 'charlesbessongtabot@gmail.com',
+        password: adminPassword,
+        firstname: 'Charles',
+        lastname: 'Bessong',
+        role: 'ADMIN',
+        isEmailVerified: EmailStatus.VERIFIED,
+        accountStatus: AccountStatus.ACTIVE
+      }, { transaction });
+      users.push(adminUser);
 
       // Create patient users (35 verified, 5 unverified)
       console.log('Creating patient users...');

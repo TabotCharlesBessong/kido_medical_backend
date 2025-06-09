@@ -19,7 +19,7 @@ const PostModel = database_1.default.define("PostModel", {
         allowNull: false,
         references: {
             model: doctor_model_1.default,
-            key: "userId",
+            key: "id",
         },
     },
     title: {

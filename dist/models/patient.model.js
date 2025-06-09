@@ -30,6 +30,30 @@ const PatientModel = database_1.default.define("PatientModel", {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,
     },
+    address1: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
+    address2: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
+    occupation: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
+    phoneNumber: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
+    tribe: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
+    religion: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
     createdAt: {
         type: sequelize_1.DataTypes.DATE,
         defaultValue: sequelize_1.DataTypes.NOW,
@@ -52,5 +76,6 @@ user_model_1.default.hasOne(PatientModel, {
 });
 PatientModel.belongsTo(user_model_1.default, {
     foreignKey: "userId",
+    as: "users"
 });
 exports.default = PatientModel;

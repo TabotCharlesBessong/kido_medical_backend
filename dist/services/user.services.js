@@ -13,16 +13,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // import { where } from "sequelize"
+const token_datasource_1 = __importDefault(require("../datasources/token.datasource"));
 const user_datasource_1 = __importDefault(require("../datasources/user.datasource"));
 // import { raw } from "express"
 class UserService {
     constructor() {
         this.userDataSource = new user_datasource_1.default();
+        this.tokenDataSource = new token_datasource_1.default();
     }
     getUserByField(record) {
         return __awaiter(this, void 0, void 0, function* () {
-            const query = { where: Object.assign({}, record), raw: true };
-            return this.userDataSource.fetchOne(query);
+            try {
+                console.log('Searching for user with criteria:', record);
+                const query = { where: Object.assign({}, record), raw: true };
+                const user = yield this.userDataSource.fetchOne(query);
+                console.log('User search result:', user ? 'Found' : 'Not found');
+                return user;
+            }
+            catch (error) {
+                console.error('Error in getUserByField:', error);
+                throw error;
+            }
         });
     }
     createUser(record) {
@@ -47,6 +58,22 @@ class UserService {
             catch (error) {
                 throw new Error("Failed to update user role.");
             }
+        });
+    }
+    logout(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Invalidate the token in your preferred way, such as deleting it from a token store or setting a flag in the database
+            }
+            catch (error) {
+                throw new Error("Failed to log out.");
+            }
+        });
+    }
+    getUsers() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const query = { where: {}, raw: true };
+            return this.userDataSource.fetchAll(query);
         });
     }
 }

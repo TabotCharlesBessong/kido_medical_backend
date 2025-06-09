@@ -51,6 +51,18 @@ class CallService {
     return this.callDataSource.fetchAll(query);
   }
 
+  async updateCall(callId: string, data: Partial<ICall>): Promise<ICall> {
+    await this.callDataSource.updateOne(
+      { where: { id: callId } },
+      data
+    );
+    const updatedCall = await this.getCallById(callId);
+    if (!updatedCall) {
+      throw new Error("Call not found after update");
+    }
+    return updatedCall;
+  }
+
   async deleteCall(callId: string): Promise<void> {
     await this.callDataSource.deleteOne({ where: { id: callId } });
   }

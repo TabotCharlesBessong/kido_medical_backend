@@ -49,6 +49,6 @@ const MedicationModel = database_1.default.define("Medication", {
     createdAt: "createdAt",
     updatedAt: "updatedAt",
 });
-MedicationModel.belongsTo(prescription_model_1.default, { foreignKey: "prescriptionId" });
+MedicationModel.belongsTo(prescription_model_1.default, { foreignKey: "prescriptionId", onDelete: 'CASCADE' });
 prescription_model_1.default.hasMany(MedicationModel, { foreignKey: "prescriptionId" });
 exports.default = MedicationModel;

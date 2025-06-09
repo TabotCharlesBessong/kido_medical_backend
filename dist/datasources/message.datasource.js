@@ -18,7 +18,16 @@ const user_model_1 = __importDefault(require("../models/user.model"));
 class MessageDataSource {
     create(record) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield message_model_1.default.create(record);
+            console.log('Creating message in database with record:', record);
+            try {
+                const message = yield message_model_1.default.create(record);
+                console.log('Message created successfully:', message.id);
+                return message;
+            }
+            catch (error) {
+                console.error('Error creating message:', error);
+                throw error;
+            }
         });
     }
     fetchAllByUserId(userId) {

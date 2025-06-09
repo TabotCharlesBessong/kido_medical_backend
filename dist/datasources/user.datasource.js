@@ -29,5 +29,10 @@ class UserDataSource {
             yield user_model_1.default.update(data, searchBy);
         });
     }
+    fetchAll(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield user_model_1.default.findAll(query);
+        });
+    }
 }
 exports.default = UserDataSource;

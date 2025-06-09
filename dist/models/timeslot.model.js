@@ -18,15 +18,15 @@ const TimeSlotModel = database_1.default.define("TimeSlot", {
         allowNull: true,
         references: {
             model: doctor_model_1.default,
-            key: "userId",
+            key: "id",
         },
     },
     startTime: {
-        type: sequelize_1.DataTypes.TIME,
+        type: sequelize_1.DataTypes.DATE,
         allowNull: false,
     },
     endTime: {
-        type: sequelize_1.DataTypes.TIME,
+        type: sequelize_1.DataTypes.DATE,
         allowNull: false,
     },
     isAvailable: {
