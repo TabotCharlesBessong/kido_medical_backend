@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Doctor Verification Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .document-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .approve-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .decline-button {
+            background-color: #f44336;
+            color: white;
+        }
+        .document-preview {
+            max-width: 100%;
+            margin: 10px 0;
+        }
+        .document-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Doctor Verification Request</h1>
+        </div>
+        <div class="content">
+            <p>Dear Admin,</p>
+            <p>A new doctor has submitted their registration request for verification. Please review their details and documents below:</p>
+            
+            <h3>Doctor Information:</h3>
+            <p><strong>Name:</strong> #DOCTOR_NAME#</p>
+            <p><strong>Email:</strong> #DOCTOR_EMAIL#</p>
+            <p><strong>Specialization:</strong> #SPECIALIZATION#</p>
+            <p><strong>Experience:</strong> #EXPERIENCE# years</p>
+            
+            <div class="document-section">
+                <h3>Submitted Documents:</h3>
+                #DOCUMENT_PREVIEW#
+                <a href="#DOCUMENT_URL#" class="document-link" target="_blank">Download Document</a>
+            </div>
+
+            <div class="button-container">
+                <a href="#APPROVE_URL#" class="button approve-button">Approve</a>
+                <a href="#DECLINE_URL#" class="button decline-button">Decline</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -29,7 +29,7 @@ const VitalSignModel = database_1.default.define("VitalSignModel", {
         allowNull: false,
         references: {
             model: doctor_model_1.default,
-            key: "userId",
+            key: "id",
         },
     },
     appointmentId: {

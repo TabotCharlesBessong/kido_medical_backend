@@ -13,7 +13,8 @@ import callRouter from "./router/call.router";
 import {Server} from "socket.io"
 import MessageController from './controllers/message.controller';
 import rateLimit from 'express-rate-limit';
-import seedDatabase from './database/seeders';
+// import seedDatabase from './database/seeders';
+import adminRouter from "./routers/admin.router"
 
 //create an app
 const app = express();
@@ -55,6 +56,7 @@ app.use("/api/posts", postRouter);
 app.use("/api/patient", patientRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/call", callRouter);
+app.use("/api/admin", adminRouter)
 
 io.on("connection", (socket) => {
   console.log("A user connected");

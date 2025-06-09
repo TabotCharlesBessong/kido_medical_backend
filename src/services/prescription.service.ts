@@ -1,7 +1,8 @@
 import PrescriptionDataSource from "../datasources/prescription.datasource";
 import MedicationDataSource from "../datasources/medication.datasource";
 import NotificationDataSource from "../datasources/notification.datasource";
-import DoctorService from "./doctor.service";
+import { DoctorService } from "./doctor.service";
+import DoctorDataSource from "../datasources/doctor.datasource";
 import PatientService from "./patient.service";
 import EmailService from "./email.service";
 import ConsultationService from "./consultation.service";
@@ -31,7 +32,11 @@ class PrescriptionService {
     this.prescriptionDataSource = new PrescriptionDataSource();
     this.medicationDataSource = new MedicationDataSource();
     this.notificationDataSource = new NotificationDataSource();
-    this.doctorService = new DoctorService();
+    this.doctorService = new DoctorService(
+      new DoctorDataSource(),
+      EmailService,
+      new UserService()
+    );
     this.patientService = new PatientService();
     this.consultationService = new ConsultationService();
     this.userService = new UserService();
@@ -73,7 +78,7 @@ class PrescriptionService {
       }
 
       // Get doctor and patient records
-      const doctor = await this.doctorService.getDoctorByField({ id: appointment.doctorId });
+      const doctor = await this.doctorService.getDoctorByField({ where: { id: appointment.doctorId } });
       const patient = await this.patientService.getPatientById(appointment.patientId);
 
       if (doctor && patient) {

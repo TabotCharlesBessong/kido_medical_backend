@@ -29,6 +29,12 @@ class PatientController {
                     userId: params.user.id,
                     age: params.age,
                     gender: params.gender,
+                    address1: params.address1,
+                    address2: params.address2,
+                    occupation: params.occupation,
+                    phoneNumber: params.phoneNumber,
+                    tribe: params.tribe,
+                    religion: params.religion,
                 };
                 // checkign if the patient already exist
                 let patientExists = yield this.patientService.getPatientById(newPatient.userId);
@@ -61,10 +67,15 @@ class PatientController {
     updatePatient(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const patientId = req.params.userId;
-                const data = Object.assign({}, req.body);
-                const patient = yield this.patientService.updatePatient(patientId, data);
-                return index_utils_1.default.handleSuccess(res, "Post updated successfully", { patient }, code_enum_1.ResponseCode.SUCCESS);
+                const { patientId } = req.params;
+                const updateData = req.body;
+                // Remove sensitive fields that shouldn't be updated directly
+                delete updateData.userId;
+                const patient = yield this.patientService.updatePatient(patientId, updateData);
+                if (!patient) {
+                    return index_utils_1.default.handleError(res, 'Patient not found', code_enum_1.ResponseCode.NOT_FOUND);
+                }
+                return index_utils_1.default.handleSuccess(res, 'Patient information updated successfully', { patient }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -75,18 +86,23 @@ class PatientController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const params = Object.assign({}, req.body);
+                // First get the patient using the user ID
+                const patient = yield this.patientService.getPatientById(params.user.id);
+                if (!patient) {
+                    return index_utils_1.default.handleError(res, "Patient not found", code_enum_1.ResponseCode.NOT_FOUND);
+                }
                 const newAppointment = {
-                    patientId: params.user.id,
+                    patientId: patient.id, // Use the patient's ID instead of user's ID
                     doctorId: params.doctorId,
                     timeslotId: params.timeslotId,
                     date: params.date,
                     reason: params.reason,
                 };
                 const appointment = yield this.appointmentService.createAppointment(newAppointment);
-                return index_utils_1.default.handleSuccess(res, "Doctor created successfully", { appointment }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "Appointment booked successfully", { appointment }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
-                res.status(code_enum_1.ResponseCode.SERVER_ERROR).json(error.message);
+                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
             }
         });
     }
@@ -109,7 +125,23 @@ class PatientController {
             try {
                 const params = Object.assign({}, req.body);
                 let appointments = yield this.appointmentService.getAppointments();
-                return index_utils_1.default.handleSuccess(res, "Account fetched successfully", { appointments }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "Appointments fetched successfully", { appointments }, code_enum_1.ResponseCode.SUCCESS);
+            }
+            catch (error) {
+                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
+            }
+        });
+    }
+    getPatientAppointments(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const params = Object.assign({}, req.body);
+                const patient = yield this.patientService.getPatientById(params.user.id);
+                if (!patient) {
+                    return index_utils_1.default.handleError(res, "Patient not found", code_enum_1.ResponseCode.NOT_FOUND);
+                }
+                const appointments = yield this.appointmentService.getAppointmentsByPatient(patient.id);
+                return index_utils_1.default.handleSuccess(res, "Patient appointments fetched successfully", { appointments }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
