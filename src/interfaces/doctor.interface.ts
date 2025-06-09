@@ -5,7 +5,6 @@ export interface IDoctor {
   userId: string;
   specialization: string;
   verificationStatus: string;
-  isVerified: boolean;
   verificationNotes?: string;
   verifiedAt?: Date | null;
   documents: string;
@@ -20,7 +19,6 @@ export interface IFindDoctorQuery {
   where: {
     id?: string;
     userId?: string;
-    isVerified?: boolean;
   };
 }
 

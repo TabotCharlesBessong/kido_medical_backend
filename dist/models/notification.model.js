@@ -7,8 +7,7 @@ const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../database"));
 const uuid_1 = require("uuid");
 const user_model_1 = __importDefault(require("./user.model"));
-const message_model_1 = __importDefault(require("./message.model"));
-const appointment_model_1 = __importDefault(require("./appointment.model"));
+const notification_enum_1 = require("../interfaces/enum/notification.enum");
 const NotificationModel = database_1.default.define("NotificationModel", {
     id: {
         type: sequelize_1.DataTypes.UUID,
@@ -24,22 +23,6 @@ const NotificationModel = database_1.default.define("NotificationModel", {
             key: "id",
         },
     },
-    messageId: {
-        type: sequelize_1.DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: message_model_1.default,
-            key: "id",
-        },
-    },
-    appointmentId: {
-        type: sequelize_1.DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: appointment_model_1.default,
-            key: "id",
-        },
-    },
     message: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
@@ -49,8 +32,13 @@ const NotificationModel = database_1.default.define("NotificationModel", {
         defaultValue: false,
     },
     type: {
-        type: sequelize_1.DataTypes.ENUM("MESSAGE", "APPOINTMENT_SCHEDULED", "APPOINTMENT_APPROVED", "APPOINTMENT_CANCELLED"),
+        type: sequelize_1.DataTypes.ENUM(notification_enum_1.NotificationType.MESSAGE, notification_enum_1.NotificationType.APPOINTMENT, notification_enum_1.NotificationType.PRESCRIPTION),
         allowNull: false,
+    },
+    referenceId: {
+        type: sequelize_1.DataTypes.UUID,
+        allowNull: true,
+        comment: "ID of the related entity (message, appointment, prescription)",
     },
     createdAt: {
         type: sequelize_1.DataTypes.DATE,
@@ -74,19 +62,5 @@ user_model_1.default.hasMany(NotificationModel, {
 });
 NotificationModel.belongsTo(user_model_1.default, {
     foreignKey: "userId",
-});
-message_model_1.default.hasOne(NotificationModel, {
-    foreignKey: "messageId",
-    as: "messageNotifications",
-});
-NotificationModel.belongsTo(message_model_1.default, {
-    foreignKey: "messageId",
-});
-appointment_model_1.default.hasOne(NotificationModel, {
-    foreignKey: "appointmentId",
-    as: "appointmentNotifications",
-});
-NotificationModel.belongsTo(appointment_model_1.default, {
-    foreignKey: "appointmentId",
 });
 exports.default = NotificationModel;

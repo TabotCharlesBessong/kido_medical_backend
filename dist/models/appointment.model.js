@@ -8,8 +8,9 @@ const database_1 = __importDefault(require("../database"));
 const uuid_1 = require("uuid");
 const patient_model_1 = __importDefault(require("./patient.model"));
 const doctor_model_1 = __importDefault(require("./doctor.model"));
+const timeslot_model_1 = __importDefault(require("./timeslot.model"));
 const patient_enum_1 = require("../interfaces/enum/patient.enum");
-const AppointmentModel = database_1.default.define("AppointmentModel", {
+const AppointmentModel = database_1.default.define("Appointment", {
     id: {
         type: sequelize_1.DataTypes.UUID,
         defaultValue: () => (0, uuid_1.v4)(),
@@ -18,15 +19,15 @@ const AppointmentModel = database_1.default.define("AppointmentModel", {
     },
     patientId: {
         type: sequelize_1.DataTypes.UUID,
-        allowNull: true,
+        allowNull: false,
         references: {
             model: patient_model_1.default,
-            key: "userId",
+            key: "id",
         },
     },
     doctorId: {
         type: sequelize_1.DataTypes.UUID,
-        allowNull: true,
+        allowNull: false,
         references: {
             model: doctor_model_1.default,
             key: "id",
@@ -35,17 +36,21 @@ const AppointmentModel = database_1.default.define("AppointmentModel", {
     timeslotId: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
+        references: {
+            model: timeslot_model_1.default,
+            key: "id",
+        },
     },
     date: {
         type: sequelize_1.DataTypes.DATE,
         allowNull: false,
     },
     reason: {
-        type: sequelize_1.DataTypes.STRING,
+        type: sequelize_1.DataTypes.TEXT,
         allowNull: false,
     },
-    staus: {
-        type: sequelize_1.DataTypes.ENUM("PENDING", "APPROVED", "CANCELED"),
+    status: {
+        type: sequelize_1.DataTypes.ENUM(...Object.values(patient_enum_1.AppointmentStatus)),
         allowNull: false,
         defaultValue: patient_enum_1.AppointmentStatus.PENDING,
     },
@@ -67,16 +72,26 @@ const AppointmentModel = database_1.default.define("AppointmentModel", {
 });
 patient_model_1.default.hasMany(AppointmentModel, {
     foreignKey: "patientId",
-    as: "patientAppointments",
+    as: "appointments",
 });
 AppointmentModel.belongsTo(patient_model_1.default, {
     foreignKey: "patientId",
+    as: "patient",
 });
 doctor_model_1.default.hasMany(AppointmentModel, {
     foreignKey: "doctorId",
-    as: "doctorAppointments",
+    as: "appointments",
 });
 AppointmentModel.belongsTo(doctor_model_1.default, {
     foreignKey: "doctorId",
+    as: "doctor",
+});
+timeslot_model_1.default.hasMany(AppointmentModel, {
+    foreignKey: "timeslotId",
+    as: "appointments",
+});
+AppointmentModel.belongsTo(timeslot_model_1.default, {
+    foreignKey: "timeslotId",
+    as: "timeslot",
 });
 exports.default = AppointmentModel;

@@ -63,8 +63,7 @@ export class DoctorController {
         documents: params.documents,
         fee: params.fee,
         language: params.language,
-        experience: params.experience,
-        isVerified: false // Default value for new doctors
+        experience: params.experience
       };
       // checkign if the doctor already exist
       let doctorExists = await this.doctorService.getDoctorByUserId(

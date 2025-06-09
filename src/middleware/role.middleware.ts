@@ -13,7 +13,7 @@ export const isAdmin = (req: Request, res: Response, next: NextFunction): void =
     }
 
     if (user.role !== UserRoles.ADMIN) {
-      Utility.handleError(res, 'Access denied. Admin privileges required', ResponseCode.FORBIDDEN);
+      Utility.handleError(res, 'Access denied. Admin privileges required', ResponseCode.BAD_REQUEST);
       return;
     }
 

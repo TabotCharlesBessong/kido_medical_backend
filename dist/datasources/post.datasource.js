@@ -66,16 +66,14 @@ class PostDataSource {
     }
     fetchAllPost(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield post_model_1.default.findAll({
-                include: [
+            return yield post_model_1.default.findAll(Object.assign(Object.assign({}, query), { include: [
                     { model: comment_model_1.default, as: "postComments" },
                     {
                         model: like_model_1.default,
                         as: "postLikes",
                         include: [{ model: user_model_1.default, as: "likeUser" }],
                     },
-                ],
-            });
+                ] }));
         });
     }
 }

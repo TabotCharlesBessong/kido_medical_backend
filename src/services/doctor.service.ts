@@ -20,7 +20,9 @@ export class DoctorService {
   }
 
   async createDoctor(record: IDoctorCreationBody): Promise<IDoctor> {
-    const doctor = await this.doctorDataSource.create(record);
+    // Remove isVerified from record if present
+    const { isVerified, ...cleanRecord } = record as any;
+    const doctor = await this.doctorDataSource.create(cleanRecord);
     
     // Get doctor's user details
     const doctorUser = await this.userService.getUserByField({ id: record.userId });
@@ -67,14 +69,14 @@ export class DoctorService {
   async updateDoctorVerification(
     doctorId: string,
     updateData: {
-      isVerified: boolean;
+      verificationStatus: string;
       verificationNotes?: string;
       verifiedAt?: Date | null;
     }
   ): Promise<IDoctor | null> {
     const filter = { where: { id: doctorId } };
     await this.doctorDataSource.updateOne(filter, {
-      isVerified: updateData.isVerified,
+      verificationStatus: updateData.verificationStatus,
       verificationNotes: updateData.verificationNotes,
       verifiedAt: updateData.verifiedAt
     });
@@ -100,7 +102,6 @@ export class DoctorService {
     // Update verification status
     await this.updateDoctor(doctor.id, {
       verificationStatus: status,
-      isVerified: status === 'APPROVED',
       verificationNotes: notes,
       verifiedAt: status === 'APPROVED' ? new Date() : null
     });
@@ -109,7 +110,7 @@ export class DoctorService {
     await this.emailService.sendVerificationStatusEmail({
       doctorEmail: doctorUser.email,
       doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
-      isVerified: status === 'APPROVED',
+      status,
       verificationNotes: notes
     });
   }
