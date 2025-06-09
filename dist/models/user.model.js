@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../database"));
 const uuid_1 = require("uuid");
+const user_enum_1 = require("../interfaces/enum/user.enum");
 const UserModel = database_1.default.define('UserModel', {
     id: {
         type: sequelize_1.DataTypes.UUID,
@@ -40,12 +41,14 @@ const UserModel = database_1.default.define('UserModel', {
         allowNull: true,
     },
     isEmailVerified: {
-        type: sequelize_1.DataTypes.STRING,
-        allowNull: true,
+        type: sequelize_1.DataTypes.ENUM(user_enum_1.EmailStatus.VERIFIED, user_enum_1.EmailStatus.NOT_VERIFIED),
+        allowNull: false,
+        defaultValue: user_enum_1.EmailStatus.NOT_VERIFIED,
     },
     accountStatus: {
-        type: sequelize_1.DataTypes.STRING,
-        allowNull: true,
+        type: sequelize_1.DataTypes.ENUM(user_enum_1.AccountStatus.ACTIVE, user_enum_1.AccountStatus.INACTIVE, user_enum_1.AccountStatus.SUSPENDED),
+        allowNull: false,
+        defaultValue: user_enum_1.AccountStatus.ACTIVE,
     },
     createdAt: {
         type: sequelize_1.DataTypes.DATE,

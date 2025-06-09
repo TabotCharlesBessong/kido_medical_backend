@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import Utility from "../utils/index.utils";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import PostService from "../services/post.service";
-import DoctorService from "../services/doctor.service";
+import {DoctorService} from "../services/doctor.service";
+import DoctorDataSource from "../datasources/doctor.datasource";
+import emailService from "../services/email.service";
+import UserService from "../services/user.services";
 
 class PostController {
   private postService: PostService;
@@ -10,7 +13,11 @@ class PostController {
 
   constructor() {
     this.postService = new PostService();
-    this.doctorService = new DoctorService();
+    this.doctorService = new DoctorService(
+      new DoctorDataSource(),
+      emailService,
+      new UserService()
+    );
   }
 
   async createPost(req: Request, res: Response) {
