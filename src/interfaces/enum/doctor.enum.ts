@@ -14,3 +14,9 @@ export enum Frequency {
   TWICE_A_DAY = "TWICE_A_DAY",
   THRICE_A_DAY = "THRICE_A_DAY",
 }
+
+export enum DoctorVerificationStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED"
+}

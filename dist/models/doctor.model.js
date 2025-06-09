@@ -34,6 +34,19 @@ const DoctorModel = database_1.default.define("Doctor", {
         type: sequelize_1.DataTypes.STRING,
         allowNull: true,
     },
+    language: {
+        type: sequelize_1.DataTypes.ARRAY(sequelize_1.DataTypes.STRING),
+        allowNull: false,
+        defaultValue: [],
+    },
+    fee: {
+        type: sequelize_1.DataTypes.DECIMAL,
+        allowNull: true,
+    },
+    experience: {
+        type: sequelize_1.DataTypes.INTEGER,
+        allowNull: true,
+    },
     createdAt: {
         type: sequelize_1.DataTypes.DATE,
         defaultValue: sequelize_1.DataTypes.NOW,
@@ -56,5 +69,6 @@ user_model_1.default.hasOne(DoctorModel, {
 });
 DoctorModel.belongsTo(user_model_1.default, {
     foreignKey: "userId",
+    as: "users"
 });
 exports.default = DoctorModel;

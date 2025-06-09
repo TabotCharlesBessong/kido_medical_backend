@@ -12,21 +12,89 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const medication_datasource_1 = __importDefault(require("../datasources/medication.datasource"));
 const prescription_datasource_1 = __importDefault(require("../datasources/prescription.datasource"));
+const medication_datasource_1 = __importDefault(require("../datasources/medication.datasource"));
+const notification_datasource_1 = __importDefault(require("../datasources/notification.datasource"));
+const doctor_service_1 = require("./doctor.service");
+const doctor_datasource_1 = __importDefault(require("../datasources/doctor.datasource"));
+const patient_service_1 = __importDefault(require("./patient.service"));
+const email_service_1 = __importDefault(require("./email.service"));
+const consultation_service_1 = __importDefault(require("./consultation.service"));
+const user_services_1 = __importDefault(require("./user.services"));
+const appointment_service_1 = __importDefault(require("./appointment.service"));
+const notification_enum_1 = require("../interfaces/enum/notification.enum");
+const database_1 = __importDefault(require("../database"));
 class PrescriptionService {
     constructor() {
         this.prescriptionDataSource = new prescription_datasource_1.default();
         this.medicationDataSource = new medication_datasource_1.default();
+        this.notificationDataSource = new notification_datasource_1.default();
+        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, new user_services_1.default());
+        this.patientService = new patient_service_1.default();
+        this.consultationService = new consultation_service_1.default();
+        this.userService = new user_services_1.default();
+        this.appointmentService = new appointment_service_1.default();
+        this.emailService = email_service_1.default;
     }
-    createPrescription(prescriptionData, medications) {
+    createPrescription(record, medications) {
         return __awaiter(this, void 0, void 0, function* () {
-            const prescription = yield this.prescriptionDataSource.create(prescriptionData);
-            for (const medication of medications) {
-                medication.prescriptionId = prescription.id;
-                yield this.medicationDataSource.create(medication);
+            const transaction = yield database_1.default.transaction();
+            try {
+                // Create prescription
+                const prescription = record;
+                const createdPrescription = yield this.prescriptionDataSource.create(prescription, { transaction });
+                // Create medications
+                const medicationsWithPrescriptionId = medications.map(medication => (Object.assign(Object.assign({}, medication), { prescriptionId: createdPrescription.id })));
+                yield this.medicationDataSource.bulkCreate(medicationsWithPrescriptionId, { transaction });
+                // Get consultation to find appointment
+                const consultation = yield this.consultationService.getConsultationById(createdPrescription.consultationId);
+                if (!consultation) {
+                    throw new Error("Consultation not found");
+                }
+                // Get appointment to find doctor and patient
+                const appointment = yield this.appointmentService.getAppointmentById(consultation.appointmentId);
+                if (!appointment) {
+                    throw new Error("Appointment not found");
+                }
+                // Get doctor and patient records
+                const doctor = yield this.doctorService.getDoctorByField({ where: { id: appointment.doctorId } });
+                const patient = yield this.patientService.getPatientById(appointment.patientId);
+                if (doctor && patient) {
+                    // Get user details for email
+                    const doctorUser = yield this.userService.getUserByField({ id: doctor.userId });
+                    const patientUser = yield this.userService.getUserByField({ id: patient.userId });
+                    if (doctorUser && patientUser) {
+                        // Send email to patient
+                        yield this.emailService.sendPrescriptionEmail({
+                            patientEmail: patientUser.email,
+                            patientName: `${patientUser.firstname} ${patientUser.lastname}`,
+                            doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
+                            date: new Date(createdPrescription.createdAt).toLocaleString(),
+                            instructions: createdPrescription.instructions || '',
+                            medications: medications.map(med => ({
+                                name: med.name,
+                                dosage: med.dosage,
+                                frequency: med.frequency,
+                                duration: med.duration.toString()
+                            }))
+                        });
+                        // Create notification
+                        yield this.notificationDataSource.create({
+                            userId: patient.userId,
+                            message: "New prescription has been issued",
+                            type: notification_enum_1.NotificationType.PRESCRIPTION,
+                            referenceId: createdPrescription.id,
+                            read: false
+                        });
+                    }
+                }
+                yield transaction.commit();
+                return createdPrescription;
             }
-            return prescription;
+            catch (error) {
+                yield transaction.rollback();
+                throw error;
+            }
         });
     }
     getPrescriptionById(prescriptionId) {
@@ -38,11 +106,21 @@ class PrescriptionService {
     }
     updatePrescription(id, data, medications) {
         return __awaiter(this, void 0, void 0, function* () {
-            const filter = { where: { id } };
-            yield this.prescriptionDataSource.updateOne(data, filter);
-            for (const medication of medications) {
-                medication.prescriptionId = id;
-                yield this.medicationDataSource.create(medication);
+            const transaction = yield database_1.default.transaction();
+            try {
+                // Update prescription
+                const filter = { where: { id } };
+                yield this.prescriptionDataSource.updateOne(data, filter);
+                // Delete existing medications
+                yield this.medicationDataSource.deleteMany({ where: { prescriptionId: id } });
+                // Create new medications
+                const medicationsWithPrescriptionId = medications.map(medication => (Object.assign(Object.assign({}, medication), { prescriptionId: id })));
+                yield this.medicationDataSource.bulkCreate(medicationsWithPrescriptionId, { transaction });
+                yield transaction.commit();
+            }
+            catch (error) {
+                yield transaction.rollback();
+                throw error;
             }
         });
     }
@@ -52,9 +130,20 @@ class PrescriptionService {
             return this.prescriptionDataSource.fetchAll(query);
         });
     }
-    deletePrescription(postId) {
+    deletePrescription(prescriptionId) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.prescriptionDataSource.deleteOne({ where: { id: postId } });
+            const transaction = yield database_1.default.transaction();
+            try {
+                // Delete medications first
+                yield this.medicationDataSource.deleteMany({ where: { prescriptionId } });
+                // Then delete prescription
+                yield this.prescriptionDataSource.deleteOne({ where: { id: prescriptionId } });
+                yield transaction.commit();
+            }
+            catch (error) {
+                yield transaction.rollback();
+                throw error;
+            }
         });
     }
 }

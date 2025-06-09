@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const doctor_model_1 = __importDefault(require("../models/doctor.model"));
+const user_model_1 = __importDefault(require("../models/user.model"));
 class DoctorDataSource {
     create(record) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -21,7 +22,20 @@ class DoctorDataSource {
     }
     fetchOne(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield doctor_model_1.default.findOne(query);
+            return yield doctor_model_1.default.findOne(Object.assign(Object.assign({}, query), { include: [
+                    {
+                        model: user_model_1.default,
+                        as: "users",
+                        attributes: [
+                            "username",
+                            "firstname",
+                            "lastname",
+                            "email",
+                            "accountStatus",
+                            "role",
+                        ],
+                    },
+                ] }));
         });
     }
     updateOne(searchBy, data) {
@@ -31,7 +45,20 @@ class DoctorDataSource {
     }
     fetchAll(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield doctor_model_1.default.findAll(query);
+            return yield doctor_model_1.default.findAll(Object.assign(Object.assign({}, query), { include: [
+                    {
+                        model: user_model_1.default,
+                        as: "users",
+                        attributes: [
+                            "username",
+                            "firstname",
+                            "lastname",
+                            "email",
+                            "accountStatus",
+                            "role",
+                        ],
+                    },
+                ] }));
         });
     }
 }

@@ -4,6 +4,7 @@ import {
   IPatientCreationBody,
   IPatient,
 } from "../interfaces/patient.interface";
+import { FindOptions } from "sequelize";
 
 class PatientService {
   private patientDataSource: PatientDataSource;
@@ -20,8 +21,20 @@ class PatientService {
     return await this.patientDataSource.fetchOne({ where: { userId } });
   }
 
-  async updatePatient(userId: string, data: Partial<IPatient>): Promise<void> {
-    await this.patientDataSource.updateOne({ where: { userId } }, data);
+  async updatePatient(id: string, data: Partial<IPatient>): Promise<IPatient | null> {
+    await this.patientDataSource.updateOne(
+      { where: { id } },
+      data
+    );
+    return await this.getPatientById(id);
+  }
+
+  async getAllPatients(): Promise<IPatient[]> {
+    return await this.patientDataSource.fetchAll({ where: {} });
+  }
+
+  async deletePatient(id: string): Promise<void> {
+    await this.patientDataSource.deleteOne({ where: { id } });
   }
 }
 

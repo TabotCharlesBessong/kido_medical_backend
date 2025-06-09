@@ -1,41 +1,93 @@
 "use strict";
-// import { autoInjectable } from "tsyringe";
-// import NotificationDataSource from "../datasources/notification.datasource";
-// import {
-//   IFindNotificationQuery,
-//   INotification,
-//   INotificationCreationBody,
-// } from "../interfaces/notification.interface";
-// @autoInjectable()
-// class NotificationService {
-//   private notificationDataSource: NotificationDataSource;
-//   constructor(_notificationDataSource: NotificationDataSource) {
-//     this.notificationDataSource = _notificationDataSource;
-//   }
-//   async fetchNotificationById(id: string): Promise<INotification | null> {
-//     const query = {
-//       where: { id },
-//       raw: true,
-//     };
-//     return this.notificationDataSource.fetchOne(query);
-//   }
-//   async fetchAllNotifications(
-//     query: IFindNotificationQuery
-//   ): Promise<INotification[]> {
-//     return this.notificationDataSource.fetchAll(query);
-//   }
-//   async createNotification(
-//     data: Partial<INotification>
-//   ): Promise<INotification> {
-//     const notification = {
-//       ...data,
-//     } as INotificationCreationBody;
-//     return this.notificationDataSource.create(notification);
-//   }
-//   async markAsRead(notificationId: string): Promise<void> {
-//     const filter = { where: { id: notificationId } };
-//     const update = { read: true };
-//     await this.notificationDataSource.updateOne(update, filter);
-//   }
-// }
-// export default NotificationService;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const tsyringe_1 = require("tsyringe");
+const notification_datasource_1 = __importDefault(require("../datasources/notification.datasource"));
+const notification_enum_1 = require("../interfaces/enum/notification.enum");
+let NotificationService = class NotificationService {
+    constructor(_notificationDataSource) {
+        this.notificationDataSource = _notificationDataSource;
+    }
+    fetchNotificationById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const query = {
+                where: { id },
+                raw: true,
+            };
+            return this.notificationDataSource.fetchOne(query);
+        });
+    }
+    fetchAllNotifications(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.notificationDataSource.fetchAll(query);
+        });
+    }
+    createNotification(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const notification = Object.assign({}, data);
+            return this.notificationDataSource.create(notification);
+        });
+    }
+    createMessageNotification(userId, message, referenceId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.createNotification({
+                userId,
+                message,
+                type: notification_enum_1.NotificationType.MESSAGE,
+                referenceId,
+            });
+        });
+    }
+    createAppointmentNotification(userId, message, referenceId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.createNotification({
+                userId,
+                message,
+                type: notification_enum_1.NotificationType.APPOINTMENT,
+                referenceId,
+            });
+        });
+    }
+    createPrescriptionNotification(userId, message, referenceId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.createNotification({
+                userId,
+                message,
+                type: notification_enum_1.NotificationType.PRESCRIPTION,
+                referenceId,
+            });
+        });
+    }
+    markAsRead(notificationId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const filter = { where: { id: notificationId } };
+            const update = { read: true };
+            yield this.notificationDataSource.updateOne(update, filter);
+        });
+    }
+};
+NotificationService = __decorate([
+    (0, tsyringe_1.autoInjectable)(),
+    __metadata("design:paramtypes", [notification_datasource_1.default])
+], NotificationService);
+exports.default = NotificationService;

@@ -19,6 +19,11 @@ class MedicationDataSource {
             return yield medication_model_1.default.create(record, Object.assign({ returning: true }, options));
         });
     }
+    bulkCreate(records, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield medication_model_1.default.bulkCreate(records, Object.assign({ returning: true }, options));
+        });
+    }
     fetchOne(query) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield medication_model_1.default.findOne(query);
@@ -34,6 +39,18 @@ class MedicationDataSource {
     updateOne(data, query) {
         return __awaiter(this, void 0, void 0, function* () {
             yield medication_model_1.default.update(data, Object.assign(Object.assign({}, query), { returning: true }));
+        });
+    }
+    deleteOne(searchBy) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield medication_model_1.default.destroy(searchBy);
+        });
+    }
+    deleteMany(searchBy) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield medication_model_1.default.destroy({
+                where: searchBy.where
+            });
         });
     }
     fetchAll(query) {

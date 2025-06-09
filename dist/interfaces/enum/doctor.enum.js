@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Frequency = exports.PostStatus = exports.TimeSlotStatus = void 0;
+exports.DoctorVerificationStatus = exports.Frequency = exports.PostStatus = exports.TimeSlotStatus = void 0;
 exports.TimeSlotStatus = {
     AVAILABLE: "AVAILABLE",
     UNAVAILABLE: "UNAVAILABLE",
@@ -16,3 +16,9 @@ var Frequency;
     Frequency["TWICE_A_DAY"] = "TWICE_A_DAY";
     Frequency["THRICE_A_DAY"] = "THRICE_A_DAY";
 })(Frequency || (exports.Frequency = Frequency = {}));
+var DoctorVerificationStatus;
+(function (DoctorVerificationStatus) {
+    DoctorVerificationStatus["PENDING"] = "PENDING";
+    DoctorVerificationStatus["APPROVED"] = "APPROVED";
+    DoctorVerificationStatus["REJECTED"] = "REJECTED";
+})(DoctorVerificationStatus || (exports.DoctorVerificationStatus = DoctorVerificationStatus = {}));

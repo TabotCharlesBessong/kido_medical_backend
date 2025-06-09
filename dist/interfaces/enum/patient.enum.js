@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppointmentStatus = exports.Gender = void 0;
+exports.Religion = exports.AppointmentStatus = exports.Gender = void 0;
 exports.Gender = {
     MALE: "MALE",
     FEMALE: "FEMALE",
@@ -11,3 +11,10 @@ exports.AppointmentStatus = {
     APPROVED: "APPROVED",
     CANCELED: "CANCELED"
 };
+var Religion;
+(function (Religion) {
+    Religion["CHRISTIAN"] = "christian";
+    Religion["MUSLIM"] = "muslim";
+    Religion["BUDDHIST"] = "buddhist";
+    Religion["HINDU"] = "hindu";
+})(Religion || (exports.Religion = Religion = {}));

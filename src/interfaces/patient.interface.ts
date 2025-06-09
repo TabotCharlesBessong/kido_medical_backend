@@ -30,6 +30,7 @@ export interface IPatientDataSource {
     data: Partial<IPatient>
   ): Promise<void>;
   fetchAll(query: FindOptions<IPatient>): Promise<IPatient[]>;
+  deleteOne(searchBy: IFindPatientQuery): Promise<void>;
 }
 
 export interface IFindPatientQuery {

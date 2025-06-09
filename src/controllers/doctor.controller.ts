@@ -3,36 +3,59 @@ import sequelize from "../database";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import { UserRoles } from "../interfaces/enum/user.enum";
 import AppointmentService from "../services/appointment.service";
-import DoctorService from "../services/doctor.service";
+import { DoctorService } from "../services/doctor.service";
 import TimeSlotService from "../services/timeslot.service";
 import UserService from "../services/user.services";
 import Utility from "../utils/index.utils";
 import VitalSignService from "../services/vitalsign.services";
 import ConsultationService from "../services/consultation.service";
 import PrescriptionService from "../services/prescription.service";
+import EmailService from "../services/email.service";
+import UploadService from "../services/upload.service";
+import DoctorDataSource from '../datasources/doctor.datasource';
+import { UserTypes } from '../enums/user.types';
+import { IUserService } from '../interfaces/services.interface';
+import { IEmailService } from '../interfaces/email.interface';
+import { IUploadService } from '../interfaces/services.interface';
 
-class DoctorController {
+export class DoctorController {
   private doctorService: DoctorService;
-  private userService: UserService;
+  private userService: IUserService;
   private timeSlotService: TimeSlotService;
   private appointmentService: AppointmentService;
   private vitalsignService: VitalSignService;
   private consultationService: ConsultationService;
   private prescriptionService: PrescriptionService;
+  private emailService: IEmailService;
+  private uploadService: IUploadService;
 
   constructor() {
-    this.doctorService = new DoctorService();
-    this.userService = new UserService();
+    const userService = new UserService();
+    this.doctorService = new DoctorService(
+      new DoctorDataSource(),
+      EmailService,
+      userService
+    );
     this.timeSlotService = new TimeSlotService();
     this.appointmentService = new AppointmentService();
     this.vitalsignService = new VitalSignService();
     this.consultationService = new ConsultationService();
     this.prescriptionService = new PrescriptionService();
+    this.userService = userService;
+    this.emailService = EmailService;
+    this.uploadService = UploadService;
   }
 
   async registerDoctor(req: Request, res: Response) {
     try {
       const params = { ...req.body };
+      const file = req.file;
+
+      if (file) {
+        const fileUrl = await this.uploadService.uploadFile(file);
+        params.documents = fileUrl;
+      }
+
       const newDoctor = {
         userId: params.user.id,
         specialization: params.specialization,
@@ -40,7 +63,7 @@ class DoctorController {
         documents: params.documents,
         fee: params.fee,
         language: params.language,
-        experience: params.experience,
+        experience: params.experience
       };
       // checkign if the doctor already exist
       let doctorExists = await this.doctorService.getDoctorByUserId(
@@ -71,47 +94,38 @@ class DoctorController {
 
   async getDoctorById(req: Request, res: Response) {
     try {
-      const patient = await this.doctorService.getDoctorByUserId(
-        req.params.userId
-      );
-      if (!patient)
-        return Utility.handleError(
-          res,
-          "Could not get doctor",
-          ResponseCode.NOT_FOUND
-        );
-      else
-        return Utility.handleSuccess(
-          res,
-          "Doctor details fetched successfully",
-          { patient },
-          ResponseCode.SUCCESS
-        );
+      const { id } = req.params;
+      const doctor = await this.doctorService.getDoctorByField({ where: { id } });
+      if (!doctor) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Doctor not found'
+        });
+      }
+      return res.status(200).json({
+        status: 'success',
+        data: doctor
+      });
     } catch (error) {
-      return Utility.handleError(
-        res,
-        (error as TypeError).message,
-        ResponseCode.SERVER_ERROR
-      );
+      return res.status(500).json({
+        status: 'error',
+        message: (error as Error).message
+      });
     }
   }
 
-  async getAllDoctors(req: Request, res: Response) {
+  async getDoctors(req: Request, res: Response) {
     try {
-      const params = { ...req.body };
-      let doctors = await this.doctorService.getDoctors();
-      return Utility.handleSuccess(
-        res,
-        "Account fetched successfully",
-        { doctors },
-        ResponseCode.SUCCESS
-      );
+      const doctors = await this.doctorService.getDoctors();
+      return res.status(200).json({
+        status: 'success',
+        data: doctors
+      });
     } catch (error) {
-      return Utility.handleError(
-        res,
-        (error as TypeError).message,
-        ResponseCode.SERVER_ERROR
-      );
+      return res.status(500).json({
+        status: 'error',
+        message: (error as Error).message
+      });
     }
   }
 
@@ -250,22 +264,11 @@ class DoctorController {
   async createVitalSing(req: Request, res: Response) {
     try {
       const params = { ...req.body };
-      const newSigns = {
-        doctorId: params.user.id,
-        patientId: params.patientId,
-        appointmentId: params.appointmentId,
-        weight: params.weight,
-        height: params.height,
-        bloodPressure: params.bloodPressure,
-        pulse: params.pulse,
-        respiratoryRate: params.respiratoryRate,
-        temperature: params.temperature,
-      };
-      const post = await this.vitalsignService.recordVitalSigns(newSigns);
+      const vitalSign = await this.vitalsignService.recordVitalSigns(params);
       return Utility.handleSuccess(
         res,
-        "Vital signs created successfully",
-        { post },
+        "Vital sign created successfully",
+        { vitalSign },
         ResponseCode.SUCCESS
       );
     } catch (error) {
@@ -279,19 +282,19 @@ class DoctorController {
 
   async getVitalsById(req: Request, res: Response) {
     try {
-      const vitalId = req.params.vitalId;
-      const vital = await this.vitalsignService.getVitalSignsById(vitalId);
-      if (!vital) {
+      const { id } = req.params;
+      const vitalSign = await this.vitalsignService.getVitalSignsById(id);
+      if (!vitalSign) {
         return Utility.handleError(
           res,
-          "Vital signs not created yet",
+          "Vital sign not found",
           ResponseCode.NOT_FOUND
         );
       }
       return Utility.handleSuccess(
         res,
-        "Post retrieved successfully",
-        { vital },
+        "Vital sign fetched successfully",
+        { vitalSign },
         ResponseCode.SUCCESS
       );
     } catch (error) {
@@ -305,16 +308,13 @@ class DoctorController {
 
   async updateVitals(req: Request, res: Response) {
     try {
-      const vitalId = req.params.vitalId;
-      const data = { ...req.body };
-      const vitals = await this.vitalsignService.updateVitalSigns(
-        vitalId,
-        data
-      );
+      const { id } = req.params;
+      const params = { ...req.body };
+      await this.vitalsignService.updateVitalSigns(id, params);
       return Utility.handleSuccess(
         res,
-        "Vitals updated successfully",
-        { vitals },
+        "Vital sign updated successfully",
+        {},
         ResponseCode.SUCCESS
       );
     } catch (error) {
@@ -328,11 +328,11 @@ class DoctorController {
 
   async destroyVitals(req: Request, res: Response) {
     try {
-      const vitalId = req.params.vitalId;
-      await this.vitalsignService.deleteVitalSigns(vitalId);
+      const { id } = req.params;
+      await this.vitalsignService.deleteVitalSigns(id);
       return Utility.handleSuccess(
         res,
-        "Vitals deleted successfully",
+        "Vital sign deleted successfully",
         {},
         ResponseCode.SUCCESS
       );
@@ -347,12 +347,11 @@ class DoctorController {
 
   async getAllVitals(req: Request, res: Response) {
     try {
-      const params = { ...req.body };
-      let vitals = await this.vitalsignService.getVitalSigns();
+      const vitalSigns = await this.vitalsignService.getVitalSigns();
       return Utility.handleSuccess(
         res,
-        "Account fetched successfully",
-        { vitals },
+        "Vital signs fetched successfully",
+        { vitalSigns },
         ResponseCode.SUCCESS
       );
     } catch (error) {
@@ -367,23 +366,11 @@ class DoctorController {
   async createConsultation(req: Request, res: Response) {
     try {
       const params = { ...req.body };
-      const newConsultation = {
-        doctorId: params.user.id,
-        patientId: params.patientId,
-        appointmentId: params.appointmentId,
-        presentingComplaints: params.presentingComplaints,
-        pastHistory: params.pastHistory,
-        diagnosticImpression: params.diagnosticImpression,
-        investigations: params.investigations,
-        treatment: params.treatment,
-      };
-      const post = await this.consultationService.createConsultation(
-        newConsultation
-      );
+      const consultation = await this.consultationService.createConsultation(params);
       return Utility.handleSuccess(
         res,
-        "Vital signs created successfully",
-        { post },
+        "Consultation created successfully",
+        { consultation },
         ResponseCode.SUCCESS
       );
     } catch (error) {
@@ -397,20 +384,18 @@ class DoctorController {
 
   async getConsultationById(req: Request, res: Response) {
     try {
-      const consultationId = req.params.consultationId;
-      const consultation = await this.consultationService.getConsultationById(
-        consultationId
-      );
+      const { id } = req.params;
+      const consultation = await this.consultationService.getConsultationById(id);
       if (!consultation) {
         return Utility.handleError(
           res,
-          "No existing consultation",
+          "Consultation not found",
           ResponseCode.NOT_FOUND
         );
       }
       return Utility.handleSuccess(
         res,
-        "Consultation retrieved successfully",
+        "Consultation fetched successfully",
         { consultation },
         ResponseCode.SUCCESS
       );
@@ -425,16 +410,13 @@ class DoctorController {
 
   async updateConsultation(req: Request, res: Response) {
     try {
-      const consultationId = req.params.consultationId;
-      const data = { ...req.body };
-      const consultations = await this.consultationService.updateConsultation(
-        consultationId,
-        data
-      );
+      const { id } = req.params;
+      const params = { ...req.body };
+      await this.consultationService.updateConsultation(id, params);
       return Utility.handleSuccess(
         res,
-        "Vitals updated successfully",
-        { consultations },
+        "Consultation updated successfully",
+        {},
         ResponseCode.SUCCESS
       );
     } catch (error) {
@@ -448,11 +430,11 @@ class DoctorController {
 
   async destroyConsultation(req: Request, res: Response) {
     try {
-      const consultationId = req.params.consultationId;
-      await this.consultationService.deleteConsultation(consultationId);
+      const { id } = req.params;
+      await this.consultationService.deleteConsultation(id);
       return Utility.handleSuccess(
         res,
-        "Consulation deleted successfully",
+        "Consultation deleted successfully",
         {},
         ResponseCode.SUCCESS
       );
@@ -467,11 +449,10 @@ class DoctorController {
 
   async getAllConsultations(req: Request, res: Response) {
     try {
-      const params = { ...req.body };
-      let consultations = await this.consultationService.getConsultations();
+      const consultations = await this.consultationService.getConsultations();
       return Utility.handleSuccess(
         res,
-        "Account fetched successfully",
+        "Consultations fetched successfully",
         { consultations },
         ResponseCode.SUCCESS
       );
@@ -485,34 +466,17 @@ class DoctorController {
   }
 
   async createPrescription(req: Request, res: Response) {
-    const transaction = await sequelize.transaction();
     try {
-      const body = req.body;
-      let prescriptionData, medications;
-
-      // Handle both structured and flat request body formats
-      if (body.prescription && body.medications) {
-        prescriptionData = body.prescription;
-        medications = body.medications;
-      } else {
-        // If the body is flat, use the entire body as prescription data
-        prescriptionData = body;
-        medications = body.medications || [];
-      }
-
-      const newPrescription = await this.prescriptionService.createPrescription(
-        prescriptionData,
-        medications
-      );
-      await transaction.commit();
+      const params = { ...req.body };
+      const { prescription, medications } = params;
+      const newPrescription = await this.prescriptionService.createPrescription(prescription, medications);
       return Utility.handleSuccess(
         res,
         "Prescription created successfully",
-        { newPrescription },
+        { prescription: newPrescription },
         ResponseCode.SUCCESS
       );
     } catch (error) {
-      await transaction.rollback();
       return Utility.handleError(
         res,
         (error as TypeError).message,
@@ -524,9 +488,7 @@ class DoctorController {
   async getPrescriptionById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const prescription = await this.prescriptionService.getPrescriptionById(
-        id
-      );
+      const prescription = await this.prescriptionService.getPrescriptionById(id);
       if (!prescription) {
         return Utility.handleError(
           res,
@@ -550,16 +512,10 @@ class DoctorController {
   }
 
   async updatePrescription(req: Request, res: Response) {
-    const transaction = await sequelize.transaction();
     try {
       const { id } = req.params;
       const { prescription, medications } = req.body;
-      await this.prescriptionService.updatePrescription(
-        id,
-        prescription,
-        medications
-      );
-      await transaction.commit();
+      await this.prescriptionService.updatePrescription(id, prescription, medications);
       return Utility.handleSuccess(
         res,
         "Prescription updated successfully",
@@ -567,7 +523,6 @@ class DoctorController {
         ResponseCode.SUCCESS
       );
     } catch (error) {
-      await transaction.rollback();
       return Utility.handleError(
         res,
         (error as TypeError).message,
@@ -596,11 +551,11 @@ class DoctorController {
 
   async destroyPrescription(req: Request, res: Response) {
     try {
-      const prescriptionId = req.params.prescriptionId;
-      await this.prescriptionService.deletePrescription;
+      const { id } = req.params;
+      await this.prescriptionService.deletePrescription(id);
       return Utility.handleSuccess(
         res,
-        "Consulation deleted successfully",
+        "Prescription deleted successfully",
         {},
         ResponseCode.SUCCESS
       );
@@ -610,6 +565,77 @@ class DoctorController {
         (error as TypeError).message,
         ResponseCode.SERVER_ERROR
       );
+    }
+  }
+
+  async updateDoctor(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      await this.doctorService.updateDoctor(id, req.body);
+      return res.status(200).json({
+        status: 'success',
+        message: 'Doctor updated successfully'
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: 'error',
+        message: (error as Error).message
+      });
+      }
+  }
+
+  async approveDoctor(req: Request, res: Response) {
+    try {
+      const { email } = req.query;
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Doctor email is required'
+        });
+      }
+
+      await this.doctorService.verifyDoctor(email, 'APPROVED');
+      return res.status(200).json({
+        status: 'success',
+        message: 'Doctor approved successfully'
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: 'error',
+        message: (error as Error).message
+      });
+    }
+  }
+
+  async declineDoctor(req: Request, res: Response) {
+    try {
+      const { email } = req.query;
+      const { notes } = req.body;
+
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Doctor email is required'
+        });
+      }
+
+      if (!notes) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Decline reason is required'
+        });
+      }
+
+      await this.doctorService.verifyDoctor(email, 'REJECTED', notes);
+      return res.status(200).json({
+        status: 'success',
+        message: 'Doctor registration declined'
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: 'error',
+        message: (error as Error).message
+      });
     }
   }
 }

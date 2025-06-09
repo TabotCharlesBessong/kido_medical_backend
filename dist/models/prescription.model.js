@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../database"));
+const consultation_model_1 = __importDefault(require("./consultation.model"));
 const PrescriptionModel = database_1.default.define("PrescriptionModel", {
     id: {
         type: sequelize_1.DataTypes.UUID,
@@ -14,6 +15,10 @@ const PrescriptionModel = database_1.default.define("PrescriptionModel", {
     consultationId: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
+        references: {
+            model: consultation_model_1.default,
+            key: "id"
+        }
     },
     instructions: {
         type: sequelize_1.DataTypes.TEXT,
@@ -22,10 +27,6 @@ const PrescriptionModel = database_1.default.define("PrescriptionModel", {
     investigation: {
         type: sequelize_1.DataTypes.TEXT,
         allowNull: true,
-    },
-    medications: {
-        type: sequelize_1.DataTypes.JSON,
-        allowNull: false,
     },
     createdAt: {
         type: sequelize_1.DataTypes.DATE,
@@ -42,5 +43,14 @@ const PrescriptionModel = database_1.default.define("PrescriptionModel", {
     tableName: "prescriptions",
     createdAt: "createdAt",
     updatedAt: "updatedAt",
+});
+// Set up the relationship with consultation
+consultation_model_1.default.hasMany(PrescriptionModel, {
+    foreignKey: "consultationId",
+    as: "prescriptions"
+});
+PrescriptionModel.belongsTo(consultation_model_1.default, {
+    foreignKey: "consultationId",
+    as: "consultation"
 });
 exports.default = PrescriptionModel;

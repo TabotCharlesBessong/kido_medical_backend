@@ -28,16 +28,20 @@ class MessageController {
                     content: params.content
                 };
                 const message = yield this.messageService.createMessage(newMessage);
-                return index_utils_1.default.handleSuccess(res, "Post updated successfully", { message }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "Message sent successfully", { message }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
+                const errorMessage = error.message;
+                if (errorMessage === "Sender not found" || errorMessage === "Receiver not found") {
+                    return index_utils_1.default.handleError(res, errorMessage, code_enum_1.ResponseCode.BAD_REQUEST);
+                }
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
             }
         });
         this.getAllMessagesByUserId = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const messages = yield this.messageService.getAllMessagesByUserId(req.params.userId);
-                return index_utils_1.default.handleSuccess(res, "Post updated successfully", { messages }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "Messages retrieved successfully", { messages }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -46,7 +50,7 @@ class MessageController {
         this.getConversation = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const messages = yield this.messageService.getConversation(req.params.senderId, req.params.receiverId);
-                return index_utils_1.default.handleSuccess(res, "Post updated successfully", { messages }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "Conversation retrieved successfully", { messages }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
