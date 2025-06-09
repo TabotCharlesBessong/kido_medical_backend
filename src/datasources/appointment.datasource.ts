@@ -8,35 +8,27 @@ import {
 import AppointmentModel from "../models/appointment.model";
 
 class AppointmentDataSource implements IAppointmentDataSource {
-  async create(
-    record: IAppointmentCreationBody,
-    options?: Partial<IFindAppointmentQuery>
-  ): Promise<IAppointment> {
-    return await AppointmentModel.create(record, {
-      returning: true,
-      ...options,
-    });
+  async create(record: IAppointmentCreationBody): Promise<IAppointment> {
+    return await AppointmentModel.create(record);
   }
 
   async fetchOne(query: IFindAppointmentQuery): Promise<IAppointment | null> {
     return await AppointmentModel.findOne(query);
   }
 
-  async fetchById(appointmentId: string): Promise<IAppointment | null> {
-    return await AppointmentModel.findOne({
-      where: { id: appointmentId },
-    });
-  }
-
   async updateOne(
-    data: Partial<IAppointment>,
-    query: IFindAppointmentQuery
+    searchBy: IFindAppointmentQuery,
+    data: Partial<IAppointment>
   ): Promise<void> {
-    await AppointmentModel.update(data, { ...query, returning: true });
+    await AppointmentModel.update(data, { ...searchBy, returning: true });
   }
 
   async fetchAll(query: FindOptions<IAppointment>): Promise<IAppointment[]> {
     return await AppointmentModel.findAll(query);
+  }
+
+  async deleteOne(searchBy: IFindAppointmentQuery): Promise<void> {
+    await AppointmentModel.destroy(searchBy);
   }
 }
 

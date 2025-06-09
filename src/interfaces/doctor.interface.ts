@@ -5,6 +5,8 @@ export interface IDoctor {
   userId: string;
   specialization: string;
   verificationStatus: string;
+  verificationNotes?: string;
+  verifiedAt?: Date | null;
   documents: string;
   fee: number;
   language: string[];
@@ -15,10 +17,9 @@ export interface IDoctor {
 
 export interface IFindDoctorQuery {
   where: {
-    [key: string]: string;
+    id?: string;
+    userId?: string;
   };
-  raw?: boolean;
-  returning?: boolean;
 }
 
 export interface IDoctorCreationBody
@@ -29,8 +30,8 @@ export interface IDoctorModel
     IDoctor {}
 
 export interface IDoctorDataSource {
-  fetchOne(query: IFindDoctorQuery): Promise<IDoctor | null>;
   create(record: IDoctorCreationBody): Promise<IDoctor>;
+  fetchOne(query: IFindDoctorQuery): Promise<IDoctor | null>;
   updateOne(searchBy: IFindDoctorQuery, data: Partial<IDoctor>): Promise<void>;
   fetchAll(query: FindOptions<IDoctor>): Promise<IDoctor[]>;
 }

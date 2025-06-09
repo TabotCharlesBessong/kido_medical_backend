@@ -1,252 +1,268 @@
 import { Request, Response } from "express";
 import PatientService from "../services/patient.service";
+import AppointmentService from "../services/appointment.service";
+import TimeSlotService from "../services/timeslot.service";
+import { IAppointmentCreationBody } from "../interfaces/appointment.interface";
+import { ITimeSlot } from "../interfaces/timeslot.interface";
+import { IUser } from "../interfaces/user.interfaces";
+import { IAppointment } from "../interfaces/appointment.interface";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import Utility from "../utils/index.utils";
 import { IPatient } from "../interfaces/patient.interface";
-import AppointmentService from "../services/appointment.service";
 
 class PatientController {
   private patientService: PatientService;
   private appointmentService: AppointmentService;
+  private timeSlotService: TimeSlotService;
 
-  constructor(
-  ) {
+  constructor() {
     this.patientService = new PatientService();
     this.appointmentService = new AppointmentService();
+    this.timeSlotService = new TimeSlotService();
   }
 
-  async createPatient(req: Request, res: Response) {
+  async createPatient(req: Request, res: Response): Promise<void> {
     try {
-      const params = { ...req.body };
-      const newPatient = {
-        userId: params.user.id,
-        age: params.age,
-        gender: params.gender,
-        address1: params.address1,
-        address2: params.address2,
-        occupation: params.occupation,
-        phoneNumber: params.phoneNumber,
-        tribe: params.tribe,
-        religion: params.religion,
-      };
-
-      // checkign if the patient already exist
-      let patientExists = await this.patientService.getPatientById(
-        newPatient.userId
-      );
-      if (patientExists)
-        return Utility.handleError(
-          res,
-          "We are sorry but you have already created a patient account",
-          ResponseCode.ALREADY_EXIST
-        );
-      const patient = await this.patientService.createPatient(newPatient);
-      return Utility.handleSuccess(
-        res,
-        "Patient Info created successfully",
-        { patient },
-        ResponseCode.SUCCESS
-      );
-    } catch (error) {
-      res
-        .status(ResponseCode.SERVER_ERROR)
-        .json({ message: (error as TypeError).message });
+      const patient = await this.patientService.createPatient(req.body);
+      res.status(201).json({
+        status: true,
+        message: "Patient created successfully",
+        data: patient,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: false,
+        message: error.message,
+      });
     }
   }
 
-  async getPatientById(req: Request, res: Response) {
+  async getPatientById(req: Request, res: Response): Promise<void> {
     try {
-      const patient = await this.patientService.getPatientById(
-        req.params.userId
-      );
-      if (!patient)
-        return Utility.handleError(
-          res,
-          "Could not get patient",
-          ResponseCode.NOT_FOUND
-        );
-      else
-        return Utility.handleSuccess(
-          res,
-          "Account fetched successfully",
-          { patient },
-          ResponseCode.SUCCESS
-        );
-    } catch (error) {
-      return Utility.handleError(
-        res,
-        (error as TypeError).message,
-        ResponseCode.SERVER_ERROR
-      );
-    }
-  }
-
-  async updatePatient(req: Request, res: Response) {
-    try {
-      const patientId = req.params.userId;
-      const data = { ...req.body };
-      const patient = await this.patientService.updatePatient(patientId, data);
-      return Utility.handleSuccess(
-        res,
-        "Post updated successfully",
-        { patient },
-        ResponseCode.SUCCESS
-      );
-    } catch (error) {
-      return Utility.handleError(
-        res,
-        (error as TypeError).message,
-        ResponseCode.SERVER_ERROR
-      );
-    }
-  }
-
-  async bookAppointment(req: Request, res: Response) {
-    try {
-      const params = { ...req.body };
-      
-      // First get the patient using the user ID
-      const patient = await this.patientService.getPatientById(params.user.id);
-      
+      const patient = await this.patientService.getPatientById(req.params.id);
       if (!patient) {
-        return Utility.handleError(
-          res,
-          "Patient not found",
-          ResponseCode.NOT_FOUND
-        );
+        res.status(404).json({
+          status: false,
+          message: "Patient not found",
+        });
+        return;
+      }
+      res.status(200).json({
+        status: true,
+        message: "Patient retrieved successfully",
+        data: patient,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async updatePatient(req: Request, res: Response): Promise<void> {
+    try {
+      const patient = await this.patientService.updatePatient(req.params.id, req.body);
+      if (!patient) {
+        res.status(404).json({
+          status: false,
+          message: "Patient not found",
+        });
+        return;
+      }
+      res.status(200).json({
+        status: true,
+        message: "Patient updated successfully",
+        data: patient,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async deletePatient(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const patient = await this.patientService.getPatientById(id);
+      if (!patient) {
+        return res.status(404).json({
+          status: false,
+          message: "Patient not found",
+        });
+      }
+      await this.patientService.deletePatient(id);
+      return res.status(200).json({
+        status: true,
+        message: "Patient deleted successfully",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: false,
+        message: (error as Error).message,
+      });
+    }
+  }
+
+  async getAllPatients(req: Request, res: Response): Promise<void> {
+    try {
+      const patients = await this.patientService.getAllPatients();
+      res.status(200).json({
+        status: true,
+        message: "Patients retrieved successfully",
+        data: patients,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async bookAppointment(req: Request & { user?: IUser }, res: Response): Promise<void> {
+    try {
+      const { doctorId, timeslotId, date, reason } = req.body;
+      const patient = req.user;
+
+      if (!patient) {
+        res.status(401).json({
+          status: false,
+          message: "User not authenticated",
+        });
+        return;
       }
 
-      const newAppointment = {
-        patientId: patient.id, // Use the patient's ID instead of user's ID
-        doctorId: params.doctorId,
-        timeslotId: params.timeslotId,
-        date: params.date,
-        reason: params.reason,
+      // Check if timeslot is available
+      const timeSlot = await this.timeSlotService.getTimeSlotById(timeslotId);
+      if (!timeSlot) {
+        res.status(404).json({
+          status: false,
+          message: "Time slot not found",
+        });
+        return;
+      }
+
+      if (!timeSlot.isAvailable) {
+        res.status(400).json({
+          status: false,
+          message: "Time slot is not available",
+        });
+        return;
+      }
+
+      // Create appointment with required fields
+      const newAppointment: IAppointmentCreationBody = {
+        patientId: patient.id,
+        doctorId,
+        timeSlotId: timeslotId,
+        status: "PENDING"
       };
 
-      const appointment = await this.appointmentService.createAppointment(
-        newAppointment
-      );
-      return Utility.handleSuccess(
-        res,
-        "Appointment booked successfully",
-        { appointment },
-        ResponseCode.SUCCESS
-      );
-    } catch (error) {
-      return Utility.handleError(
-        res,
-        (error as TypeError).message,
-        ResponseCode.SERVER_ERROR
-      );
+      const appointment = await this.appointmentService.createAppointment(newAppointment);
+
+      // Update timeslot availability
+      await this.timeSlotService.updateTimeSlot(timeslotId, { isAvailable: false });
+
+      res.status(201).json({
+        status: true,
+        message: "Appointment booked successfully",
+        data: appointment,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async getPatientAppointments(req: Request & { user?: IUser }, res: Response): Promise<void> {
+    try {
+      const patient = req.user;
+      if (!patient) {
+        res.status(401).json({
+          status: false,
+          message: "User not authenticated",
+        });
+        return;
+      }
+
+      const appointments = await this.appointmentService.getAppointmentsByPatientId(patient.id);
+      res.status(200).json({
+        status: true,
+        message: "Appointments retrieved successfully",
+        data: appointments,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async getAllAppointments(req: Request, res: Response): Promise<void> {
+    try {
+      const appointments = await this.appointmentService.getAllAppointments();
+      res.status(200).json({
+        status: true,
+        message: "Appointments retrieved successfully",
+        data: appointments,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async updateAppointment(req: Request, res: Response): Promise<void> {
+    try {
+      const appointment = await this.appointmentService.updateAppointment(req.params.id, req.body);
+      if (!appointment) {
+        res.status(404).json({
+          status: false,
+          message: "Appointment not found",
+        });
+        return;
+      }
+      res.status(200).json({
+        status: true,
+        message: "Appointment updated successfully",
+        data: appointment,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: false,
+        message: error.message,
+      });
     }
   }
 
   async getAppointmentById(req: Request, res: Response) {
     try {
-      const appointment = await this.appointmentService.getAppointmentById(
-        req.params.appointmentId
-      );
-      if (!appointment)
-        return Utility.handleError(
-          res,
-          "Could not get appointment",
-          ResponseCode.NOT_FOUND
-        );
-      else
-        return Utility.handleSuccess(
-          res,
-          "Account fetched successfully",
-          { appointment },
-          ResponseCode.SUCCESS
-        );
-    } catch (error) {
-      return Utility.handleError(
-        res,
-        (error as TypeError).message,
-        ResponseCode.SERVER_ERROR
-      );
-    }
-  }
-
-  async getAllAppointments(req: Request, res: Response) {
-    try {
-      const params = { ...req.body };
-      let appointments = await this.appointmentService.getAppointments();
-      return Utility.handleSuccess(
-        res,
-        "Appointments fetched successfully",
-        { appointments },
-        ResponseCode.SUCCESS
-      );
-    } catch (error) {
-      return Utility.handleError(
-        res,
-        (error as TypeError).message,
-        ResponseCode.SERVER_ERROR
-      );
-    }
-  }
-
-  async getPatientAppointments(req: Request, res: Response) {
-    try {
-      const params = { ...req.body };
-      const patient = await this.patientService.getPatientById(params.user.id);
-      
-      if (!patient) {
-        return Utility.handleError(
-          res,
-          "Patient not found",
-          ResponseCode.NOT_FOUND
-        );
+      const { id } = req.params;
+      const appointment = await this.appointmentService.getAppointmentById(id);
+      if (!appointment) {
+        return res.status(404).json({
+          status: false,
+          message: "Appointment not found",
+        });
       }
-
-      const appointments = await this.appointmentService.getAppointmentsByPatient(patient.id);
-      return Utility.handleSuccess(
-        res,
-        "Patient appointments fetched successfully",
-        { appointments },
-        ResponseCode.SUCCESS
-      );
+      return res.status(200).json({
+        status: true,
+        message: "Appointment retrieved successfully",
+        data: appointment,
+      });
     } catch (error) {
-      return Utility.handleError(
-        res,
-        (error as TypeError).message,
-        ResponseCode.SERVER_ERROR
-      );
-    }
-  }
-
-  // async getAllAppointments(req: Request, res: Response) {
-  //   try {
-  //     const query = req.query;
-  //     const appointments = await this.appointmentService.fetchAllAppointments(query);
-  //     return Utility.handleSuccess(
-  //       res,
-  //       "Appointments fetched successfully",
-  //       { appointments },
-  //       ResponseCode.SUCCESS
-  //     );
-  //   } catch (error) {
-  //     return Utility.handleError(
-  //       res,
-  //       (error as TypeError).message,
-  //       ResponseCode.SERVER_ERROR
-  //     );
-  //   }
-  // }
-
-  async updateAppointment(req: Request, res: Response) {
-    try {
-      await this.appointmentService.updateAppointment(req.params.id, req.body);
-      return Utility.handleSuccess(
-        res,
-        "Appointment updated successfully",
-        {  },
-        ResponseCode.SUCCESS
-      );
-    } catch (error) {
-      res.status(ResponseCode.SERVER_ERROR).json((error as TypeError).message);
+      return res.status(500).json({
+        status: false,
+        message: (error as Error).message,
+      });
     }
   }
 }

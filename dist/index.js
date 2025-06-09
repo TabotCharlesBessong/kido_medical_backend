@@ -23,8 +23,12 @@ const doctor_router_1 = __importDefault(require("./router/doctor.router"));
 const post_router_1 = __importDefault(require("./router/post.router"));
 const patient_router_1 = __importDefault(require("./router/patient.router"));
 const message_router_1 = __importDefault(require("./router/message.router"));
+const call_router_1 = __importDefault(require("./router/call.router"));
 const socket_io_1 = require("socket.io");
 const message_controller_1 = __importDefault(require("./controllers/message.controller"));
+const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+// import seedDatabase from './database/seeders';
+const admin_router_1 = __importDefault(require("./routers/admin.router"));
 //create an app
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
@@ -35,6 +39,7 @@ app.use((0, cors_1.default)({
 }));
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(express_1.default.json());
+// @ts-ignore
 app.use((err, req, res, next) => {
     try {
         if (err) {
@@ -45,11 +50,20 @@ app.use((err, req, res, next) => {
     }
     catch (e) { }
 });
+// api requests limit
+const limiter = (0, express_rate_limit_1.default)({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
+});
 app.use("/api/user", user_router_1.default);
 app.use("/api/doctor", doctor_router_1.default);
 app.use("/api/posts", post_router_1.default);
 app.use("/api/patient", patient_router_1.default);
 app.use("/api/message", message_router_1.default);
+app.use("/api/call", call_router_1.default);
+app.use("/api/admin", admin_router_1.default);
 io.on("connection", (socket) => {
     console.log("A user connected");
     socket.on("sendMessage", (message) => __awaiter(void 0, void 0, void 0, function* () {

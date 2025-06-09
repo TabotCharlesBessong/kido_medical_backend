@@ -26,7 +26,7 @@ const validator = (schema) => {
             next();
         }
         catch (error) {
-            return index_utils_1.default.handleError(res, error.errors[0], code_enum_1.ResponseCode.BAD_REQUEST);
+            index_utils_1.default.handleError(res, error.errors[0], code_enum_1.ResponseCode.BAD_REQUEST);
         }
     });
 };
@@ -49,12 +49,15 @@ const Auth = () => {
                 if (user.accountStatus == "DELETED") {
                     throw new TypeError("Authorization failed");
                 }
+                if (!req.body) {
+                    req.body = {};
+                }
                 req.body.user = decoded;
                 next();
             }
         }
         catch (error) {
-            return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.BAD_REQUEST);
+            index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.BAD_REQUEST);
         }
     });
 };
@@ -77,11 +80,14 @@ const DoctorMiddleware = () => {
                 if (user.accountStatus == "DELETED")
                     throw new TypeError("Account does not exist");
             }
+            if (!req.body) {
+                req.body = {};
+            }
             req.body.user = decode;
             next();
         }
         catch (error) {
-            return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.BAD_REQUEST);
+            index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.BAD_REQUEST);
         }
     });
 };

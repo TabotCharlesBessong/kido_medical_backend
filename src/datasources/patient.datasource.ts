@@ -59,6 +59,10 @@ class PatientDataSource implements IPatientDataSource {
       ],
     });
   }
+
+  async deleteOne(searchBy: IFindPatientQuery): Promise<void> {
+    await PatientModel.destroy(searchBy);
+  }
 }
 
 export default PatientDataSource;
