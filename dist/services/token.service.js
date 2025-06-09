@@ -20,6 +20,7 @@ class TokenService {
         this.tokenExpires = 5;
         this.TokenTypes = {
             FORGOT_PASSWORD: "FORGOT_PASSWORD",
+            VERIFY_ACCOUNT: "VERIFY_ACCOUNT",
         };
         this.TokenStatus = {
             NOTUSED: "NOTUSED",
@@ -38,6 +39,18 @@ class TokenService {
             const tokenData = {
                 key: email,
                 type: this.TokenTypes.FORGOT_PASSWORD,
+                expires: (0, moment_1.default)().add(this.tokenExpires, "minutes").toDate(),
+                status: this.TokenStatus.NOTUSED,
+            };
+            let token = yield this.createToken(tokenData);
+            return token;
+        });
+    }
+    createVerificationToken(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tokenData = {
+                key: email,
+                type: this.TokenTypes.VERIFY_ACCOUNT,
                 expires: (0, moment_1.default)().add(this.tokenExpires, "minutes").toDate(),
                 status: this.TokenStatus.NOTUSED,
             };

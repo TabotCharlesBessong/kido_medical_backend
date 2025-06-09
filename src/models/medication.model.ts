@@ -57,7 +57,7 @@ const MedicationModel = sequelize.define<IMedicationModel>(
   }
 );
 
-MedicationModel.belongsTo(PrescriptionModel, { foreignKey: "prescriptionId" });
+MedicationModel.belongsTo(PrescriptionModel, { foreignKey: "prescriptionId",onDelete:'CASCADE' });
 PrescriptionModel.hasMany(MedicationModel, { foreignKey: "prescriptionId" });
 
 export default MedicationModel;

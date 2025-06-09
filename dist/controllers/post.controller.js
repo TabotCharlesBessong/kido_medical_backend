@@ -15,16 +15,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const index_utils_1 = __importDefault(require("../utils/index.utils"));
 const code_enum_1 = require("../interfaces/enum/code.enum");
 const post_service_1 = __importDefault(require("../services/post.service"));
+const doctor_service_1 = require("../services/doctor.service");
+const doctor_datasource_1 = __importDefault(require("../datasources/doctor.datasource"));
+const email_service_1 = __importDefault(require("../services/email.service"));
+const user_services_1 = __importDefault(require("../services/user.services"));
 class PostController {
     constructor() {
         this.postService = new post_service_1.default();
+        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, new user_services_1.default());
     }
     createPost(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const params = Object.assign({}, req.body);
+                // First, get the doctor record using the user ID
+                const doctor = yield this.doctorService.getDoctorByUserId(params.user.id);
+                if (!doctor) {
+                    return index_utils_1.default.handleError(res, "User is not a registered doctor", code_enum_1.ResponseCode.BAD_REQUEST);
+                }
                 const newPost = {
-                    doctorId: params.user.id,
+                    doctorId: doctor.id, // Use the doctor's ID instead of user ID
                     title: params.title,
                     image: params.image,
                     description: params.description,
@@ -57,6 +67,9 @@ class PostController {
             try {
                 const postId = req.params.postId;
                 const data = Object.assign({}, req.body);
+                // Remove doctorId from update data if it exists
+                // This prevents changing the post's doctor
+                delete data.doctorId;
                 const post = yield this.postService.updatePost(postId, data);
                 return index_utils_1.default.handleSuccess(res, "Post updated successfully", { post }, code_enum_1.ResponseCode.SUCCESS);
             }
@@ -120,7 +133,7 @@ class PostController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const postId = req.params.postId;
-                const userId = req.body.userId;
+                const userId = req.body.user.id;
                 yield this.postService.removeLikeFromPost(postId, userId);
                 return index_utils_1.default.handleSuccess(res, "Like removed successfully", {}, code_enum_1.ResponseCode.SUCCESS);
             }

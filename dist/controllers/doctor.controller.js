@@ -12,36 +12,51 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DoctorController = void 0;
 const database_1 = __importDefault(require("../database"));
 const code_enum_1 = require("../interfaces/enum/code.enum");
 const user_enum_1 = require("../interfaces/enum/user.enum");
 const appointment_service_1 = __importDefault(require("../services/appointment.service"));
-const doctor_service_1 = __importDefault(require("../services/doctor.service"));
+const doctor_service_1 = require("../services/doctor.service");
 const timeslot_service_1 = __importDefault(require("../services/timeslot.service"));
 const user_services_1 = __importDefault(require("../services/user.services"));
 const index_utils_1 = __importDefault(require("../utils/index.utils"));
 const vitalsign_services_1 = __importDefault(require("../services/vitalsign.services"));
 const consultation_service_1 = __importDefault(require("../services/consultation.service"));
 const prescription_service_1 = __importDefault(require("../services/prescription.service"));
+const email_service_1 = __importDefault(require("../services/email.service"));
+const upload_service_1 = __importDefault(require("../services/upload.service"));
+const doctor_datasource_1 = __importDefault(require("../datasources/doctor.datasource"));
 class DoctorController {
     constructor() {
-        this.doctorService = new doctor_service_1.default();
-        this.userService = new user_services_1.default();
+        const userService = new user_services_1.default();
+        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, userService);
         this.timeSlotService = new timeslot_service_1.default();
         this.appointmentService = new appointment_service_1.default();
         this.vitalsignService = new vitalsign_services_1.default();
         this.consultationService = new consultation_service_1.default();
         this.prescriptionService = new prescription_service_1.default();
+        this.userService = userService;
+        this.emailService = email_service_1.default;
+        this.uploadService = upload_service_1.default;
     }
     registerDoctor(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const params = Object.assign({}, req.body);
+                const file = req.file;
+                if (file) {
+                    const fileUrl = yield this.uploadService.uploadFile(file);
+                    params.documents = fileUrl;
+                }
                 const newDoctor = {
                     userId: params.user.id,
                     specialization: params.specialization,
                     verificationStatus: params.verificationStatus,
                     documents: params.documents,
+                    fee: params.fee,
+                    language: params.language,
+                    experience: params.experience
                 };
                 // checkign if the doctor already exist
                 let doctorExists = yield this.doctorService.getDoctorByUserId(newDoctor.userId);
@@ -54,19 +69,48 @@ class DoctorController {
                 return index_utils_1.default.handleSuccess(res, "Doctor created successfully", { doctor }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
-                return res.status(500).json({ error: "Server error" });
+                return res.status(code_enum_1.ResponseCode.SERVER_ERROR).json(error.message);
             }
         });
     }
-    getAllDoctors(req, res) {
+    getDoctorById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const params = Object.assign({}, req.body);
-                let doctors = yield this.doctorService.getDoctors();
-                return index_utils_1.default.handleSuccess(res, "Account fetched successfully", { doctors }, code_enum_1.ResponseCode.SUCCESS);
+                const { id } = req.params;
+                const doctor = yield this.doctorService.getDoctorByField({ where: { id } });
+                if (!doctor) {
+                    return res.status(404).json({
+                        status: 'error',
+                        message: 'Doctor not found'
+                    });
+                }
+                return res.status(200).json({
+                    status: 'success',
+                    data: doctor
+                });
             }
             catch (error) {
-                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
+                return res.status(500).json({
+                    status: 'error',
+                    message: error.message
+                });
+            }
+        });
+    }
+    getDoctors(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const doctors = yield this.doctorService.getDoctors();
+                return res.status(200).json({
+                    status: 'success',
+                    data: doctors
+                });
+            }
+            catch (error) {
+                return res.status(500).json({
+                    status: 'error',
+                    message: error.message
+                });
             }
         });
     }
@@ -75,7 +119,24 @@ class DoctorController {
             try {
                 const params = Object.assign({}, req.body);
                 let timeslots = yield this.timeSlotService.getTimeSlots();
-                return index_utils_1.default.handleSuccess(res, "Account fetched successfully", { timeslots }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "All time slots fetched successfully", { timeslots }, code_enum_1.ResponseCode.SUCCESS);
+            }
+            catch (error) {
+                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
+            }
+        });
+    }
+    getDoctorTimeSlots(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const params = Object.assign({}, req.body);
+                // First get the doctor using the user ID
+                const doctor = yield this.doctorService.getDoctorByUserId(params.user.id);
+                if (!doctor) {
+                    return index_utils_1.default.handleError(res, "Doctor not found", code_enum_1.ResponseCode.NOT_FOUND);
+                }
+                const timeslots = yield this.timeSlotService.getTimeSlotsByDoctor(doctor.id);
+                return index_utils_1.default.handleSuccess(res, "Doctor time slots fetched successfully", { timeslots }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -86,17 +147,22 @@ class DoctorController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const params = Object.assign({}, req.body);
+                // First get the doctor using the user ID
+                const doctor = yield this.doctorService.getDoctorByUserId(params.user.id);
+                if (!doctor) {
+                    return index_utils_1.default.handleError(res, "Doctor not found", code_enum_1.ResponseCode.NOT_FOUND);
+                }
                 const newTimeSlot = {
-                    doctorId: params.user.id,
+                    doctorId: doctor.id, // Use the doctor's ID instead of user's ID
                     startTime: params.startTime,
                     endTime: params.endTime,
                     isAvailable: params.isAvailable,
                 };
                 const timeSlot = yield this.timeSlotService.createTimeSlot(newTimeSlot);
-                return index_utils_1.default.handleSuccess(res, "Doctor created successfully", { timeSlot }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "Time slot created successfully", { timeSlot }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
-                res.status(code_enum_1.ResponseCode.SERVER_ERROR).json(error.message);
+                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
             }
         });
     }
@@ -134,19 +200,8 @@ class DoctorController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const params = Object.assign({}, req.body);
-                const newSigns = {
-                    doctorId: params.user.id,
-                    patientId: params.patientId,
-                    appointmentId: params.appointmentId,
-                    weight: params.weight,
-                    height: params.height,
-                    bloodPressure: params.bloodPressure,
-                    pulse: params.pulse,
-                    respiratoryRate: params.respiratoryRate,
-                    temperature: params.temperature,
-                };
-                const post = yield this.vitalsignService.recordVitalSigns(newSigns);
-                return index_utils_1.default.handleSuccess(res, "Vital signs created successfully", { post }, code_enum_1.ResponseCode.SUCCESS);
+                const vitalSign = yield this.vitalsignService.recordVitalSigns(params);
+                return index_utils_1.default.handleSuccess(res, "Vital sign created successfully", { vitalSign }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -156,12 +211,12 @@ class DoctorController {
     getVitalsById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const vitalId = req.params.vitalId;
-                const vital = yield this.vitalsignService.getVitalSignsById(vitalId);
-                if (!vital) {
-                    return index_utils_1.default.handleError(res, "Vital signs not created yet", code_enum_1.ResponseCode.NOT_FOUND);
+                const { id } = req.params;
+                const vitalSign = yield this.vitalsignService.getVitalSignsById(id);
+                if (!vitalSign) {
+                    return index_utils_1.default.handleError(res, "Vital sign not found", code_enum_1.ResponseCode.NOT_FOUND);
                 }
-                return index_utils_1.default.handleSuccess(res, "Post retrieved successfully", { vital }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "Vital sign fetched successfully", { vitalSign }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -171,10 +226,10 @@ class DoctorController {
     updateVitals(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const vitalId = req.params.vitalId;
-                const data = Object.assign({}, req.body);
-                const vitals = yield this.vitalsignService.updateVitalSigns(vitalId, data);
-                return index_utils_1.default.handleSuccess(res, "Vitals updated successfully", { vitals }, code_enum_1.ResponseCode.SUCCESS);
+                const { id } = req.params;
+                const params = Object.assign({}, req.body);
+                yield this.vitalsignService.updateVitalSigns(id, params);
+                return index_utils_1.default.handleSuccess(res, "Vital sign updated successfully", {}, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -184,9 +239,9 @@ class DoctorController {
     destroyVitals(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const vitalId = req.params.vitalId;
-                yield this.vitalsignService.deleteVitalSigns(vitalId);
-                return index_utils_1.default.handleSuccess(res, "Vitals deleted successfully", {}, code_enum_1.ResponseCode.SUCCESS);
+                const { id } = req.params;
+                yield this.vitalsignService.deleteVitalSigns(id);
+                return index_utils_1.default.handleSuccess(res, "Vital sign deleted successfully", {}, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -196,9 +251,8 @@ class DoctorController {
     getAllVitals(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const params = Object.assign({}, req.body);
-                let vitals = yield this.vitalsignService.getVitalSigns();
-                return index_utils_1.default.handleSuccess(res, "Account fetched successfully", { vitals }, code_enum_1.ResponseCode.SUCCESS);
+                const vitalSigns = yield this.vitalsignService.getVitalSigns();
+                return index_utils_1.default.handleSuccess(res, "Vital signs fetched successfully", { vitalSigns }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -209,18 +263,8 @@ class DoctorController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const params = Object.assign({}, req.body);
-                const newConsultation = {
-                    doctorId: params.user.id,
-                    patientId: params.patientId,
-                    appointmentId: params.appointmentId,
-                    presentingComplaints: params.presentingComplaints,
-                    pastHistory: params.pastHistory,
-                    diagnosticImpression: params.diagnosticImpression,
-                    investigations: params.investigations,
-                    treatment: params.treatment,
-                };
-                const post = yield this.consultationService.createConsultation(newConsultation);
-                return index_utils_1.default.handleSuccess(res, "Vital signs created successfully", { post }, code_enum_1.ResponseCode.SUCCESS);
+                const consultation = yield this.consultationService.createConsultation(params);
+                return index_utils_1.default.handleSuccess(res, "Consultation created successfully", { consultation }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -230,12 +274,12 @@ class DoctorController {
     getConsultationById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const consultationId = req.params.consultationId;
-                const consultation = yield this.consultationService.getConsultationById(consultationId);
+                const { id } = req.params;
+                const consultation = yield this.consultationService.getConsultationById(id);
                 if (!consultation) {
-                    return index_utils_1.default.handleError(res, "No existing consultation", code_enum_1.ResponseCode.NOT_FOUND);
+                    return index_utils_1.default.handleError(res, "Consultation not found", code_enum_1.ResponseCode.NOT_FOUND);
                 }
-                return index_utils_1.default.handleSuccess(res, "Consultation retrieved successfully", { consultation }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "Consultation fetched successfully", { consultation }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -245,10 +289,10 @@ class DoctorController {
     updateConsultation(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const consultationId = req.params.consultationId;
-                const data = Object.assign({}, req.body);
-                const consultations = yield this.consultationService.updateConsultation(consultationId, data);
-                return index_utils_1.default.handleSuccess(res, "Vitals updated successfully", { consultations }, code_enum_1.ResponseCode.SUCCESS);
+                const { id } = req.params;
+                const params = Object.assign({}, req.body);
+                yield this.consultationService.updateConsultation(id, params);
+                return index_utils_1.default.handleSuccess(res, "Consultation updated successfully", {}, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -258,9 +302,9 @@ class DoctorController {
     destroyConsultation(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const consultationId = req.params.consultationId;
-                yield this.consultationService.deleteConsultation(consultationId);
-                return index_utils_1.default.handleSuccess(res, "Consulation deleted successfully", {}, code_enum_1.ResponseCode.SUCCESS);
+                const { id } = req.params;
+                yield this.consultationService.deleteConsultation(id);
+                return index_utils_1.default.handleSuccess(res, "Consultation deleted successfully", {}, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -270,9 +314,8 @@ class DoctorController {
     getAllConsultations(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const params = Object.assign({}, req.body);
-                let consultations = yield this.consultationService.getConsultations();
-                return index_utils_1.default.handleSuccess(res, "Account fetched successfully", { consultations }, code_enum_1.ResponseCode.SUCCESS);
+                const consultations = yield this.consultationService.getConsultations();
+                return index_utils_1.default.handleSuccess(res, "Consultations fetched successfully", { consultations }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
@@ -281,15 +324,13 @@ class DoctorController {
     }
     createPrescription(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const transaction = yield database_1.default.transaction();
             try {
-                const { prescription, medications } = req.body;
+                const params = Object.assign({}, req.body);
+                const { prescription, medications } = params;
                 const newPrescription = yield this.prescriptionService.createPrescription(prescription, medications);
-                yield transaction.commit();
-                return index_utils_1.default.handleSuccess(res, "Prescription created successfully", { newPrescription }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "Prescription created successfully", { prescription: newPrescription }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
-                yield transaction.rollback();
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
             }
         });
@@ -311,16 +352,13 @@ class DoctorController {
     }
     updatePrescription(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const transaction = yield database_1.default.transaction();
             try {
                 const { id } = req.params;
                 const { prescription, medications } = req.body;
                 yield this.prescriptionService.updatePrescription(id, prescription, medications);
-                yield transaction.commit();
                 return index_utils_1.default.handleSuccess(res, "Prescription updated successfully", {}, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
-                yield transaction.rollback();
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
             }
         });
@@ -339,14 +377,88 @@ class DoctorController {
     destroyPrescription(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const prescriptionId = req.params.prescriptionId;
-                yield this.prescriptionService.deletePrescription;
-                return index_utils_1.default.handleSuccess(res, "Consulation deleted successfully", {}, code_enum_1.ResponseCode.SUCCESS);
+                const { id } = req.params;
+                yield this.prescriptionService.deletePrescription(id);
+                return index_utils_1.default.handleSuccess(res, "Prescription deleted successfully", {}, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
             }
         });
     }
+    updateDoctor(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { id } = req.params;
+                yield this.doctorService.updateDoctor(id, req.body);
+                return res.status(200).json({
+                    status: 'success',
+                    message: 'Doctor updated successfully'
+                });
+            }
+            catch (error) {
+                return res.status(500).json({
+                    status: 'error',
+                    message: error.message
+                });
+            }
+        });
+    }
+    approveDoctor(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email } = req.query;
+                if (!email || typeof email !== 'string') {
+                    return res.status(400).json({
+                        status: 'error',
+                        message: 'Doctor email is required'
+                    });
+                }
+                yield this.doctorService.verifyDoctor(email, 'APPROVED');
+                return res.status(200).json({
+                    status: 'success',
+                    message: 'Doctor approved successfully'
+                });
+            }
+            catch (error) {
+                return res.status(500).json({
+                    status: 'error',
+                    message: error.message
+                });
+            }
+        });
+    }
+    declineDoctor(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email } = req.query;
+                const { notes } = req.body;
+                if (!email || typeof email !== 'string') {
+                    return res.status(400).json({
+                        status: 'error',
+                        message: 'Doctor email is required'
+                    });
+                }
+                if (!notes) {
+                    return res.status(400).json({
+                        status: 'error',
+                        message: 'Decline reason is required'
+                    });
+                }
+                yield this.doctorService.verifyDoctor(email, 'REJECTED', notes);
+                return res.status(200).json({
+                    status: 'success',
+                    message: 'Doctor registration declined'
+                });
+            }
+            catch (error) {
+                return res.status(500).json({
+                    status: 'error',
+                    message: error.message
+                });
+            }
+        });
+    }
 }
+exports.DoctorController = DoctorController;
 exports.default = DoctorController;

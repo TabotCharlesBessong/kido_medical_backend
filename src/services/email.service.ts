@@ -2,6 +2,7 @@ import { TransactionalEmailsApi, Configuration, TransactionalEmailsApiApiKeys } 
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
+import { IEmailService } from '../interfaces/email.interface';
 
 dotenv.config();
 
@@ -24,16 +25,20 @@ const appointmentBookingTemplate = path.join(__dirname, '..', 'template', 'appoi
 const appointmentStatusTemplate = path.join(__dirname, '..', 'template', 'appointment-status.html');
 const prescriptionTemplate = path.join(__dirname, '..', 'template', 'prescription.html');
 const verificationStatusTemplate = path.join(__dirname, '..', 'template', 'verification-status.html');
+const doctorVerificationRequestTemplate = path.join(__dirname, '..', 'template', 'doctor-verification-request.html');
 
 const templates = {
   default: fs.readFileSync(emailTemplate, 'utf8'),
   appointmentBooking: fs.readFileSync(appointmentBookingTemplate, 'utf8'),
   appointmentStatus: fs.readFileSync(appointmentStatusTemplate, 'utf8'),
   prescription: fs.readFileSync(prescriptionTemplate, 'utf8'),
-  verificationStatus: fs.readFileSync(verificationStatusTemplate, 'utf8')
+  verificationStatus: fs.readFileSync(verificationStatusTemplate, 'utf8'),
+  doctorVerificationRequest: fs.readFileSync(doctorVerificationRequestTemplate, 'utf8'),
+  'doctor-verification-approved': fs.readFileSync(path.join(__dirname, '..', 'template', 'doctor-verification-approved.html'), 'utf8'),
+  'doctor-verification-rejected': fs.readFileSync(path.join(__dirname, '..', 'template', 'doctor-verification-rejected.html'), 'utf8')
 };
 
-class EmailService {
+class EmailService implements IEmailService {
   private apiInstance: TransactionalEmailsApi;
 
   constructor() {
@@ -220,32 +225,102 @@ class EmailService {
   async sendVerificationStatusEmail({
     doctorEmail,
     doctorName,
-    isVerified,
+    status,
     verificationNotes
   }: {
     doctorEmail: string;
     doctorName: string;
-    isVerified: boolean;
+    status: 'APPROVED' | 'REJECTED';
     verificationNotes?: string;
   }) {
     try {
       const appName = process.env.APPNAME || 'Kido Medical';
       const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
-      const status = isVerified ? 'VERIFIED' : 'REJECTED';
-      const statusClass = isVerified ? 'status-approved' : 'status-canceled';
+      const statusText = status === 'APPROVED' ? 'VERIFIED' : 'REJECTED';
+      const statusClass = status === 'APPROVED' ? 'status-approved' : 'status-canceled';
 
       let html = this.replaceTemplateConstant(templates.verificationStatus, '#APP_NAME#', appName);
       html = this.replaceTemplateConstant(html, '#NAME#', doctorName);
-      html = this.replaceTemplateConstant(html, '#STATUS#', status);
+      html = this.replaceTemplateConstant(html, '#STATUS#', statusText);
       html = this.replaceTemplateConstant(html, '#STATUS_CLASS#', statusClass);
       html = this.replaceTemplateConstant(html, '#NOTES#', verificationNotes || 'No additional notes provided.');
       html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
 
-      return this.sendEmail(doctorEmail, `Account ${status}`, html);
+      return this.sendEmail(doctorEmail, `Account ${statusText}`, html);
     } catch (error) {
       console.error('Failed to send verification status email:', error);
       throw error;
     }
+  }
+
+  async sendDoctorVerificationRequestEmail({
+    adminEmail,
+    doctorName,
+    doctorEmail,
+    specialization,
+    experience,
+    documentUrl,
+    documentType
+  }: {
+    adminEmail: string;
+    doctorName: string;
+    doctorEmail: string;
+    specialization: string;
+    experience: number;
+    documentUrl: string;
+    documentType: 'image' | 'pdf';
+  }) {
+    try {
+      const appName = process.env.APPNAME || 'Kido Medical';
+      const approveUrl = `${apiUrl}/doctors/verify/approve?email=${doctorEmail}`;
+      const declineUrl = `${apiUrl}/doctors/verify/decline?email=${doctorEmail}`;
+
+      let html = this.replaceTemplateConstant(templates.doctorVerificationRequest, '#APP_NAME#', appName);
+      html = this.replaceTemplateConstant(html, '#DOCTOR_NAME#', doctorName);
+      html = this.replaceTemplateConstant(html, '#DOCTOR_EMAIL#', doctorEmail);
+      html = this.replaceTemplateConstant(html, '#SPECIALIZATION#', specialization);
+      html = this.replaceTemplateConstant(html, '#EXPERIENCE#', experience.toString());
+      html = this.replaceTemplateConstant(html, '#DOCUMENT_URL#', documentUrl);
+      html = this.replaceTemplateConstant(html, '#APPROVE_URL#', approveUrl);
+      html = this.replaceTemplateConstant(html, '#DECLINE_URL#', declineUrl);
+
+      // Add document preview based on type
+      const documentPreview = documentType === 'image' 
+        ? `<img src="${documentUrl}" alt="Doctor's Document" class="document-preview">`
+        : '<p>PDF document submitted. Please download to view.</p>';
+      html = this.replaceTemplateConstant(html, '#DOCUMENT_PREVIEW#', documentPreview);
+
+      return this.sendEmail(adminEmail, 'New Doctor Verification Request', html);
+    } catch (error) {
+      console.error('Failed to send doctor verification request email:', error);
+      throw error;
+    }
+  }
+
+  async sendDoctorVerificationApprovedEmail(data: {
+    doctorEmail: string;
+    doctorName: string;
+  }) {
+    const appName = process.env.APPNAME || 'Kido Medical';
+    const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+    let html = this.replaceTemplateConstant(templates['doctor-verification-approved'], '#DOCTOR_NAME#', data.doctorName);
+    html = this.replaceTemplateConstant(html, '#APP_NAME#', appName);
+    html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+    await this.sendEmail(data.doctorEmail, 'Doctor Verification Approved', html);
+  }
+
+  async sendDoctorVerificationRejectedEmail(data: {
+    doctorEmail: string;
+    doctorName: string;
+    reason: string;
+  }) {
+    const appName = process.env.APPNAME || 'Kido Medical';
+    const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+    let html = this.replaceTemplateConstant(templates['doctor-verification-rejected'], '#DOCTOR_NAME#', data.doctorName);
+    html = this.replaceTemplateConstant(html, '#APP_NAME#', appName);
+    html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+    html = this.replaceTemplateConstant(html, '#REJECTION_REASON#', data.reason);
+    await this.sendEmail(data.doctorEmail, 'Doctor Verification Rejected', html);
   }
 }
 

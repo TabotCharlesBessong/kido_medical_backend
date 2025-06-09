@@ -36,7 +36,7 @@ const createDoctorRoute = () => {
 
   router.get("/doctor/all", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      await doctorController.getAllDoctors(req, res);
+      await doctorController.getDoctors(req, res);
     } catch (error) {
       next(error);
     }
@@ -72,7 +72,7 @@ const createDoctorRoute = () => {
   });
 
   router.put(
-    "/cancel/:id",
+    "/appointments/:id/cancel",
     DoctorMiddleware(),
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
@@ -84,7 +84,7 @@ const createDoctorRoute = () => {
   );
 
   router.put(
-    "/approve/:id",
+    "/appointments/:id/approve",
     DoctorMiddleware(),
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
