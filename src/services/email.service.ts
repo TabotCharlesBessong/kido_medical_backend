@@ -1,22 +1,25 @@
-import { TransactionalEmailsApi, Configuration, TransactionalEmailsApiApiKeys } from '@getbrevo/brevo';
+// @ts-ignore
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { IEmailService } from '../interfaces/email.interface';
+import { Resend } from "resend";
 
 dotenv.config();
 
-const brevoApiKey = process.env.BREVO_API_KEY as string;
+const resendApiKey = process.env.RESEND_API_KEY as string;
 const frontendUrl = process.env.FRONTEND_URL as string;
 const apiUrl = process.env.API_URL as string;
 
-if (!brevoApiKey) {
-  throw new Error('BREVO_API_KEY is not set in environment variables');
+if (!resendApiKey) {
+  throw new Error('RESEND_API_KEY is not set in environment variables');
 }
 
+const resend = new Resend(resendApiKey);
+
 const sender = {
-  name: 'Kido Medical',
-  email: 'ebezebeatrice@gmail.com'
+  name: "Kido Medical",
+  email: "info@lamuel.site",
 };
 
 // Load email templates
@@ -39,13 +42,6 @@ const templates = {
 };
 
 class EmailService implements IEmailService {
-  private apiInstance: TransactionalEmailsApi;
-
-  constructor() {
-    this.apiInstance = new TransactionalEmailsApi();
-    this.apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, brevoApiKey);
-  }
-
   private replaceTemplateConstant(template: string, key: string, data: string) {
     const regex = new RegExp(key, 'g');
     return template.replace(regex, data);
@@ -53,16 +49,20 @@ class EmailService implements IEmailService {
 
   private async sendEmail(to: string, subject: string, htmlContent: string) {
     try {
-      const sendSmtpEmail = {
-        sender,
-        to: [{ email: to }],
+      const { data, error } = await resend.emails.send({
+        from: `${sender.name} <${sender.email}>`,
+        to: [to],
         subject,
-        htmlContent
-      };
+        html: htmlContent
+      });
 
-      const result = await this.apiInstance.sendTransacEmail(sendSmtpEmail);
+      if (error) {
+        console.error('Failed to send email:', error);
+        throw error;
+      }
+
       console.log(`Email sent successfully to ${to}`);
-      return result;
+      return data;
     } catch (error) {
       console.error('Failed to send email:', error);
       throw error;
