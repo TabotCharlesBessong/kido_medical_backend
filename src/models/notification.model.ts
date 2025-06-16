@@ -3,8 +3,7 @@ import Db from "../database";
 import { INotificationModel } from "../interfaces/notification.interface";
 import { v4 as uuidv4 } from "uuid";
 import UserModel from "./user.model";
-import MessageModel from "./message.model";
-import AppointmentModel from "./appointment.model";
+import { NotificationType } from "../interfaces/enum/notification.enum";
 
 const NotificationModel = Db.define<INotificationModel>(
   "NotificationModel",
@@ -23,22 +22,6 @@ const NotificationModel = Db.define<INotificationModel>(
         key: "id",
       },
     },
-    messageId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: MessageModel,
-        key: "id",
-      },
-    },
-    appointmentId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: AppointmentModel,
-        key: "id",
-      },
-    },
     message: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -49,12 +32,16 @@ const NotificationModel = Db.define<INotificationModel>(
     },
     type: {
       type: DataTypes.ENUM(
-        "MESSAGE",
-        "APPOINTMENT_SCHEDULED",
-        "APPOINTMENT_APPROVED",
-        "APPOINTMENT_CANCELLED"
+        NotificationType.MESSAGE,
+        NotificationType.APPOINTMENT,
+        NotificationType.PRESCRIPTION
       ),
       allowNull: false,
+    },
+    referenceId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      comment: "ID of the related entity (message, appointment, prescription)",
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -81,22 +68,6 @@ UserModel.hasMany(NotificationModel, {
 });
 NotificationModel.belongsTo(UserModel, {
   foreignKey: "userId",
-});
-
-MessageModel.hasOne(NotificationModel, {
-  foreignKey: "messageId",
-  as: "messageNotifications",
-});
-NotificationModel.belongsTo(MessageModel, {
-  foreignKey: "messageId",
-});
-
-AppointmentModel.hasOne(NotificationModel, {
-  foreignKey: "appointmentId",
-  as: "appointmentNotifications",
-});
-NotificationModel.belongsTo(AppointmentModel, {
-  foreignKey: "appointmentId",
 });
 
 export default NotificationModel;

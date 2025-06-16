@@ -1,8 +1,6 @@
 import { DataTypes } from "sequelize";
 import Db from "../database";
 import { IConsultationModel } from "../interfaces/consultation.interface";
-import DoctorModel from "./doctor.model";
-import PatientModel from "./patient.model";
 import AppointmentModel from "./appointment.model";
 
 const ConsultationModel = Db.define<IConsultationModel>(
@@ -12,22 +10,6 @@ const ConsultationModel = Db.define<IConsultationModel>(
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
-    },
-    patientId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: PatientModel,
-        key: "id",
-      },
-    },
-    doctorId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: DoctorModel,
-        key: "userId",
-      },
     },
     appointmentId: {
       type: DataTypes.UUID,

@@ -28,11 +28,19 @@ class MessageController {
       const message = await this.messageService.createMessage(newMessage);
       return Utility.handleSuccess(
         res,
-        "Post updated successfully",
+        "Message sent successfully",
         { message },
         ResponseCode.SUCCESS
       );
     } catch (error) {
+      const errorMessage = (error as Error).message;
+      if (errorMessage === "Sender not found" || errorMessage === "Receiver not found") {
+        return Utility.handleError(
+          res,
+          errorMessage,
+          ResponseCode.BAD_REQUEST
+        );
+      }
       return Utility.handleError(
         res,
         (error as TypeError).message,
@@ -51,7 +59,7 @@ class MessageController {
       );
       return Utility.handleSuccess(
         res,
-        "Post updated successfully",
+        "Messages retrieved successfully",
         { messages },
         ResponseCode.SUCCESS
       );
@@ -72,7 +80,7 @@ class MessageController {
       );
       return Utility.handleSuccess(
         res,
-        "Post updated successfully",
+        "Conversation retrieved successfully",
         { messages },
         ResponseCode.SUCCESS
       );

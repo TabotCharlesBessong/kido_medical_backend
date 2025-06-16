@@ -20,7 +20,7 @@ const CallModel = Db.define<ICallModel>(
       allowNull: false,
       references: {
         model: DoctorModel,
-        key: "userId",
+        key: "id",
       },
     },
     patientId: {
@@ -39,8 +39,12 @@ const CallModel = Db.define<ICallModel>(
         key: "id",
       },
     },
+    streamCallId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     status: {
-      type: DataTypes.ENUM("PENDING", "COMPLETED", "FAILED"),
+      type: DataTypes.ENUM("PENDING", "ACTIVE", "COMPLETED", "FAILED"),
       allowNull: false,
       defaultValue: "PENDING",
     },
@@ -72,10 +76,7 @@ PatientModel.hasMany(CallModel, {
 });
 CallModel.belongsTo(PatientModel, { foreignKey: "patientId" });
 
-AppointmentModel.hasOne(CallModel, {
-  foreignKey: "appointmentId",
-  as: "appointmentCall",
-});
+AppointmentModel.hasMany(CallModel, { foreignKey: "appointmentId", as: "appointmentCalls" });
 CallModel.belongsTo(AppointmentModel, { foreignKey: "appointmentId" });
 
 export default CallModel;

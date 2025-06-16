@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize"
 import Db from "../database"
 import { IUserModel } from "../interfaces/user.interfaces"
 import { v4 as uuidv4 } from "uuid"
+import { AccountStatus, EmailStatus } from "../interfaces/enum/user.enum"
 
 const UserModel = Db.define<IUserModel>('UserModel',{
   id: {
@@ -37,12 +38,14 @@ const UserModel = Db.define<IUserModel>('UserModel',{
       allowNull: true,
     },
     isEmailVerified: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      type: DataTypes.ENUM(EmailStatus.VERIFIED, EmailStatus.NOT_VERIFIED),
+      allowNull: false,
+      defaultValue: EmailStatus.NOT_VERIFIED,
     },
     accountStatus: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      type: DataTypes.ENUM(AccountStatus.ACTIVE, AccountStatus.INACTIVE, AccountStatus.SUSPENDED),
+      allowNull: false,
+      defaultValue: AccountStatus.ACTIVE,
     },
     createdAt: {
       type: DataTypes.DATE,

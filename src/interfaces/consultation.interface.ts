@@ -2,8 +2,6 @@ import { FindOptions, Model, Optional, Transaction } from "sequelize";
 
 export interface IConsultation {
   id: string;
-  patientId: string;
-  doctorId: string;
   appointmentId: string;
   presentingComplaints: string;
   pastHistory: string;

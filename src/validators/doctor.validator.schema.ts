@@ -15,30 +15,19 @@ const doctorValidationSchema = yup.object({
 const timeSlotSchema = yup.object({
   startTime: yup
     .string()
-    .required()
-    .test(
-      "valid-time-format",
-      "Invalid time format. Expected format: HH:MI:SS",
-      (value) => {
-        if (!value) return true; // Allow empty value
-        const timeRegex = /^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/;
-        return timeRegex.test(value);
-      }
-    ),
+    .required("Start time is required")
+    .test("valid-timestamp", "Invalid timestamp format", (value) => {
+      return !value || !isNaN(Date.parse(value));
+    }),
   endTime: yup
     .string()
-    .required()
-    .test(
-      "valid-time-format",
-      "Invalid time format. Expected format: HH:MI:SS",
-      (value) => {
-        if (!value) return true; // Allow empty value
-        const timeRegex = /^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/;
-        return timeRegex.test(value);
-      }
-    ),
+    .required("End time is required")
+    .test("valid-timestamp", "Invalid timestamp format", (value) => {
+      return !value || !isNaN(Date.parse(value));
+    }),
   isAvailable: yup.boolean().default(true),
 });
+
 
 // const timeSlotSchema = yup.object({
 //   startTime: yup

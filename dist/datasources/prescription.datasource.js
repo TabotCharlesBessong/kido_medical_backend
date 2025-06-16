@@ -21,14 +21,15 @@ class PrescriptionDataSource {
     }
     fetchOne(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield prescription_model_1.default.findOne(query);
+            return yield prescription_model_1.default.findOne(Object.assign(Object.assign({}, query), { include: [{
+                        association: 'medications',
+                        required: false
+                    }] }));
         });
     }
-    fetchById(PrescriptionId) {
+    fetchById(id, options) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield prescription_model_1.default.findOne({
-                where: { id: PrescriptionId },
-            });
+            return yield prescription_model_1.default.findOne(Object.assign({ where: { id } }, options));
         });
     }
     updateOne(data, query) {
@@ -41,9 +42,52 @@ class PrescriptionDataSource {
             yield prescription_model_1.default.destroy(searchBy);
         });
     }
+    deleteMany(searchBy) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield prescription_model_1.default.destroy({
+                where: searchBy.where
+            });
+        });
+    }
     fetchAll(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield prescription_model_1.default.findAll(query);
+            return yield prescription_model_1.default.findAll(Object.assign(Object.assign({}, query), { include: [{
+                        association: 'medications',
+                        required: false
+                    }] }));
+        });
+    }
+    // Optimized method to fetch prescriptions with pagination
+    fetchPaginated() {
+        return __awaiter(this, arguments, void 0, function* (page = 1, limit = 10, where = {}, transaction) {
+            const offset = (page - 1) * limit;
+            const [prescriptions, total] = yield Promise.all([
+                prescription_model_1.default.findAll({
+                    where,
+                    limit,
+                    offset,
+                    include: [{
+                            association: 'medications',
+                            required: false
+                        }],
+                    transaction
+                }),
+                prescription_model_1.default.count({ where, transaction })
+            ]);
+            return { prescriptions, total };
+        });
+    }
+    // Optimized method to fetch prescriptions by consultation with caching
+    fetchByConsultation(consultationId, transaction) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield prescription_model_1.default.findAll({
+                where: { consultationId },
+                include: [{
+                        association: 'medications',
+                        required: false
+                    }],
+                transaction
+            });
         });
     }
 }
