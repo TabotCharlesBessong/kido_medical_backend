@@ -261,3 +261,4 @@ notNull Violation: PrescriptionModel.medications cannot be null
 2025-06-06 16:33:07 error : Invalid religion 
 2025-06-07 16:58:26 error : column Doctor.isVerified does not exist 
 2025-06-07 18:12:46 error : Token has expired or is invalid 
+2025-06-16 15:03:36 error : lastname is a required field 
