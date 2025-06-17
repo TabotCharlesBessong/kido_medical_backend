@@ -120,6 +120,26 @@ export class StreamService {
       throw error;
     }
   }
+
+  // Call management methods
+  async createCallChannel(appointmentId: string, doctorId: string, patientId: string, startTime: Date) {
+    // Alias for createAppointmentChannel for clarity in call context
+    return this.createAppointmentChannel(appointmentId, doctorId, patientId, startTime);
+  }
+
+  async setCallStatus(channelId: string, status: 'ACTIVE' | 'COMPLETED' | 'FAILED') {
+    try {
+      // Use the updateChannelMetadata method for custom fields
+      return await this.updateChannelMetadata(channelId, { call_status: status });
+    } catch (error) {
+      console.error('Error updating call status:', error);
+      throw error;
+    }
+  }
+
+  async endCallChannel(channelId: string) {
+    return this.setCallStatus(channelId, 'COMPLETED');
+  }
 }
 
 export default new StreamService(); 

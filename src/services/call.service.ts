@@ -1,6 +1,6 @@
 import CallDataSource from "../datasources/call.datasource";
 import PatientDataSource from "../datasources/patient.datasource";
-import { makeCall } from "./twilio.service";
+import streamService from "./stream.service";
 import { ICall, ICallCreationBody } from "../interfaces/call.interface";
 
 class CallService {
@@ -13,28 +13,12 @@ class CallService {
   }
 
   async createCall(record: ICallCreationBody): Promise<ICall> {
+    // Create the call record in the DB
     const call = await this.callDataSource.create(record);
 
-    const patient = await this.patientDataSource.fetchOne({
-      where: { userId: record.patientId },
-    });
-    console.log(patient)
-    // if (!patient || !patient.phoneNumber) {
-    //   throw new Error("Patient does not have a phone number.");
-    // }
-
-    try {
-      await makeCall("+13149364610", record.appointmentId);
-      await this.callDataSource.updateOne(
-        { where: { id: call.id } },
-        { status: "COMPLETED" }
-      );
-    } catch (error) {
-      await this.callDataSource.updateOne(
-        { where: { id: call.id } },
-        { status: "FAILED" }
-      );
-      throw error;
+    // Optionally, update the Stream channel status to ACTIVE
+    if (record.streamCallId) {
+      await streamService.setCallStatus(record.streamCallId, "ACTIVE");
     }
 
     return call;
@@ -59,6 +43,10 @@ class CallService {
     const updatedCall = await this.getCallById(callId);
     if (!updatedCall) {
       throw new Error("Call not found after update");
+    }
+    // If status is being updated and streamCallId exists, update Stream channel status
+    if (data.status && updatedCall.streamCallId) {
+      await streamService.setCallStatus(updatedCall.streamCallId, data.status as any);
     }
     return updatedCall;
   }

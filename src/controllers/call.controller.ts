@@ -77,8 +77,8 @@ class CallController {
 
   getCallById = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const call = await this.callService.getCallById(id);
+      const { callId } = req.params;
+      const call = await this.callService.getCallById(callId);
       if (!call) {
         return Utility.handleError(res, "Call not found", ResponseCode.NOT_FOUND);
       }
@@ -90,16 +90,13 @@ class CallController {
 
   endCall = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const call = await this.callService.getCallById(id);
-      
+      const { callId } = req.params;
+      const call = await this.callService.getCallById(callId);
       if (!call) {
         return Utility.handleError(res, "Call not found", ResponseCode.NOT_FOUND);
       }
-
       // Update call status
-      const updatedCall = await this.callService.updateCall(id, { status: "COMPLETED" });
-      
+      const updatedCall = await this.callService.updateCall(callId, { status: "COMPLETED" });
       return Utility.handleSuccess(res, "Call ended successfully", { call: updatedCall }, ResponseCode.SUCCESS);
     } catch (error) {
       return Utility.handleError(res, (error as Error).message);
@@ -108,14 +105,12 @@ class CallController {
 
   deleteCall = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const call = await this.callService.getCallById(id);
-      
+      const { callId } = req.params;
+      const call = await this.callService.getCallById(callId);
       if (!call) {
         return Utility.handleError(res, "Call not found", ResponseCode.NOT_FOUND);
       }
-
-      await this.callService.deleteCall(id);
+      await this.callService.deleteCall(callId);
       return Utility.handleSuccess(res, "Call deleted successfully", {}, ResponseCode.SUCCESS);
     } catch (error) {
       return Utility.handleError(res, (error as Error).message);
