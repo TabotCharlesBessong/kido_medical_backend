@@ -262,3 +262,31 @@ notNull Violation: PrescriptionModel.medications cannot be null
 2025-06-07 16:58:26 error : column Doctor.isVerified does not exist 
 2025-06-07 18:12:46 error : Token has expired or is invalid 
 2025-06-16 15:03:36 error : lastname is a required field 
+2025-06-23 13:18:04 error : Doctor ID is required 
+2025-06-23 13:21:35 error : Document URL must be a valid URL 
+2025-06-23 14:11:15 error : Doctor ID is required 
+2025-06-23 14:12:20 error : User ID is required 
+2025-06-23 14:14:17 error : User ID is required 
+2025-06-23 14:16:43 error : User ID is required 
+2025-06-23 14:17:02 error : User ID is required 
+2025-06-23 14:17:19 error : User ID is required 
+2025-06-23 14:17:45 error : User ID is required 
+2025-06-23 14:22:35 error : Document URL is required 
+2025-06-23 14:25:57 error : User ID is required 
+2025-06-23 14:26:01 error : User ID is required 
+2025-06-23 14:26:03 error : User ID is required 
+2025-06-23 14:26:04 error : User ID is required 
+2025-06-23 14:26:44 error : User ID is required 
+2025-06-23 14:29:39 error : Document URL is required 
+2025-06-23 14:30:24 error : Document URL is required 
+2025-06-23 14:32:08 error : Document URL is required 
+2025-06-23 18:58:02 error : Kyc Verification request already exists, please wait for approval  
+2025-06-24 16:14:13 error : Kyc Verification request already exists, please wait for approval  
+2025-06-27 23:31:59 error : Authorization failed 
+2025-06-27 23:32:19 error : User not authenticated 
+2025-06-27 23:42:42 error : firstname is a required field 
+2025-06-30 09:11:25 error : Authorization failed 
+2025-06-30 09:13:58 error : specialization is a required field 
+2025-06-30 09:14:38 error : password must be at least 6 characters 
+2025-06-30 09:15:07 error : Invalid login detail 
+2025-06-30 09:15:50 error : Invalid login detail 
