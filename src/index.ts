@@ -1,4 +1,4 @@
-import http from 'http';
+import http from "http";
 import express, { Request, Response, Express, NextFunction } from "express";
 import dotenv from "dotenv";
 dotenv.config();
@@ -10,16 +10,17 @@ import postRouter from "./router/post.router";
 import patientRouter from "./router/patient.router";
 import messageRouter from "./router/message.router";
 import callRouter from "./router/call.router";
-import {Server} from "socket.io"
-import MessageController from './controllers/message.controller';
-import rateLimit from 'express-rate-limit';
+import createKycVerificationRoute from "./router/kycVerification.router";
+import { Server } from "socket.io";
+import MessageController from "./controllers/message.controller";
+import rateLimit from "express-rate-limit";
 // import seedDatabase from './database/seeders';
-import adminRouter from "./routers/admin.router"
+import adminRouter from "./routers/admin.router";
 
 //create an app
 const app = express();
-const server = http.createServer(app)
-const io = new Server(server)
+const server = http.createServer(app);
+const io = new Server(server);
 const messageController = new MessageController();
 
 app.use(
@@ -56,14 +57,16 @@ app.use("/api/posts", postRouter);
 app.use("/api/patient", patientRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/call", callRouter);
-app.use("/api/admin", adminRouter)
+app.use("/api/admin", adminRouter);
+app.use("/api/kyc-verification", createKycVerificationRoute);
 
 io.on("connection", (socket) => {
   console.log("A user connected");
 
   socket.on("sendMessage", async (message) => {
     // Handle message creation
-    const createdMessage = await messageController.messageService.createMessage(message);
+    const createdMessage =
+      await messageController.messageService.createMessage(message);
 
     // Emit the message to the receiver
     io.to(message.receiverId).emit("receiveMessage", createdMessage);

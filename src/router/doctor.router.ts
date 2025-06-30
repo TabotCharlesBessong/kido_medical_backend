@@ -26,21 +26,29 @@ const createDoctorRoute = () => {
     }
   );
 
-  router.get("/:userId", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      await doctorController.getDoctorById(req, res);
-    } catch (error) {
-      next(error);
+  router.get(
+    "/:userId",
+    Auth(),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getDoctorById(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
-  });
+  );
 
-  router.get("/doctor/all", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      await doctorController.getDoctors(req, res);
-    } catch (error) {
-      next(error);
+  router.get(
+    "/doctor/all",
+    Auth(),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getDoctors(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
-  });
+  );
 
   router.post(
     "/create-time-slot",
@@ -55,21 +63,29 @@ const createDoctorRoute = () => {
     }
   );
 
-  router.get("/time/all", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      await doctorController.getAllTimeSlots(req, res);
-    } catch (error) {
-      next(error);
+  router.get(
+    "/time/all",
+    Auth(),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getAllTimeSlots(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
-  });
+  );
 
-  router.get("/time", DoctorMiddleware(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      await doctorController.getDoctorTimeSlots(req, res);
-    } catch (error) {
-      next(error);
+  router.get(
+    "/time",
+    DoctorMiddleware(),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getDoctorTimeSlots(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
-  });
+  );
 
   router.put(
     "/appointments/:id/cancel",
@@ -120,13 +136,17 @@ const createDoctorRoute = () => {
     }
   );
 
-  router.get("/record/sign/:vitalId", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      await doctorController.getVitalsById(req, res);
-    } catch (error) {
-      next(error);
+  router.get(
+    "/record/sign/:vitalId",
+    Auth(),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getVitalsById(req, res);
+      } catch (error) {
+        next(error);
+      }
     }
-  });
+  );
 
   router.put(
     "/record/sign/:vitalId",
