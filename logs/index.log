@@ -290,3 +290,6 @@ notNull Violation: PrescriptionModel.medications cannot be null
 2025-06-30 09:14:38 error : password must be at least 6 characters 
 2025-06-30 09:15:07 error : Invalid login detail 
 2025-06-30 09:15:50 error : Invalid login detail 
+2025-06-30 12:45:14 error : specialization is a required field 
+2025-06-30 12:45:29 error : specialization is a required field 
+2025-06-30 12:45:44 error : documents is a required field 

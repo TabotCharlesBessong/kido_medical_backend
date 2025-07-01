@@ -40,4 +40,22 @@ export interface IEmailService {
     documentUrl: string;
     documentType: 'image' | 'pdf';
   }): Promise<any>;
+  sendDoctorVerificationApprovedEmail(params: {
+    doctorEmail: string;
+    doctorName: string;
+  }): Promise<any>;
+  sendDoctorVerificationRejectedEmail(params: {
+    doctorEmail: string;
+    doctorName: string;
+    reason: string;
+  }): Promise<any>;
+  sendKycApprovalEmail(params: {
+    doctorEmail: string;
+    doctorName: string;
+  }): Promise<any>;
+  sendKycRejectionEmail(params: {
+    doctorEmail: string;
+    doctorName: string;
+    reason: string;
+  }): Promise<any>;
 } 

@@ -290,7 +290,11 @@ class EmailService implements IEmailService {
         : '<p>PDF document submitted. Please download to view.</p>';
       html = this.replaceTemplateConstant(html, '#DOCUMENT_PREVIEW#', documentPreview);
 
-      return this.sendEmail(adminEmail, 'New Doctor Verification Request', html);
+      // Add KYC verification note
+      const kycNote = '<p><strong>Note:</strong> A KYC verification request has also been submitted for this doctor. Please review both the doctor registration and KYC verification before approval.</p>';
+      html = html.replace('</div>', kycNote + '</div>');
+
+      return this.sendEmail(adminEmail, 'New Doctor Verification Request (with KYC)', html);
     } catch (error) {
       console.error('Failed to send doctor verification request email:', error);
       throw error;
@@ -321,6 +325,49 @@ class EmailService implements IEmailService {
     html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
     html = this.replaceTemplateConstant(html, '#REJECTION_REASON#', data.reason);
     await this.sendEmail(data.doctorEmail, 'Doctor Verification Rejected', html);
+  }
+
+  async sendKycApprovalEmail(data: {
+    doctorEmail: string;
+    doctorName: string;
+  }) {
+    const appName = process.env.APPNAME || 'Kido Medical';
+    const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+    
+    // Use the verification status template for KYC approval
+    const statusText = 'VERIFIED';
+    const statusClass = 'status-approved';
+    
+    let html = this.replaceTemplateConstant(templates.verificationStatus, '#APP_NAME#', appName);
+    html = this.replaceTemplateConstant(html, '#NAME#', data.doctorName);
+    html = this.replaceTemplateConstant(html, '#STATUS#', 'KYC VERIFIED');
+    html = this.replaceTemplateConstant(html, '#STATUS_CLASS#', statusClass);
+    html = this.replaceTemplateConstant(html, '#NOTES#', 'Your KYC verification has been approved. You can now proceed with your doctor verification.');
+    html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+    
+    await this.sendEmail(data.doctorEmail, 'KYC Verification Approved', html);
+  }
+
+  async sendKycRejectionEmail(data: {
+    doctorEmail: string;
+    doctorName: string;
+    reason: string;
+  }) {
+    const appName = process.env.APPNAME || 'Kido Medical';
+    const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+    
+    // Use the verification status template for KYC rejection
+    const statusText = 'REJECTED';
+    const statusClass = 'status-canceled';
+    
+    let html = this.replaceTemplateConstant(templates.verificationStatus, '#APP_NAME#', appName);
+    html = this.replaceTemplateConstant(html, '#NAME#', data.doctorName);
+    html = this.replaceTemplateConstant(html, '#STATUS#', 'KYC REJECTED');
+    html = this.replaceTemplateConstant(html, '#STATUS_CLASS#', statusClass);
+    html = this.replaceTemplateConstant(html, '#NOTES#', `Your KYC verification has been rejected. Reason: ${data.reason}`);
+    html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+    
+    await this.sendEmail(data.doctorEmail, 'KYC Verification Rejected', html);
   }
 }
 

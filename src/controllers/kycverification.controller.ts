@@ -7,10 +7,13 @@ import UserService from "../services/user.services";
 import KycVerificationDataSource from "../datasources/kycVerification.datasource";
 import { IUploadService } from "../interfaces/services.interface";
 import UploadService from "../services/upload.service";
+import EmailService from "../services/email.service";
 
 export class KycVerificationController {
   private kycVerificationService: KycVerificationService;
   private uploadService: IUploadService;
+  private userService: UserService;
+  private emailService: typeof EmailService;
 
   constructor() {
     const userService = new UserService();
@@ -19,6 +22,8 @@ export class KycVerificationController {
       userService
     );
     this.uploadService = UploadService;
+    this.userService = userService;
+    this.emailService = EmailService;
   }
 
   async createKycVerificationRequest(req: Request, res: Response) {
@@ -97,14 +102,29 @@ export class KycVerificationController {
         data
       );
 
+      // Send email notification to the user
+      const user = await this.userService.getUserByField({ id: searchBy });
+      if (user) {
+        if (data.status === 'approved') {
+          await this.emailService.sendKycApprovalEmail({
+            doctorEmail: user.email,
+            doctorName: `${user.firstname} ${user.lastname}`
+          });
+        } else if (data.status === 'rejected') {
+          await this.emailService.sendKycRejectionEmail({
+            doctorEmail: user.email,
+            doctorName: `${user.firstname} ${user.lastname}`,
+            reason: data.reason || 'No reason provided'
+          });
+        }
+      }
+
       return Utility.handleSuccess(
         res,
-        "Kyc Verification request approved",
+        `Kyc Verification request ${data.status}`,
         {},
         ResponseCode.SUCCESS
       );
-
-      // TODO:  Send email to the user saying that they have been approved or rejected
     } catch (error) {
       return res
         .status(ResponseCode.SERVER_ERROR)

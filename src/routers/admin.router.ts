@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { AdminController } from "../controllers/admin.controller";
-import { authenticateToken } from "../middleware/auth.middleware";
+import { Auth } from "../middlewares/index.middlewares";
 import { isAdmin } from "../middleware/role.middleware";
 
 const router = Router();
@@ -9,7 +9,7 @@ const adminController = new AdminController();
 // Get all pending doctor verifications
 router.get(
   "/doctor-verifications/pending",
-  authenticateToken,
+  Auth(),
   isAdmin,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -20,10 +20,24 @@ router.get(
   }
 );
 
+// Get all pending KYC verifications
+router.get(
+  "/kyc-verifications/pending",
+  Auth(),
+  isAdmin,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await adminController.getPendingKycVerifications(req, res);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // Get doctor verification details
 router.get(
   "/doctor-verifications/:doctorId",
-  authenticateToken,
+  Auth(),
   isAdmin,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -37,11 +51,25 @@ router.get(
 // Verify doctor (approve/reject)
 router.post(
   "/doctor-verifications/verify",
-  authenticateToken,
+  Auth(),
   isAdmin,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       await adminController.verifyDoctor(req, res);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Verify KYC (approve/reject)
+router.patch(
+  "/kyc-verifications/:userId/verify",
+  Auth(),
+  isAdmin,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await adminController.verifyKyc(req, res);
     } catch (error) {
       next(error);
     }
