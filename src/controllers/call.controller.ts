@@ -14,11 +14,17 @@ class CallController {
   }
 
   callPatient = async (req: Request, res: Response) => {
+    const userId = (req as any).user?.id;
+    const userRole = (req as any).user?.role;
+
+    if (!userId || !userRole) {
+      return Utility.handleError(res, "Unauthorized access", ResponseCode.UNAUTHORIZED);
+    }
+
     try {
       const { appointmentId } = req.body;
-      const doctorId = (req as any).user?.id;
-
-      if (!appointmentId || !doctorId) {
+      
+      if (!appointmentId) {
         return Utility.handleError(res, "Missing required fields", ResponseCode.BAD_REQUEST);
       }
 
@@ -34,15 +40,19 @@ class CallController {
         return Utility.handleError(res, "Appointment not found", ResponseCode.NOT_FOUND);
       }
 
+      if (appointment.status !== "CONFIRMED") {
+        return Utility.handleError(res, "Appointment must be confirmed to start a call", ResponseCode.BAD_REQUEST);
+      }
+
       const timeSlot = (appointment as any).timeSlot;
       if (!timeSlot) {
         return Utility.handleError(res, "Time slot not found", ResponseCode.NOT_FOUND);
       }
 
       // Create Stream channel for the call
-      const channel = await streamService.createAppointmentChannel(
+      const channel = await streamService.createCallChannel(
         appointmentId,
-        doctorId,
+        userId,
         appointment.patientId,
         timeSlot.startTime
       );
@@ -51,18 +61,41 @@ class CallController {
         return Utility.handleError(res, "Failed to create call channel", ResponseCode.SERVER_ERROR);
       }
 
-      // Create call record
-      const call = await this.callService.createCall({
-        appointmentId,
-        doctorId,
-        patientId: appointment.patientId,
-        status: "ACTIVE",
-        streamCallId: channel.id,
-      });
+      // Create or update call record
+      const existingCall = await this.callService.getCallByAppointmentId(appointmentId);
+      let call;
 
-      return Utility.handleSuccess(res, "Call initiated successfully", { call }, ResponseCode.SUCCESS);
+      if (existingCall) {
+        call = await this.callService.updateCall(existingCall.id, {
+          status: "ACTIVE",
+          streamCallId: channel.id
+        });
+      } else {
+        call = await this.callService.createCall({
+          appointmentId,
+          doctorId: userId,
+          patientId: appointment.patientId,
+          status: "ACTIVE",
+          streamCallId: channel.id
+        });
+      }
+
+      // Generate Stream token for real-time communication
+      const streamToken = await streamService.generateStreamToken(userId);
+
+      return Utility.handleSuccess(
+        res,
+        "Call initiated successfully",
+        { 
+          call,
+          streamToken,
+          channelId: channel.id
+        },
+        ResponseCode.SUCCESS
+      );
     } catch (error) {
-      return Utility.handleError(res, (error as Error).message);
+      console.error("Error initiating call:", error);
+      return Utility.handleError(res, "Failed to initiate call", ResponseCode.SERVER_ERROR);
     }
   };
 
@@ -77,8 +110,8 @@ class CallController {
 
   getCallById = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const call = await this.callService.getCallById(id);
+      const { callId } = req.params;
+      const call = await this.callService.getCallById(callId);
       if (!call) {
         return Utility.handleError(res, "Call not found", ResponseCode.NOT_FOUND);
       }
@@ -90,32 +123,54 @@ class CallController {
 
   endCall = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const call = await this.callService.getCallById(id);
-      
+      const { callId } = req.params;
+      const userId = (req as any).user?.id;
+
+      if (!userId) {
+        return Utility.handleError(res, "Unauthorized access", ResponseCode.UNAUTHORIZED);
+      }
+
+      const call = await this.callService.getCallById(callId);
       if (!call) {
         return Utility.handleError(res, "Call not found", ResponseCode.NOT_FOUND);
       }
 
+      // Verify user is part of the call
+      if (call.doctorId !== userId && call.patientId !== userId) {
+        return Utility.handleError(res, "Unauthorized to end this call", ResponseCode.UNAUTHORIZED);
+      }
+
+      // End the Stream channel if it exists
+      if (call.streamCallId) {
+        await streamService.endCallChannel(call.streamCallId);
+      }
+
       // Update call status
-      const updatedCall = await this.callService.updateCall(id, { status: "COMPLETED" });
-      
-      return Utility.handleSuccess(res, "Call ended successfully", { call: updatedCall }, ResponseCode.SUCCESS);
+      const updatedCall = await this.callService.updateCall(callId, {
+        status: "COMPLETED",
+        updatedAt: new Date()
+      });
+
+      return Utility.handleSuccess(
+        res,
+        "Call ended successfully",
+        { call: updatedCall },
+        ResponseCode.SUCCESS
+      );
     } catch (error) {
-      return Utility.handleError(res, (error as Error).message);
+      console.error("Error ending call:", error);
+      return Utility.handleError(res, "Failed to end call", ResponseCode.SERVER_ERROR);
     }
   };
 
   deleteCall = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const call = await this.callService.getCallById(id);
-      
+      const { callId } = req.params;
+      const call = await this.callService.getCallById(callId);
       if (!call) {
         return Utility.handleError(res, "Call not found", ResponseCode.NOT_FOUND);
       }
-
-      await this.callService.deleteCall(id);
+      await this.callService.deleteCall(callId);
       return Utility.handleSuccess(res, "Call deleted successfully", {}, ResponseCode.SUCCESS);
     } catch (error) {
       return Utility.handleError(res, (error as Error).message);

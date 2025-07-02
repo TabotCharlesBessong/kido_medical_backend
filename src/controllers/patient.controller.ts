@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import PatientService from "../services/patient.service";
-import AppointmentService from "../services/appointment.service";
+import { appointmentService } from '../services/index';
 import TimeSlotService from "../services/timeslot.service";
 import { IAppointmentCreationBody } from "../interfaces/appointment.interface";
 import { ITimeSlot } from "../interfaces/timeslot.interface";
@@ -9,15 +9,17 @@ import { IAppointment } from "../interfaces/appointment.interface";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import Utility from "../utils/index.utils";
 import { IPatient } from "../interfaces/patient.interface";
+import PatientDataSource from "../datasources/patient.datasource";
+
+const patientDataSource = new PatientDataSource();
 
 class PatientController {
   private patientService: PatientService;
-  private appointmentService: AppointmentService;
+  private appointmentService!: typeof appointmentService;
   private timeSlotService: TimeSlotService;
 
   constructor() {
-    this.patientService = new PatientService();
-    this.appointmentService = new AppointmentService();
+    this.patientService = new PatientService(patientDataSource);
     this.timeSlotService = new TimeSlotService();
   }
 

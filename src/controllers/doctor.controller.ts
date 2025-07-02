@@ -17,6 +17,16 @@ import { UserTypes } from '../enums/user.types';
 import { IUserService } from '../interfaces/services.interface';
 import { IEmailService } from '../interfaces/email.interface';
 import { IUploadService } from '../interfaces/services.interface';
+import { KycVerificationService } from "../services/kycVerfication.service";
+import KycVerificationDataSource from "../datasources/kycVerification.datasource";
+import UserDataSource from "../datasources/user.datasource";
+import TokenDataSource from "../datasources/token.datasource";
+import { appointmentService } from '../services/index';
+
+const userDataSource = new UserDataSource();
+const tokenDataSource = new TokenDataSource();
+const userService = new UserService(userDataSource, tokenDataSource);
+const kycVerificationService = new KycVerificationService(new KycVerificationDataSource(), userService);
 
 export class DoctorController {
   private doctorService: DoctorService;
@@ -28,22 +38,24 @@ export class DoctorController {
   private prescriptionService: PrescriptionService;
   private emailService: IEmailService;
   private uploadService: IUploadService;
+  private kycVerificationService: KycVerificationService;
 
   constructor() {
-    const userService = new UserService();
     this.doctorService = new DoctorService(
       new DoctorDataSource(),
       EmailService,
-      userService
+      userService,
+      kycVerificationService
     );
     this.timeSlotService = new TimeSlotService();
-    this.appointmentService = new AppointmentService();
+    this.appointmentService = appointmentService;
     this.vitalsignService = new VitalSignService();
     this.consultationService = new ConsultationService();
     this.prescriptionService = new PrescriptionService();
     this.userService = userService;
     this.emailService = EmailService;
     this.uploadService = UploadService;
+    this.kycVerificationService = kycVerificationService;
   }
 
   async registerDoctor(req: Request, res: Response) {
@@ -65,7 +77,8 @@ export class DoctorController {
         language: params.language,
         experience: params.experience
       };
-      // checkign if the doctor already exist
+      
+      // checking if the doctor already exist
       let doctorExists = await this.doctorService.getDoctorByUserId(
         newDoctor.userId
       );
@@ -79,12 +92,20 @@ export class DoctorController {
       // creating a new doctor
       const doctor = await this.doctorService.createDoctor(newDoctor);
 
+      // Create KYC verification request
+      const kycRequest = await this.kycVerificationService.kycVerificationRequest({
+        userId: params.user.id,
+        documentType: "license", // Default to license for doctor registration
+        documentUrl: params.documents || "",
+      });
+
       // Update the user's role to "doctor"
       await this.userService.updateUserRole(params.user.id, UserRoles.DOCTOR);
+      
       return Utility.handleSuccess(
         res,
-        "Doctor created successfully",
-        { doctor },
+        "Doctor created successfully. KYC verification request submitted.",
+        { doctor, kycRequest },
         ResponseCode.SUCCESS
       );
     } catch (error) {

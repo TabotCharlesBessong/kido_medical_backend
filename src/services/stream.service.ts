@@ -120,6 +120,71 @@ export class StreamService {
       throw error;
     }
   }
+
+  // Call management methods
+  async createCallChannel(appointmentId: string, doctorId: string, patientId: string, startTime: Date) {
+    try {
+      const channelId = `call-${appointmentId}`;
+      const channel = this.serverClient.channel("messaging", channelId, {
+        members: [doctorId, patientId],
+        created_by_id: doctorId,
+        appointment_id: appointmentId,
+        call_status: "PENDING",
+        start_time: startTime.toISOString(),
+        channel_type: "call"
+      } as any);
+
+      await channel.create();
+      return channel;
+    } catch (error) {
+      console.error("Error creating call channel:", error);
+      throw new Error("Failed to create call channel");
+    }
+  }
+
+  async setCallStatus(channelId: string, status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'FAILED') {
+    try {
+      const channel = this.serverClient.channel('messaging', channelId);
+      const response = await channel.update({
+        call_status: status,
+        last_status_update: new Date().toISOString()
+      } as any);
+
+      // Send system message about status change
+      await channel.sendMessage({
+        text: `Call status changed to ${status}`,
+        system: true
+      } as any);
+
+      return response;
+    } catch (error) {
+      console.error('Error updating call status:', error);
+      throw error;
+    }
+  }
+
+  async endCallChannel(channelId: string) {
+    try {
+      const channel = this.serverClient.channel('messaging', channelId);
+      
+      // Update channel metadata
+      await channel.update({
+        call_status: 'COMPLETED',
+        ended_at: new Date().toISOString()
+      } as any);
+
+      // Send system message
+      await channel.sendMessage({
+        text: 'Call has ended',
+        system: true
+      } as any);
+
+      return channel;
+    } catch (error) {
+      console.error('Error ending call channel:', error);
+      throw new Error('Failed to end call channel');
+    }
+  }
 }
 
-export default new StreamService(); 
+export default new StreamService();

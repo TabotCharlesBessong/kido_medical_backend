@@ -14,13 +14,19 @@ import EmailService from "../services/email.service";
 import TokenService from "../services/token.service";
 import UserService from "../services/user.services";
 import Utility from "../utils/index.utils";
+import UserDataSource from "../datasources/user.datasource";
+import TokenDataSource from "../datasources/token.datasource";
+
+const userDataSource = new UserDataSource();
+const tokenDataSource = new TokenDataSource();
+const userService = new UserService(userDataSource, tokenDataSource);
 
 class UserController {
   private userService: UserService;
   private tokenService: TokenService;
 
   constructor() {
-    this.userService = new UserService();
+    this.userService = userService;
     this.tokenService = new TokenService();
   }
 

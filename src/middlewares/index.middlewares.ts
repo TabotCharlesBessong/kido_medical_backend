@@ -6,8 +6,12 @@ import { UserRoles } from "../interfaces/enum/user.enum";
 import { IUser } from "../interfaces/user.interfaces";
 import UserService from "../services/user.services";
 import Utility from "../utils/index.utils";
+import UserDataSource from "../datasources/user.datasource";
+import TokenDataSource from "../datasources/token.datasource";
 
-const userService = new UserService();
+const userDataSource = new UserDataSource();
+const tokenDataSource = new TokenDataSource();
+const userService = new UserService(userDataSource, tokenDataSource);
 
 export const validator = (schema: Schema<any>) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {

@@ -29,6 +29,24 @@ export class AdminController {
     }
   }
 
+  async getPendingKycVerifications(req: Request, res: Response) {
+    try {
+      const pendingKycRequests = await this.adminService.getPendingKycVerifications();
+      return Utility.handleSuccess(
+        res,
+        "Pending KYC verifications fetched successfully",
+        { kycRequests: pendingKycRequests },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as Error).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
   async verifyDoctor(req: Request, res: Response) {
     try {
       const { email } = req.query;
@@ -63,6 +81,51 @@ export class AdminController {
         res,
         `Doctor verification ${status.toLowerCase()} successfully`,
         { doctor },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as Error).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async verifyKyc(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+      const { status, reason } = req.body;
+
+      if (!userId) {
+        return Utility.handleError(
+          res,
+          "User ID is required",
+          ResponseCode.BAD_REQUEST
+        );
+      }
+
+      if (!status || !['approved', 'rejected'].includes(status)) {
+        return Utility.handleError(
+          res,
+          "Invalid KYC status. Must be 'approved' or 'rejected'",
+          ResponseCode.BAD_REQUEST
+        );
+      }
+
+      if (status === 'rejected' && !reason) {
+        return Utility.handleError(
+          res,
+          "Rejection reason is required",
+          ResponseCode.BAD_REQUEST
+        );
+      }
+
+      const kycVerification = await this.adminService.verifyKyc(userId, status, reason);
+      return Utility.handleSuccess(
+        res,
+        `KYC verification ${status} successfully`,
+        { kycVerification },
         ResponseCode.SUCCESS
       );
     } catch (error) {

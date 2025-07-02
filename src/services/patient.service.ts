@@ -9,8 +9,8 @@ import { FindOptions } from "sequelize";
 class PatientService {
   private patientDataSource: PatientDataSource;
 
-  constructor() {
-    this.patientDataSource = new PatientDataSource()
+  constructor(patientDataSource: PatientDataSource) {
+    this.patientDataSource = patientDataSource;
   }
 
   async createPatient(data: IPatientCreationBody): Promise<IPatient> {

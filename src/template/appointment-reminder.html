@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Reminder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Appointment Reminder</h2>
+        </div>
+        <div class="content">
+            <p>Dear #RECIPIENT_NAME#,</p>
+            
+            <p>This is a reminder for your upcoming appointment:</p>
+            
+            <ul>
+                <li><strong>Time:</strong> #APPOINTMENT_TIME#</li>
+                <li><strong>#COUNTERPART_ROLE#:</strong> #COUNTERPART_NAME#</li>
+                <li><strong>Time Until Appointment:</strong> #TIME_UNTIL#</li>
+            </ul>
+            
+            <p>Please ensure you're ready for the call at the scheduled time. The video call link will be available in your dashboard when it's time for the appointment.</p>
+            
+            <a href="#DASHBOARD_LINK#" class="button">Go to Dashboard</a>
+            
+            <p>If you need to make any changes to this appointment, please do so as soon as possible through the dashboard.</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message from #APP_NAME#. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

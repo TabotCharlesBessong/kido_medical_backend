@@ -3,20 +3,25 @@ import { IEmailService } from "../interfaces/email.interface";
 import UserService from "./user.services";
 import { UserTypes } from "../enums/user.types";
 import { DoctorVerificationStatus } from "../interfaces/enum/doctor.enum";
+import { KycVerificationService } from "./kycVerfication.service";
+import KycVerificationDataSource from "../datasources/kycVerification.datasource";
 
 export class DoctorService {
   private doctorDataSource: IDoctorDataSource;
   private emailService: IEmailService;
   private userService: UserService;
+  private kycVerificationService: KycVerificationService;
 
   constructor(
     doctorDataSource: IDoctorDataSource,
     emailService: IEmailService,
-    userService: UserService
+    userService: UserService,
+    kycVerificationService: KycVerificationService
   ) {
     this.doctorDataSource = doctorDataSource;
     this.emailService = emailService;
     this.userService = userService;
+    this.kycVerificationService = kycVerificationService;
   }
 
   async createDoctor(record: IDoctorCreationBody): Promise<IDoctor> {
@@ -97,6 +102,14 @@ export class DoctorService {
     const doctor = await this.getDoctorByField({ where: { userId: doctorUser.id } });
     if (!doctor) {
       throw new Error("Doctor profile not found");
+    }
+
+    // Check KYC verification status if trying to approve
+    if (status === 'APPROVED') {
+      const kycVerification = await this.kycVerificationService.getKycVerificationByUserId(doctorUser.id);
+      if (kycVerification && kycVerification.status !== 'approved') {
+        throw new Error("Doctor cannot be approved until KYC verification is completed");
+      }
     }
 
     // Update verification status
