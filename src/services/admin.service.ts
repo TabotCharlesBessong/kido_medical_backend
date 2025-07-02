@@ -5,6 +5,13 @@ import DoctorDataSource from "../datasources/doctor.datasource";
 import UserService from "./user.services";
 import { KycVerificationService } from "./kycVerfication.service";
 import KycVerificationDataSource from "../datasources/kycVerification.datasource";
+import UserDataSource from "../datasources/user.datasource";
+import TokenDataSource from "../datasources/token.datasource";
+
+const userDataSource = new UserDataSource();
+const tokenDataSource = new TokenDataSource();
+const userService = new UserService(userDataSource, tokenDataSource);
+const kycVerificationService = new KycVerificationService(new KycVerificationDataSource(), userService);
 
 class AdminService {
   private doctorService: DoctorService;
@@ -16,14 +23,12 @@ class AdminService {
     this.doctorService = new DoctorService(
       new DoctorDataSource(),
       EmailService,
-      new UserService()
+      userService,
+      kycVerificationService
     );
     this.emailService = EmailService;
-    this.userService = new UserService();
-    this.kycVerificationService = new KycVerificationService(
-      new KycVerificationDataSource(),
-      this.userService
-    );
+    this.userService = userService;
+    this.kycVerificationService = kycVerificationService;
   }
 
   async getPendingDoctorVerifications() {

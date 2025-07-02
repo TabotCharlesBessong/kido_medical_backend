@@ -13,15 +13,53 @@ class CallService {
   }
 
   async createCall(record: ICallCreationBody): Promise<ICall> {
-    // Create the call record in the DB
-    const call = await this.callDataSource.create(record);
+    try {
+      // Create the call record in the DB
+      const call = await this.callDataSource.create(record);
 
-    // Optionally, update the Stream channel status to ACTIVE
-    if (record.streamCallId) {
-      await streamService.setCallStatus(record.streamCallId, "ACTIVE");
+      // If streamCallId is provided, update Stream channel status
+      if (record.streamCallId) {
+        await streamService.setCallStatus(record.streamCallId, "ACTIVE");
+      }
+
+      return call;
+    } catch (error) {
+      console.error('Error creating call:', error);
+      throw new Error('Failed to create call record');
     }
+  }
 
-    return call;
+  async getCallByAppointmentId(appointmentId: string): Promise<ICall | null> {
+    try {
+      return await this.callDataSource.fetchOne({
+        where: { appointmentId }
+      });
+    } catch (error) {
+      console.error('Error fetching call by appointment ID:', error);
+      throw new Error('Failed to fetch call record');
+    }
+  }
+
+  async updateCallStatus(callId: string, status: "PENDING" | "ACTIVE" | "COMPLETED" | "FAILED"): Promise<void> {
+    try {
+      const call = await this.getCallById(callId);
+      if (!call) {
+        throw new Error('Call not found');
+      }
+
+      await this.callDataSource.updateOne(
+        { where: { id: callId } },
+        { status }
+      );
+
+      // If there's a Stream call ID, update its status
+      if (call.streamCallId) {
+        await streamService.setCallStatus(call.streamCallId, status);
+      }
+    } catch (error) {
+      console.error('Error updating call status:', error);
+      throw new Error('Failed to update call status');
+    }
   }
 
   async getCallById(callId: string): Promise<ICall | null> {

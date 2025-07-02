@@ -7,9 +7,9 @@ import { IFindUserQuery, IUser, IUserCreationBody, IUserDataSource } from "../in
 class UserService {
   private userDataSource: UserDataSource;
   private tokenDataSource: TokenDataSource;
-  constructor() {
-    this.userDataSource = new UserDataSource();
-    this.tokenDataSource = new TokenDataSource()
+  constructor(userDataSource: UserDataSource, tokenDataSource: TokenDataSource) {
+    this.userDataSource = userDataSource;
+    this.tokenDataSource = tokenDataSource;
   }
 
   async getUserByField(record: Partial<IUser>): Promise<IUser | null> {

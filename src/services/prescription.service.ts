@@ -16,6 +16,17 @@ import {
 import { NotificationType } from "../interfaces/enum/notification.enum";
 import { IMedication } from "../interfaces/medication.interface";
 import sequelize from "../database";
+import KycVerificationDataSource from "../datasources/kycVerification.datasource";
+import { KycVerificationService } from "./kycVerfication.service";
+import PatientDataSource from "../datasources/patient.datasource";
+import UserDataSource from "../datasources/user.datasource";
+import TokenDataSource from "../datasources/token.datasource";
+
+const userDataSource = new UserDataSource();
+const tokenDataSource = new TokenDataSource();
+const userService = new UserService(userDataSource, tokenDataSource);
+const kycVerificationService = new KycVerificationService(new KycVerificationDataSource(), userService);
+const patientDataSource = new PatientDataSource();
 
 class PrescriptionService {
   private prescriptionDataSource: PrescriptionDataSource;
@@ -35,11 +46,12 @@ class PrescriptionService {
     this.doctorService = new DoctorService(
       new DoctorDataSource(),
       EmailService,
-      new UserService()
+      userService,
+      kycVerificationService
     );
-    this.patientService = new PatientService();
+    this.patientService = new PatientService(patientDataSource);
     this.consultationService = new ConsultationService();
-    this.userService = new UserService();
+    this.userService = userService;
     this.appointmentService = new AppointmentService();
     this.emailService = EmailService;
   }
