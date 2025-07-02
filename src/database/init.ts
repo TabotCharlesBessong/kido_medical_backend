@@ -16,6 +16,7 @@ import PrescriptionModel from "../models/prescription.model";
 import MedicationModel from "../models/medication.model";
 import CallModel from "../models/call.model";
 import KycVerification from "../models/kycverification.model";
+import ReminderModel from "../models/reminder.model";
 
 const sequelize = new Sequelize(
   process.env.DB_NAME as string,
@@ -52,6 +53,7 @@ export const DbInitialize = async () => {
     await MedicationModel.sync();
     await CallModel.sync();
     await KycVerification.sync({ alter: true });
+    await ReminderModel.sync();
 
     console.log("All models synchronized successfully.");
   } catch (error) {
