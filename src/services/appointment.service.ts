@@ -44,21 +44,26 @@ class AppointmentService {
   private reminderService: ReminderService;
   private callService: CallService;
 
-  constructor() {
-    this.appointmentDataSource = new AppointmentDataSource();
-    this.notificationDataSource = new NotificationDataSource();
-    this.doctorService = new DoctorService(
-      new DoctorDataSource(),
-      EmailService,
-      userService,
-      kycVerificationService
-    );
-    this.patientService = new PatientService(patientDataSource);
-    this.emailService = EmailService;
+  constructor(
+    appointmentDataSource: AppointmentDataSource,
+    notificationDataSource: NotificationDataSource,
+    doctorService: DoctorService,
+    patientService: PatientService,
+    emailService: typeof EmailService,
+    userService: UserService,
+    timeSlotDataSource: TimeSlotDataSource,
+    reminderService: ReminderService,
+    callService: CallService
+  ) {
+    this.appointmentDataSource = appointmentDataSource;
+    this.notificationDataSource = notificationDataSource;
+    this.doctorService = doctorService;
+    this.patientService = patientService;
+    this.emailService = emailService;
     this.userService = userService;
-    this.timeSlotDataSource = new TimeSlotDataSource();
-    this.reminderService = new ReminderService(reminderDataSource);
-    this.callService = new CallService();
+    this.timeSlotDataSource = timeSlotDataSource;
+    this.reminderService = reminderService;
+    this.callService = callService;
   }
 
   async createAppointment(record: IAppointmentCreationBody): Promise<IAppointment> {

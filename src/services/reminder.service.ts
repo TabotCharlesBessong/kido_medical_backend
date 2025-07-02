@@ -37,21 +37,24 @@ class ReminderService {
   private reminderTemplate: string;
   private userService: UserService;
 
-  constructor(reminderDataSource: ReminderDataSource) {
+  constructor(
+    reminderDataSource: ReminderDataSource,
+    appointmentService: AppointmentService,
+    timeSlotService: TimeSlotService,
+    doctorService: DoctorService,
+    patientService: PatientService,
+    emailService: typeof EmailService,
+    callService: CallService,
+    userService: UserService
+  ) {
     this.reminderDataSource = reminderDataSource;
-    this.appointmentService = new AppointmentService();
-    this.timeSlotService = new TimeSlotService();
+    this.appointmentService = appointmentService;
+    this.timeSlotService = timeSlotService;
+    this.doctorService = doctorService;
+    this.patientService = patientService;
+    this.emailService = emailService;
+    this.callService = callService;
     this.userService = userService;
-    this.doctorService = new DoctorService(
-      new DoctorDataSource(),
-      EmailService,
-      this.userService,
-      kycVerificationService
-    );
-    this.patientService = new PatientService(patientDataSource);
-    this.emailService = EmailService;
-    this.callService = new CallService();
-    
     // Load reminder template
     const templatePath = path.join(__dirname, '..', 'template', 'appointment-reminder.html');
     this.reminderTemplate = fs.readFileSync(templatePath, 'utf8');
