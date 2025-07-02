@@ -1,14 +1,14 @@
 import cron from 'node-cron';
-import ReminderService from './reminder.service';
+import { reminderService } from './index';
 import ReminderDataSource from "../datasources/reminder.datasource";
 
 const reminderDataSource = new ReminderDataSource();
 
 class CronService {
-  private reminderService: ReminderService;
+  private reminderService: typeof reminderService;
 
   constructor() {
-    this.reminderService = new ReminderService(reminderDataSource);
+    this.reminderService = reminderService;
     this.initializeJobs();
   }
 

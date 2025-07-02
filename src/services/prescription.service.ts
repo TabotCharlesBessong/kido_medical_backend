@@ -21,6 +21,7 @@ import { KycVerificationService } from "./kycVerfication.service";
 import PatientDataSource from "../datasources/patient.datasource";
 import UserDataSource from "../datasources/user.datasource";
 import TokenDataSource from "../datasources/token.datasource";
+import {appointmentService} from "../services/index"
 
 const userDataSource = new UserDataSource();
 const tokenDataSource = new TokenDataSource();
@@ -52,7 +53,7 @@ class PrescriptionService {
     this.patientService = new PatientService(patientDataSource);
     this.consultationService = new ConsultationService();
     this.userService = userService;
-    this.appointmentService = new AppointmentService();
+    this.appointmentService = appointmentService;
     this.emailService = EmailService;
   }
 
