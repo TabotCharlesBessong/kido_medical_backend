@@ -6,6 +6,15 @@ import {DoctorService} from "../services/doctor.service";
 import DoctorDataSource from "../datasources/doctor.datasource";
 import emailService from "../services/email.service";
 import UserService from "../services/user.services";
+import KycVerificationDataSource from "../datasources/kycVerification.datasource";
+import { KycVerificationService } from "../services/kycVerfication.service";
+import UserDataSource from "../datasources/user.datasource";
+import TokenDataSource from "../datasources/token.datasource";
+
+const userDataSource = new UserDataSource();
+const tokenDataSource = new TokenDataSource();
+const userService = new UserService(userDataSource, tokenDataSource);
+const kycVerificationService = new KycVerificationService(new KycVerificationDataSource(), userService);
 
 class PostController {
   private postService: PostService;
@@ -16,7 +25,8 @@ class PostController {
     this.doctorService = new DoctorService(
       new DoctorDataSource(),
       emailService,
-      new UserService()
+      userService,
+      kycVerificationService
     );
   }
 

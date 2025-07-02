@@ -9,6 +9,9 @@ import { IAppointment } from "../interfaces/appointment.interface";
 import { ResponseCode } from "../interfaces/enum/code.enum";
 import Utility from "../utils/index.utils";
 import { IPatient } from "../interfaces/patient.interface";
+import PatientDataSource from "../datasources/patient.datasource";
+
+const patientDataSource = new PatientDataSource();
 
 class PatientController {
   private patientService: PatientService;
@@ -16,7 +19,7 @@ class PatientController {
   private timeSlotService: TimeSlotService;
 
   constructor() {
-    this.patientService = new PatientService();
+    this.patientService = new PatientService(patientDataSource);
     this.appointmentService = new AppointmentService();
     this.timeSlotService = new TimeSlotService();
   }

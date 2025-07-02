@@ -8,6 +8,12 @@ import KycVerificationDataSource from "../datasources/kycVerification.datasource
 import { IUploadService } from "../interfaces/services.interface";
 import UploadService from "../services/upload.service";
 import EmailService from "../services/email.service";
+import UserDataSource from "../datasources/user.datasource";
+import TokenDataSource from "../datasources/token.datasource";
+
+const userDataSource = new UserDataSource();
+const tokenDataSource = new TokenDataSource();
+const userService = new UserService(userDataSource, tokenDataSource);
 
 export class KycVerificationController {
   private kycVerificationService: KycVerificationService;
@@ -16,7 +22,6 @@ export class KycVerificationController {
   private emailService: typeof EmailService;
 
   constructor() {
-    const userService = new UserService();
     this.kycVerificationService = new KycVerificationService(
       new KycVerificationDataSource(),
       userService

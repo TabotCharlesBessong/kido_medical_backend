@@ -19,6 +19,13 @@ import { IEmailService } from '../interfaces/email.interface';
 import { IUploadService } from '../interfaces/services.interface';
 import { KycVerificationService } from "../services/kycVerfication.service";
 import KycVerificationDataSource from "../datasources/kycVerification.datasource";
+import UserDataSource from "../datasources/user.datasource";
+import TokenDataSource from "../datasources/token.datasource";
+
+const userDataSource = new UserDataSource();
+const tokenDataSource = new TokenDataSource();
+const userService = new UserService(userDataSource, tokenDataSource);
+const kycVerificationService = new KycVerificationService(new KycVerificationDataSource(), userService);
 
 export class DoctorController {
   private doctorService: DoctorService;
@@ -33,11 +40,11 @@ export class DoctorController {
   private kycVerificationService: KycVerificationService;
 
   constructor() {
-    const userService = new UserService();
     this.doctorService = new DoctorService(
       new DoctorDataSource(),
       EmailService,
-      userService
+      userService,
+      kycVerificationService
     );
     this.timeSlotService = new TimeSlotService();
     this.appointmentService = new AppointmentService();
@@ -47,10 +54,7 @@ export class DoctorController {
     this.userService = userService;
     this.emailService = EmailService;
     this.uploadService = UploadService;
-    this.kycVerificationService = new KycVerificationService(
-      new KycVerificationDataSource(),
-      userService
-    );
+    this.kycVerificationService = kycVerificationService;
   }
 
   async registerDoctor(req: Request, res: Response) {
