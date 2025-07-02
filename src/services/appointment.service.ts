@@ -17,6 +17,21 @@ import { FindOptions } from "sequelize";
 import DoctorDataSource from "../datasources/doctor.datasource";
 import TimeSlotDataSource from "../datasources/timeslot.datasource";
 import streamService from "./stream.service";
+import ReminderService from "./reminder.service";
+import CallService from "./call.service";
+import KycVerificationDataSource from "../datasources/kycVerification.datasource";
+import { KycVerificationService } from "./kycVerfication.service";
+import PatientDataSource from "../datasources/patient.datasource";
+import UserDataSource from "../datasources/user.datasource";
+import TokenDataSource from "../datasources/token.datasource";
+import ReminderDataSource from "../datasources/reminder.datasource";
+
+const userDataSource = new UserDataSource();
+const tokenDataSource = new TokenDataSource();
+const userService = new UserService(userDataSource, tokenDataSource);
+const kycVerificationService = new KycVerificationService(new KycVerificationDataSource(), userService);
+const patientDataSource = new PatientDataSource();
+const reminderDataSource = new ReminderDataSource();
 
 class AppointmentService {
   private appointmentDataSource: AppointmentDataSource;
@@ -26,19 +41,29 @@ class AppointmentService {
   private emailService: typeof EmailService;
   private userService: UserService;
   private timeSlotDataSource: TimeSlotDataSource;
+  private reminderService: ReminderService;
+  private callService: CallService;
 
-  constructor() {
-    this.appointmentDataSource = new AppointmentDataSource();
-    this.notificationDataSource = new NotificationDataSource();
-    this.doctorService = new DoctorService(
-      new DoctorDataSource(),
-      EmailService,
-      new UserService()
-    );
-    this.patientService = new PatientService();
-    this.emailService = EmailService;
-    this.userService = new UserService();
-    this.timeSlotDataSource = new TimeSlotDataSource();
+  constructor(
+    appointmentDataSource: AppointmentDataSource,
+    notificationDataSource: NotificationDataSource,
+    doctorService: DoctorService,
+    patientService: PatientService,
+    emailService: typeof EmailService,
+    userService: UserService,
+    timeSlotDataSource: TimeSlotDataSource,
+    reminderService: ReminderService,
+    callService: CallService
+  ) {
+    this.appointmentDataSource = appointmentDataSource;
+    this.notificationDataSource = notificationDataSource;
+    this.doctorService = doctorService;
+    this.patientService = patientService;
+    this.emailService = emailService;
+    this.userService = userService;
+    this.timeSlotDataSource = timeSlotDataSource;
+    this.reminderService = reminderService;
+    this.callService = callService;
   }
 
   async createAppointment(record: IAppointmentCreationBody): Promise<IAppointment> {
@@ -72,6 +97,14 @@ class AppointmentService {
       { where: { id: createdAppointment.id } },
       { streamChannelId: streamChannel.id }
     );
+
+    // Create a pending call record
+    await this.callService.createCall({
+      doctorId: createdAppointment.doctorId,
+      patientId: createdAppointment.patientId,
+      appointmentId: createdAppointment.id,
+      status: "PENDING"
+    });
 
     // Return the updated appointment
     const updatedAppointment = await this.appointmentDataSource.fetchOne({
@@ -156,8 +189,21 @@ class AppointmentService {
       throw new Error("Only pending appointments can be approved");
     }
 
+    // Get the time slot for the appointment
+    const timeSlot = await this.timeSlotDataSource.fetchOne({
+      where: { id: appointment.timeSlotId },
+      returning: true
+    });
+
+    if (!timeSlot) {
+      throw new Error("Time slot not found");
+    }
+
     // Update appointment status to CONFIRMED
     const updatedAppointment = await this.updateAppointmentStatus(appointmentId, "CONFIRMED");
+
+    // Create reminders for both doctor and patient
+    await this.reminderService.createReminders(appointmentId, timeSlot);
 
     // If there's a Stream channel, update its metadata
     if (updatedAppointment.streamChannelId) {
@@ -165,6 +211,12 @@ class AppointmentService {
         status: "CONFIRMED",
         appointmentId: updatedAppointment.id
       });
+
+      // Update associated call status
+      const call = await this.callService.getCallByAppointmentId(appointmentId);
+      if (call) {
+        await this.callService.updateCallStatus(call.id, "PENDING");
+      }
     }
 
     return updatedAppointment;

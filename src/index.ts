@@ -14,6 +14,7 @@ import createKycVerificationRoute from "./router/kycVerification.router";
 import { Server } from "socket.io";
 import MessageController from "./controllers/message.controller";
 import rateLimit from "express-rate-limit";
+import './services/cron.service';
 // import seedDatabase from './database/seeders';
 import adminRouter from "./routers/admin.router";
 
@@ -98,8 +99,9 @@ const PORT = process.env.PORT || 5000;
 const Boostrap = async function () {
   try {
     await DbInitialize();
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log("Connection has been established successfully.");
+      console.log("Cron service initialized for appointment reminders.");
     });
   } catch (error) {
     console.error("Unable to connect to the database:", error);

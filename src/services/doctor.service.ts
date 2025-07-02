@@ -15,15 +15,13 @@ export class DoctorService {
   constructor(
     doctorDataSource: IDoctorDataSource,
     emailService: IEmailService,
-    userService: UserService
+    userService: UserService,
+    kycVerificationService: KycVerificationService
   ) {
     this.doctorDataSource = doctorDataSource;
     this.emailService = emailService;
     this.userService = userService;
-    this.kycVerificationService = new KycVerificationService(
-      new KycVerificationDataSource(),
-      userService
-    );
+    this.kycVerificationService = kycVerificationService;
   }
 
   async createDoctor(record: IDoctorCreationBody): Promise<IDoctor> {

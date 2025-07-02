@@ -7,6 +7,12 @@ import {
 import { INotification, INotificationDataSource } from "../interfaces/notification.interface";
 import UserService from "./user.services";
 import streamService from "./stream.service";
+import UserDataSource from "../datasources/user.datasource";
+import TokenDataSource from "../datasources/token.datasource";
+
+const userDataSource = new UserDataSource();
+const tokenDataSource = new TokenDataSource();
+const userService = new UserService(userDataSource, tokenDataSource);
 
 class MessageService {
   private messageDataSource: IMessageDataSource;
@@ -19,7 +25,7 @@ class MessageService {
   ) {
     this.messageDataSource = messageDataSource;
     this.notificationDataSource = notificationDataSource;
-    this.userService = new UserService();
+    this.userService = userService;
   }
 
   async createMessage(record: IMessageCreationBody): Promise<IMessage> {

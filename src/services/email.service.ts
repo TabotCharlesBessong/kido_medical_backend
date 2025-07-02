@@ -47,7 +47,7 @@ class EmailService implements IEmailService {
     return template.replace(regex, data);
   }
 
-  private async sendEmail(to: string, subject: string, htmlContent: string) {
+  public async sendEmail(to: string, subject: string, htmlContent: string) {
     try {
       const { data, error } = await resend.emails.send({
         from: `${sender.name} <${sender.email}>`,
