@@ -21,6 +21,7 @@ import { KycVerificationService } from "../services/kycVerfication.service";
 import KycVerificationDataSource from "../datasources/kycVerification.datasource";
 import UserDataSource from "../datasources/user.datasource";
 import TokenDataSource from "../datasources/token.datasource";
+import { appointmentService } from '../services/index';
 
 const userDataSource = new UserDataSource();
 const tokenDataSource = new TokenDataSource();
@@ -47,7 +48,7 @@ export class DoctorController {
       kycVerificationService
     );
     this.timeSlotService = new TimeSlotService();
-    this.appointmentService = new AppointmentService();
+    this.appointmentService = appointmentService;
     this.vitalsignService = new VitalSignService();
     this.consultationService = new ConsultationService();
     this.prescriptionService = new PrescriptionService();
