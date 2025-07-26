@@ -1,0 +1,2 @@
+# This file ensures the public folder is tracked by git
+# Vercel requires a public folder for deployment 
