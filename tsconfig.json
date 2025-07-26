@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2016",
+    "target": "es2020",
     "module": "commonjs",
+    "lib": ["es2020"],
     "rootDir": "./src",
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -18,8 +19,12 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowJs": true,
-    "checkJs": false
+    "checkJs": false,
+    "declaration": false,
+    "sourceMap": false,
+    "removeComments": true,
+    "noEmitOnError": false
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }
