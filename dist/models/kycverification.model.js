@@ -48,6 +48,7 @@ KycVerification.init({
     tableName: "kyc_verifications",
     timestamps: true,
 });
+// Many-to-one relationship: Many KycVerifications belong to one User
 KycVerification.belongsTo(user_model_1.default, { foreignKey: "userId", as: "user" });
 user_model_1.default.hasMany(KycVerification, {
     foreignKey: "userId",

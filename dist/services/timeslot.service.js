@@ -37,5 +37,19 @@ class TimeSlotService {
             return this.timeSlotDatasource.fetchAll(query);
         });
     }
+    getTimeSlotById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.timeSlotDatasource.fetchOne({
+                where: { id },
+                returning: true
+            });
+        });
+    }
+    updateTimeSlot(id, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.timeSlotDatasource.updateOne({ where: { id }, returning: true }, data);
+            return yield this.getTimeSlotById(id);
+        });
+    }
 }
 exports.default = TimeSlotService;

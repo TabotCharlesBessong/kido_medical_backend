@@ -68,7 +68,7 @@ const createDoctorRoute = () => {
             next(error);
         }
     }));
-    router.put("/cancel/:id", (0, index_middlewares_1.DoctorMiddleware)(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    router.put("/appointments/:id/cancel", (0, index_middlewares_1.DoctorMiddleware)(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             yield doctorController.cancelAppointment(req, res);
         }
@@ -76,7 +76,7 @@ const createDoctorRoute = () => {
             next(error);
         }
     }));
-    router.put("/approve/:id", (0, index_middlewares_1.DoctorMiddleware)(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    router.put("/appointments/:id/approve", (0, index_middlewares_1.DoctorMiddleware)(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             yield doctorController.approveAppointment(req, res);
         }

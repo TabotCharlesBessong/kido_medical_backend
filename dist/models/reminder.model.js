@@ -58,6 +58,7 @@ ReminderModel.init({
     modelName: "Reminder",
     tableName: "reminders",
 });
+// Define associations
 ReminderModel.belongsTo(appointment_model_1.default, {
     foreignKey: "appointmentId",
     as: "appointment",

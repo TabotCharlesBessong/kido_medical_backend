@@ -12,151 +12,66 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const appointment_datasource_1 = __importDefault(require("../datasources/appointment.datasource"));
-const notification_datasource_1 = __importDefault(require("../datasources/notification.datasource"));
-const doctor_service_1 = require("./doctor.service");
-const patient_service_1 = __importDefault(require("./patient.service"));
-const email_service_1 = __importDefault(require("./email.service"));
 const user_services_1 = __importDefault(require("./user.services"));
-const notification_enum_1 = require("../interfaces/enum/notification.enum");
-const patient_enum_1 = require("../interfaces/enum/patient.enum");
-const doctor_datasource_1 = __importDefault(require("../datasources/doctor.datasource"));
+const stream_service_1 = __importDefault(require("./stream.service"));
+const kycVerification_datasource_1 = __importDefault(require("../datasources/kycVerification.datasource"));
+const kycVerfication_service_1 = require("./kycVerfication.service");
+const patient_datasource_1 = __importDefault(require("../datasources/patient.datasource"));
+const user_datasource_1 = __importDefault(require("../datasources/user.datasource"));
+const token_datasource_1 = __importDefault(require("../datasources/token.datasource"));
+const reminder_datasource_1 = __importDefault(require("../datasources/reminder.datasource"));
+const userDataSource = new user_datasource_1.default();
+const tokenDataSource = new token_datasource_1.default();
+const userService = new user_services_1.default(userDataSource, tokenDataSource);
+const kycVerificationService = new kycVerfication_service_1.KycVerificationService(new kycVerification_datasource_1.default(), userService);
+const patientDataSource = new patient_datasource_1.default();
+const reminderDataSource = new reminder_datasource_1.default();
 class AppointmentService {
-    constructor() {
-        this.appointmentDataSource = new appointment_datasource_1.default();
-        this.notificationDataSource = new notification_datasource_1.default();
-        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, new user_services_1.default());
-        this.patientService = new patient_service_1.default();
-        this.emailService = email_service_1.default;
-        this.userService = new user_services_1.default();
+    constructor(appointmentDataSource, notificationDataSource, doctorService, patientService, emailService, userService, timeSlotDataSource, reminderService, callService) {
+        this.appointmentDataSource = appointmentDataSource;
+        this.notificationDataSource = notificationDataSource;
+        this.doctorService = doctorService;
+        this.patientService = patientService;
+        this.emailService = emailService;
+        this.userService = userService;
+        this.timeSlotDataSource = timeSlotDataSource;
+        this.reminderService = reminderService;
+        this.callService = callService;
     }
     createAppointment(record) {
         return __awaiter(this, void 0, void 0, function* () {
-            const appointment = Object.assign(Object.assign({}, record), { status: patient_enum_1.AppointmentStatus.PENDING });
-            const createdAppointment = yield this.appointmentDataSource.create(appointment);
-            // Get doctor and patient records to get their user IDs
-            const doctor = yield this.doctorService.getDoctorByField({ where: { id: createdAppointment.doctorId } });
-            const patient = yield this.patientService.getPatientById(createdAppointment.patientId);
-            if (doctor && patient) {
-                // Get user details for email
-                const doctorUser = yield this.userService.getUserByField({ id: doctor.userId });
-                const patientUser = yield this.userService.getUserByField({ id: patient.userId });
-                if (doctorUser && patientUser) {
-                    // Send email to doctor
-                    yield this.emailService.sendAppointmentBookingEmail({
-                        patientEmail: doctorUser.email,
-                        patientName: `${patientUser.firstname} ${patientUser.lastname}`,
-                        doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
-                        reason: createdAppointment.reason,
-                        time: createdAppointment.date.toLocaleString(),
-                        appointmentId: createdAppointment.id
-                    });
-                    // Send email to patient
-                    yield this.emailService.sendAppointmentStatusEmail({
-                        patientEmail: patientUser.email,
-                        patientName: `${patientUser.firstname} ${patientUser.lastname}`,
-                        doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
-                        reason: createdAppointment.reason,
-                        time: createdAppointment.date.toLocaleString(),
-                        status: 'PENDING'
-                    });
-                    // Notify the doctor
-                    yield this.notificationDataSource.create({
-                        userId: doctor.userId,
-                        message: "New appointment request received",
-                        type: notification_enum_1.NotificationType.APPOINTMENT,
-                        referenceId: createdAppointment.id,
-                        read: false,
-                    });
-                    // Notify the patient
-                    yield this.notificationDataSource.create({
-                        userId: patient.userId,
-                        message: "Your appointment request has been sent",
-                        type: notification_enum_1.NotificationType.APPOINTMENT,
-                        referenceId: createdAppointment.id,
-                        read: false,
-                    });
-                }
+            // Get the time slot to get the start time
+            const timeSlot = yield this.timeSlotDataSource.fetchOne({
+                where: { id: record.timeSlotId },
+                returning: true
+            });
+            if (!timeSlot) {
+                throw new Error("Time slot not found");
             }
-            return createdAppointment;
-        });
-    }
-    approveAppointment(appointmentId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const filter = { where: { id: appointmentId } };
-            const update = {
-                status: patient_enum_1.AppointmentStatus.APPROVED,
-            };
-            yield this.appointmentDataSource.updateOne(update, filter);
-            const appointment = yield this.getAppointmentById(appointmentId);
-            if (appointment) {
-                // Get doctor and patient records
-                const doctor = yield this.doctorService.getDoctorByField({ where: { id: appointment.doctorId } });
-                const patient = yield this.patientService.getPatientById(appointment.patientId);
-                if (doctor && patient) {
-                    // Get user details for email
-                    const doctorUser = yield this.userService.getUserByField({ id: doctor.userId });
-                    const patientUser = yield this.userService.getUserByField({ id: patient.userId });
-                    if (doctorUser && patientUser) {
-                        // Send email to patient
-                        yield this.emailService.sendAppointmentStatusEmail({
-                            patientEmail: patientUser.email,
-                            patientName: `${patientUser.firstname} ${patientUser.lastname}`,
-                            doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
-                            reason: appointment.reason,
-                            time: appointment.date.toLocaleString(),
-                            status: 'APPROVED'
-                        });
-                        // Create notification
-                        yield this.notificationDataSource.create({
-                            userId: patient.userId,
-                            message: "Your appointment has been approved",
-                            type: notification_enum_1.NotificationType.APPOINTMENT_APPROVED,
-                            referenceId: appointment.id,
-                            read: false,
-                        });
-                    }
-                }
+            // Create the appointment
+            const createdAppointment = yield this.appointmentDataSource.create(record);
+            // Create Stream channel for the appointment
+            const streamChannel = yield stream_service_1.default.createAppointmentChannel(createdAppointment.id, createdAppointment.doctorId, createdAppointment.patientId, timeSlot.startTime);
+            if (!streamChannel || !streamChannel.id) {
+                throw new Error("Failed to create Stream channel");
             }
-        });
-    }
-    cancelAppointment(appointmentId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const filter = { where: { id: appointmentId } };
-            const update = {
-                status: patient_enum_1.AppointmentStatus.CANCELED,
-            };
-            yield this.appointmentDataSource.updateOne(update, filter);
-            const appointment = yield this.getAppointmentById(appointmentId);
-            if (appointment) {
-                // Get doctor and patient records
-                const doctor = yield this.doctorService.getDoctorByField({ where: { id: appointment.doctorId } });
-                const patient = yield this.patientService.getPatientById(appointment.patientId);
-                if (doctor && patient) {
-                    // Get user details for email
-                    const doctorUser = yield this.userService.getUserByField({ id: doctor.userId });
-                    const patientUser = yield this.userService.getUserByField({ id: patient.userId });
-                    if (doctorUser && patientUser) {
-                        // Send email to patient
-                        yield this.emailService.sendAppointmentStatusEmail({
-                            patientEmail: patientUser.email,
-                            patientName: `${patientUser.firstname} ${patientUser.lastname}`,
-                            doctorName: `${doctorUser.firstname} ${doctorUser.lastname}`,
-                            reason: appointment.reason,
-                            time: appointment.date.toLocaleString(),
-                            status: 'CANCELED'
-                        });
-                        // Create notification
-                        yield this.notificationDataSource.create({
-                            userId: patient.userId,
-                            message: "Your appointment has been canceled",
-                            type: notification_enum_1.NotificationType.APPOINTMENT_CANCELED,
-                            referenceId: appointment.id,
-                            read: false,
-                        });
-                    }
-                }
+            // Update appointment with Stream channel ID
+            yield this.appointmentDataSource.updateOne({ where: { id: createdAppointment.id } }, { streamChannelId: streamChannel.id });
+            // Create a pending call record
+            yield this.callService.createCall({
+                doctorId: createdAppointment.doctorId,
+                patientId: createdAppointment.patientId,
+                appointmentId: createdAppointment.id,
+                status: "PENDING"
+            });
+            // Return the updated appointment
+            const updatedAppointment = yield this.appointmentDataSource.fetchOne({
+                where: { id: createdAppointment.id },
+            });
+            if (!updatedAppointment) {
+                throw new Error("Failed to fetch updated appointment");
             }
+            return updatedAppointment;
         });
     }
     getAppointmentById(appointmentId) {
@@ -166,26 +81,155 @@ class AppointmentService {
             });
         });
     }
-    updateAppointment(id, data) {
+    getAppointmentsByDoctorId(doctorId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const filter = { where: { id } };
-            yield this.appointmentDataSource.updateOne(data, filter);
+            const appointments = yield this.appointmentDataSource.fetchAll({
+                where: { doctorId },
+            });
+            return appointments.map((appointment) => ({
+                id: appointment.id,
+                doctorId: appointment.doctorId,
+                patientId: appointment.patientId,
+                timeSlotId: appointment.timeSlotId,
+                status: appointment.status,
+                streamChannelId: appointment.streamChannelId,
+                createdAt: appointment.createdAt,
+                updatedAt: appointment.updatedAt,
+            }));
         });
     }
-    getAppointments() {
+    getAppointmentsByPatientId(patientId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const query = { where: {}, raw: true };
-            return this.appointmentDataSource.fetchAll(query);
-        });
-    }
-    getAppointmentsByPatient(patientId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const query = {
+            const appointments = yield this.appointmentDataSource.fetchAll({
                 where: { patientId },
-                raw: true,
-                order: [['createdAt', 'DESC']] // Most recent first
-            };
-            return this.appointmentDataSource.fetchAll(query);
+            });
+            return appointments.map((appointment) => ({
+                id: appointment.id,
+                doctorId: appointment.doctorId,
+                patientId: appointment.patientId,
+                timeSlotId: appointment.timeSlotId,
+                status: appointment.status,
+                streamChannelId: appointment.streamChannelId,
+                createdAt: appointment.createdAt,
+                updatedAt: appointment.updatedAt,
+            }));
+        });
+    }
+    updateAppointmentStatus(appointmentId, status) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const filter = { where: { id: appointmentId } };
+            const update = { status };
+            yield this.appointmentDataSource.updateOne(filter, update);
+            const updatedAppointment = yield this.appointmentDataSource.fetchOne({
+                where: { id: appointmentId },
+            });
+            if (!updatedAppointment) {
+                throw new Error("Failed to fetch updated appointment");
+            }
+            return updatedAppointment;
+        });
+    }
+    approveAppointment(appointmentId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const appointment = yield this.getAppointmentById(appointmentId);
+            if (!appointment) {
+                throw new Error("Appointment not found");
+            }
+            if (appointment.status !== "PENDING") {
+                throw new Error("Only pending appointments can be approved");
+            }
+            // Get the time slot for the appointment
+            const timeSlot = yield this.timeSlotDataSource.fetchOne({
+                where: { id: appointment.timeSlotId },
+                returning: true
+            });
+            if (!timeSlot) {
+                throw new Error("Time slot not found");
+            }
+            // Update appointment status to CONFIRMED
+            const updatedAppointment = yield this.updateAppointmentStatus(appointmentId, "CONFIRMED");
+            // Create reminders for both doctor and patient
+            yield this.reminderService.createReminders(appointmentId, timeSlot);
+            // If there's a Stream channel, update its metadata
+            if (updatedAppointment.streamChannelId) {
+                yield stream_service_1.default.updateChannelMetadata(updatedAppointment.streamChannelId, {
+                    status: "CONFIRMED",
+                    appointmentId: updatedAppointment.id
+                });
+                // Update associated call status
+                const call = yield this.callService.getCallByAppointmentId(appointmentId);
+                if (call) {
+                    yield this.callService.updateCallStatus(call.id, "PENDING");
+                }
+            }
+            return updatedAppointment;
+        });
+    }
+    cancelAppointment(appointmentId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const appointment = yield this.getAppointmentById(appointmentId);
+            if (!appointment) {
+                throw new Error("Appointment not found");
+            }
+            if (appointment.status === "COMPLETED") {
+                throw new Error("Completed appointments cannot be cancelled");
+            }
+            // Update appointment status to CANCELLED
+            const updatedAppointment = yield this.updateAppointmentStatus(appointmentId, "CANCELLED");
+            // If there's a Stream channel, update its metadata
+            if (updatedAppointment.streamChannelId) {
+                yield stream_service_1.default.updateChannelMetadata(updatedAppointment.streamChannelId, {
+                    status: "CANCELLED",
+                    appointmentId: updatedAppointment.id
+                });
+            }
+            return updatedAppointment;
+        });
+    }
+    getAllAppointments() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const appointments = yield this.appointmentDataSource.fetchAll({
+                where: {},
+            });
+            return appointments.map((appointment) => ({
+                id: appointment.id,
+                doctorId: appointment.doctorId,
+                patientId: appointment.patientId,
+                timeSlotId: appointment.timeSlotId,
+                status: appointment.status,
+                streamChannelId: appointment.streamChannelId,
+                createdAt: appointment.createdAt,
+                updatedAt: appointment.updatedAt,
+            }));
+        });
+    }
+    deleteAppointment(appointmentId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const appointment = yield this.appointmentDataSource.fetchOne({
+                where: { id: appointmentId },
+            });
+            if (!appointment) {
+                throw new Error("Appointment not found");
+            }
+            yield this.appointmentDataSource.deleteOne({
+                where: { id: appointmentId },
+            });
+        });
+    }
+    updateAppointment(appointmentId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.appointmentDataSource.updateOne({ where: { id: appointmentId } }, data);
+            const appointment = yield this.getAppointmentById(appointmentId);
+            if (!appointment) {
+                throw new Error("Failed to retrieve updated appointment");
+            }
+            // If status is being updated, update Stream channel metadata
+            if (data.status && appointment.streamChannelId) {
+                yield stream_service_1.default.updateChannelMetadata(appointment.streamChannelId, {
+                    status: data.status,
+                });
+            }
+            return appointment;
         });
     }
 }
