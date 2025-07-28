@@ -5,25 +5,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../database"));
-const uuid_1 = require("uuid");
-const patient_model_1 = __importDefault(require("./patient.model"));
 const doctor_model_1 = __importDefault(require("./doctor.model"));
+const patient_model_1 = __importDefault(require("./patient.model"));
 const timeslot_model_1 = __importDefault(require("./timeslot.model"));
-const patient_enum_1 = require("../interfaces/enum/patient.enum");
-const AppointmentModel = database_1.default.define("Appointment", {
+class AppointmentModel extends sequelize_1.Model {
+}
+AppointmentModel.init({
     id: {
         type: sequelize_1.DataTypes.UUID,
-        defaultValue: () => (0, uuid_1.v4)(),
-        allowNull: false,
+        defaultValue: sequelize_1.DataTypes.UUIDV4,
         primaryKey: true,
-    },
-    patientId: {
-        type: sequelize_1.DataTypes.UUID,
-        allowNull: false,
-        references: {
-            model: patient_model_1.default,
-            key: "id",
-        },
     },
     doctorId: {
         type: sequelize_1.DataTypes.UUID,
@@ -33,7 +24,15 @@ const AppointmentModel = database_1.default.define("Appointment", {
             key: "id",
         },
     },
-    timeslotId: {
+    patientId: {
+        type: sequelize_1.DataTypes.UUID,
+        allowNull: false,
+        references: {
+            model: patient_model_1.default,
+            key: "id",
+        },
+    },
+    timeSlotId: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: {
@@ -41,57 +40,30 @@ const AppointmentModel = database_1.default.define("Appointment", {
             key: "id",
         },
     },
-    date: {
-        type: sequelize_1.DataTypes.DATE,
-        allowNull: false,
-    },
-    reason: {
-        type: sequelize_1.DataTypes.TEXT,
-        allowNull: false,
-    },
     status: {
-        type: sequelize_1.DataTypes.ENUM(...Object.values(patient_enum_1.AppointmentStatus)),
-        allowNull: false,
-        defaultValue: patient_enum_1.AppointmentStatus.PENDING,
+        type: sequelize_1.DataTypes.ENUM("PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"),
+        defaultValue: "PENDING",
     },
-    createdAt: {
-        type: sequelize_1.DataTypes.DATE,
-        defaultValue: sequelize_1.DataTypes.NOW,
-        allowNull: false,
-    },
-    updatedAt: {
-        type: sequelize_1.DataTypes.DATE,
-        defaultValue: sequelize_1.DataTypes.NOW,
-        allowNull: false,
+    streamChannelId: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
     },
 }, {
-    timestamps: true,
+    sequelize: database_1.default,
+    modelName: "Appointment",
     tableName: "appointments",
-    createdAt: "createdAt",
-    updatedAt: "updatedAt",
 });
-patient_model_1.default.hasMany(AppointmentModel, {
-    foreignKey: "patientId",
-    as: "appointments",
+// Define relationships
+AppointmentModel.belongsTo(doctor_model_1.default, {
+    foreignKey: "doctorId",
+    as: "doctor",
 });
 AppointmentModel.belongsTo(patient_model_1.default, {
     foreignKey: "patientId",
     as: "patient",
 });
-doctor_model_1.default.hasMany(AppointmentModel, {
-    foreignKey: "doctorId",
-    as: "appointments",
-});
-AppointmentModel.belongsTo(doctor_model_1.default, {
-    foreignKey: "doctorId",
-    as: "doctor",
-});
-timeslot_model_1.default.hasMany(AppointmentModel, {
-    foreignKey: "timeslotId",
-    as: "appointments",
-});
 AppointmentModel.belongsTo(timeslot_model_1.default, {
-    foreignKey: "timeslotId",
-    as: "timeslot",
+    foreignKey: "timeSlotId",
+    as: "timeSlot",
 });
 exports.default = AppointmentModel;

@@ -14,9 +14,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const appointment_model_1 = __importDefault(require("../models/appointment.model"));
 class AppointmentDataSource {
-    create(record, options) {
+    create(record) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield appointment_model_1.default.create(record, Object.assign({ returning: true }, options));
+            return yield appointment_model_1.default.create(record);
         });
     }
     fetchOne(query) {
@@ -24,21 +24,19 @@ class AppointmentDataSource {
             return yield appointment_model_1.default.findOne(query);
         });
     }
-    fetchById(appointmentId) {
+    updateOne(searchBy, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield appointment_model_1.default.findOne({
-                where: { id: appointmentId },
-            });
-        });
-    }
-    updateOne(data, query) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield appointment_model_1.default.update(data, Object.assign(Object.assign({}, query), { returning: true }));
+            yield appointment_model_1.default.update(data, Object.assign(Object.assign({}, searchBy), { returning: true }));
         });
     }
     fetchAll(query) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield appointment_model_1.default.findAll(query);
+        });
+    }
+    deleteOne(searchBy) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield appointment_model_1.default.destroy(searchBy);
         });
     }
 }

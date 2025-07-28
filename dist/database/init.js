@@ -31,6 +31,8 @@ const consultation_model_1 = __importDefault(require("../models/consultation.mod
 const prescription_model_1 = __importDefault(require("../models/prescription.model"));
 const medication_model_1 = __importDefault(require("../models/medication.model"));
 const call_model_1 = __importDefault(require("../models/call.model"));
+const kycverification_model_1 = __importDefault(require("../models/kycverification.model"));
+const reminder_model_1 = __importDefault(require("../models/reminder.model"));
 const sequelize = new sequelize_1.Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
     host: process.env.DB_HOST,
     dialect: (_a = process.env.DB_DIALECT) !== null && _a !== void 0 ? _a : "postgres",
@@ -58,6 +60,8 @@ const DbInitialize = () => __awaiter(void 0, void 0, void 0, function* () {
         yield prescription_model_1.default.sync();
         yield medication_model_1.default.sync();
         yield call_model_1.default.sync();
+        yield kycverification_model_1.default.sync({ alter: true });
+        yield reminder_model_1.default.sync();
         console.log("All models synchronized successfully.");
     }
     catch (error) {

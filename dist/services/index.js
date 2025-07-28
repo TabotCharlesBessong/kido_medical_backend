@@ -23,6 +23,7 @@ const reminder_service_1 = __importDefault(require("./reminder.service"));
 const appointment_service_1 = __importDefault(require("./appointment.service"));
 const timeslot_service_1 = __importDefault(require("./timeslot.service"));
 const call_service_1 = __importDefault(require("./call.service"));
+// Datasources
 const appointmentDataSource = new appointment_datasource_1.default();
 const notificationDataSource = new notification_datasource_1.default();
 const doctorDataSource = new doctor_datasource_1.default();
@@ -33,6 +34,7 @@ const callDataSource = new call_datasource_1.default();
 const userDataSource = new user_datasource_1.default();
 const tokenDataSource = new token_datasource_1.default();
 const kycVerificationDataSource = new kycVerification_datasource_1.default();
+// Services (except Appointment/Reminder, which are wired below)
 const userService = new user_services_1.default(userDataSource, tokenDataSource);
 exports.userService = userService;
 const kycVerificationService = new kycVerfication_service_1.KycVerificationService(kycVerificationDataSource, userService);
@@ -45,8 +47,11 @@ const timeSlotService = new timeslot_service_1.default();
 exports.timeSlotService = timeSlotService;
 const callService = new call_service_1.default();
 exports.callService = callService;
+// Placeholders for circular services
 let appointmentService;
 let reminderService;
-exports.reminderService = reminderService = new reminder_service_1.default(reminderDataSource, null, timeSlotService, doctorService, patientService, email_service_1.default, callService, userService);
+// Wire up circular dependencies
+exports.reminderService = reminderService = new reminder_service_1.default(reminderDataSource, null, // appointmentService will be set after instantiation
+timeSlotService, doctorService, patientService, email_service_1.default, callService, userService);
 exports.appointmentService = appointmentService = new appointment_service_1.default(appointmentDataSource, notificationDataSource, doctorService, patientService, email_service_1.default, userService, timeSlotDataSource, reminderService, callService);
 reminderService.appointmentService = appointmentService;

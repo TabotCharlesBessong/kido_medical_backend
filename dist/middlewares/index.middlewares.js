@@ -18,7 +18,11 @@ const code_enum_1 = require("../interfaces/enum/code.enum");
 const user_enum_1 = require("../interfaces/enum/user.enum");
 const user_services_1 = __importDefault(require("../services/user.services"));
 const index_utils_1 = __importDefault(require("../utils/index.utils"));
-const userService = new user_services_1.default();
+const user_datasource_1 = __importDefault(require("../datasources/user.datasource"));
+const token_datasource_1 = __importDefault(require("../datasources/token.datasource"));
+const userDataSource = new user_datasource_1.default();
+const tokenDataSource = new token_datasource_1.default();
+const userService = new user_services_1.default(userDataSource, tokenDataSource);
 const validator = (schema) => {
     return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {

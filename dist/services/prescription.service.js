@@ -21,19 +21,29 @@ const patient_service_1 = __importDefault(require("./patient.service"));
 const email_service_1 = __importDefault(require("./email.service"));
 const consultation_service_1 = __importDefault(require("./consultation.service"));
 const user_services_1 = __importDefault(require("./user.services"));
-const appointment_service_1 = __importDefault(require("./appointment.service"));
 const notification_enum_1 = require("../interfaces/enum/notification.enum");
 const database_1 = __importDefault(require("../database"));
+const kycVerification_datasource_1 = __importDefault(require("../datasources/kycVerification.datasource"));
+const kycVerfication_service_1 = require("./kycVerfication.service");
+const patient_datasource_1 = __importDefault(require("../datasources/patient.datasource"));
+const user_datasource_1 = __importDefault(require("../datasources/user.datasource"));
+const token_datasource_1 = __importDefault(require("../datasources/token.datasource"));
+const index_1 = require("../services/index");
+const userDataSource = new user_datasource_1.default();
+const tokenDataSource = new token_datasource_1.default();
+const userService = new user_services_1.default(userDataSource, tokenDataSource);
+const kycVerificationService = new kycVerfication_service_1.KycVerificationService(new kycVerification_datasource_1.default(), userService);
+const patientDataSource = new patient_datasource_1.default();
 class PrescriptionService {
     constructor() {
         this.prescriptionDataSource = new prescription_datasource_1.default();
         this.medicationDataSource = new medication_datasource_1.default();
         this.notificationDataSource = new notification_datasource_1.default();
-        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, new user_services_1.default());
-        this.patientService = new patient_service_1.default();
+        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, userService, kycVerificationService);
+        this.patientService = new patient_service_1.default(patientDataSource);
         this.consultationService = new consultation_service_1.default();
-        this.userService = new user_services_1.default();
-        this.appointmentService = new appointment_service_1.default();
+        this.userService = userService;
+        this.appointmentService = index_1.appointmentService;
         this.emailService = email_service_1.default;
     }
     createPrescription(record, medications) {
