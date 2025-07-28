@@ -22,10 +22,10 @@ if (!brevoUser) {
 // For Brevo SMTP, we need to use the SMTP key (which is stored in BREVO_API_KEY)
 // The user should be the SMTP login email address
 const brevoTransport = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
   service: 'gmail',
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: brevoUser, // SMTP login email
     pass: brevoApiKey, // SMTP key
@@ -33,7 +33,7 @@ const brevoTransport = nodemailer.createTransport({
 });
 
 // Verify connection configuration
-brevoTransport.verify(function(error, success) {
+brevoTransport.verify(function(error:any, success:any) {
   if (error) {
     console.error('SMTP server connection failed:', error);
   } else {

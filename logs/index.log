@@ -418,3 +418,5 @@ notNull Violation: PrescriptionModel.medications cannot be null
 2025-07-21 06:31:28 error : Authorization failed 
 2025-07-26 06:00:24 error : Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
 535 5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-3b778f1e797sm1663592f8f.70 - gsmtp 
+2025-07-28 05:04:45 error : email is a required field 
+2025-07-28 05:05:36 error : Invalid login detail 
