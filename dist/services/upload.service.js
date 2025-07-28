@@ -19,16 +19,16 @@ const multer_1 = __importDefault(require("multer"));
 cloudinary_1.v2.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 // Configure storage
 const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
     cloudinary: cloudinary_1.v2,
     params: {
-        folder: 'kido_medical',
-        allowed_formats: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
-        resource_type: 'auto'
-    } // Type assertion to bypass strict type checking
+        folder: "kido_medical",
+        allowed_formats: ["jpg", "jpeg", "png", "pdf", "doc", "docx"],
+        resource_type: "auto",
+    }, // Type assertion to bypass strict type checking
 });
 // Configure multer
 const upload = (0, multer_1.default)({ storage: storage });
@@ -37,7 +37,7 @@ class UploadService {
         this.upload = upload;
     }
     getUploadMiddleware() {
-        return this.upload.single('file');
+        return this.upload.single("file");
     }
     uploadFile(file) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -46,8 +46,8 @@ class UploadService {
                 return result.secure_url;
             }
             catch (error) {
-                console.error('Error uploading file to Cloudinary:', error);
-                throw new Error('Failed to upload file');
+                console.error("Error uploading file to Cloudinary:", error);
+                throw new Error("Failed to upload file");
             }
         });
     }
@@ -57,8 +57,8 @@ class UploadService {
                 yield cloudinary_1.v2.uploader.destroy(publicId);
             }
             catch (error) {
-                console.error('Error deleting file from Cloudinary:', error);
-                throw new Error('Failed to delete file');
+                console.error("Error deleting file from Cloudinary:", error);
+                throw new Error("Failed to delete file");
             }
         });
     }

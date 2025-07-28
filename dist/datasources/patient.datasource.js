@@ -61,5 +61,10 @@ class PatientDataSource {
                 ] }));
         });
     }
+    deleteOne(searchBy) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield patient_model_1.default.destroy(searchBy);
+        });
+    }
 }
 exports.default = PatientDataSource;

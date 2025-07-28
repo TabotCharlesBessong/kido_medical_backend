@@ -24,9 +24,11 @@ const post_router_1 = __importDefault(require("./router/post.router"));
 const patient_router_1 = __importDefault(require("./router/patient.router"));
 const message_router_1 = __importDefault(require("./router/message.router"));
 const call_router_1 = __importDefault(require("./router/call.router"));
+const kycVerification_router_1 = __importDefault(require("./router/kycVerification.router"));
 const socket_io_1 = require("socket.io");
 const message_controller_1 = __importDefault(require("./controllers/message.controller"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+require("./services/cron.service");
 // import seedDatabase from './database/seeders';
 const admin_router_1 = __importDefault(require("./routers/admin.router"));
 //create an app
@@ -64,6 +66,7 @@ app.use("/api/patient", patient_router_1.default);
 app.use("/api/message", message_router_1.default);
 app.use("/api/call", call_router_1.default);
 app.use("/api/admin", admin_router_1.default);
+app.use("/api/kyc-verification", kycVerification_router_1.default);
 io.on("connection", (socket) => {
     console.log("A user connected");
     socket.on("sendMessage", (message) => __awaiter(void 0, void 0, void 0, function* () {
@@ -94,8 +97,9 @@ const Boostrap = function () {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield (0, init_1.default)();
-            app.listen(PORT, () => {
+            server.listen(PORT, () => {
                 console.log("Connection has been established successfully.");
+                console.log("Cron service initialized for appointment reminders.");
             });
         }
         catch (error) {

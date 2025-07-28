@@ -13,167 +13,268 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const patient_service_1 = __importDefault(require("../services/patient.service"));
-const code_enum_1 = require("../interfaces/enum/code.enum");
-const index_utils_1 = __importDefault(require("../utils/index.utils"));
-const appointment_service_1 = __importDefault(require("../services/appointment.service"));
+const timeslot_service_1 = __importDefault(require("../services/timeslot.service"));
+const patient_datasource_1 = __importDefault(require("../datasources/patient.datasource"));
+const patientDataSource = new patient_datasource_1.default();
 class PatientController {
     constructor() {
-        this.patientService = new patient_service_1.default();
-        this.appointmentService = new appointment_service_1.default();
+        this.patientService = new patient_service_1.default(patientDataSource);
+        this.timeSlotService = new timeslot_service_1.default();
     }
     createPatient(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const params = Object.assign({}, req.body);
-                const newPatient = {
-                    userId: params.user.id,
-                    age: params.age,
-                    gender: params.gender,
-                    address1: params.address1,
-                    address2: params.address2,
-                    occupation: params.occupation,
-                    phoneNumber: params.phoneNumber,
-                    tribe: params.tribe,
-                    religion: params.religion,
-                };
-                // checkign if the patient already exist
-                let patientExists = yield this.patientService.getPatientById(newPatient.userId);
-                if (patientExists)
-                    return index_utils_1.default.handleError(res, "We are sorry but you have already created a patient account", code_enum_1.ResponseCode.ALREADY_EXIST);
-                const patient = yield this.patientService.createPatient(newPatient);
-                return index_utils_1.default.handleSuccess(res, "Patient Info created successfully", { patient }, code_enum_1.ResponseCode.SUCCESS);
+                const patient = yield this.patientService.createPatient(req.body);
+                res.status(201).json({
+                    status: true,
+                    message: "Patient created successfully",
+                    data: patient,
+                });
             }
             catch (error) {
-                res
-                    .status(code_enum_1.ResponseCode.SERVER_ERROR)
-                    .json({ message: error.message });
+                res.status(400).json({
+                    status: false,
+                    message: error.message,
+                });
             }
         });
     }
     getPatientById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const patient = yield this.patientService.getPatientById(req.params.userId);
-                if (!patient)
-                    return index_utils_1.default.handleError(res, "Could not get patient", code_enum_1.ResponseCode.NOT_FOUND);
-                else
-                    return index_utils_1.default.handleSuccess(res, "Account fetched successfully", { patient }, code_enum_1.ResponseCode.SUCCESS);
+                const patient = yield this.patientService.getPatientById(req.params.id);
+                if (!patient) {
+                    res.status(404).json({
+                        status: false,
+                        message: "Patient not found",
+                    });
+                    return;
+                }
+                res.status(200).json({
+                    status: true,
+                    message: "Patient retrieved successfully",
+                    data: patient,
+                });
             }
             catch (error) {
-                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
+                res.status(400).json({
+                    status: false,
+                    message: error.message,
+                });
             }
         });
     }
     updatePatient(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { patientId } = req.params;
-                const updateData = req.body;
-                // Remove sensitive fields that shouldn't be updated directly
-                delete updateData.userId;
-                const patient = yield this.patientService.updatePatient(patientId, updateData);
+                const patient = yield this.patientService.updatePatient(req.params.id, req.body);
                 if (!patient) {
-                    return index_utils_1.default.handleError(res, 'Patient not found', code_enum_1.ResponseCode.NOT_FOUND);
+                    res.status(404).json({
+                        status: false,
+                        message: "Patient not found",
+                    });
+                    return;
                 }
-                return index_utils_1.default.handleSuccess(res, 'Patient information updated successfully', { patient }, code_enum_1.ResponseCode.SUCCESS);
+                res.status(200).json({
+                    status: true,
+                    message: "Patient updated successfully",
+                    data: patient,
+                });
             }
             catch (error) {
-                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
+                res.status(400).json({
+                    status: false,
+                    message: error.message,
+                });
+            }
+        });
+    }
+    deletePatient(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { id } = req.params;
+                const patient = yield this.patientService.getPatientById(id);
+                if (!patient) {
+                    return res.status(404).json({
+                        status: false,
+                        message: "Patient not found",
+                    });
+                }
+                yield this.patientService.deletePatient(id);
+                return res.status(200).json({
+                    status: true,
+                    message: "Patient deleted successfully",
+                });
+            }
+            catch (error) {
+                return res.status(500).json({
+                    status: false,
+                    message: error.message,
+                });
+            }
+        });
+    }
+    getAllPatients(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const patients = yield this.patientService.getAllPatients();
+                res.status(200).json({
+                    status: true,
+                    message: "Patients retrieved successfully",
+                    data: patients,
+                });
+            }
+            catch (error) {
+                res.status(400).json({
+                    status: false,
+                    message: error.message,
+                });
             }
         });
     }
     bookAppointment(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const params = Object.assign({}, req.body);
-                // First get the patient using the user ID
-                const patient = yield this.patientService.getPatientById(params.user.id);
+                const { doctorId, timeslotId, date, reason } = req.body;
+                const patient = req.user;
                 if (!patient) {
-                    return index_utils_1.default.handleError(res, "Patient not found", code_enum_1.ResponseCode.NOT_FOUND);
+                    res.status(401).json({
+                        status: false,
+                        message: "User not authenticated",
+                    });
+                    return;
                 }
+                // Check if timeslot is available
+                const timeSlot = yield this.timeSlotService.getTimeSlotById(timeslotId);
+                if (!timeSlot) {
+                    res.status(404).json({
+                        status: false,
+                        message: "Time slot not found",
+                    });
+                    return;
+                }
+                if (!timeSlot.isAvailable) {
+                    res.status(400).json({
+                        status: false,
+                        message: "Time slot is not available",
+                    });
+                    return;
+                }
+                // Create appointment with required fields
                 const newAppointment = {
-                    patientId: patient.id, // Use the patient's ID instead of user's ID
-                    doctorId: params.doctorId,
-                    timeslotId: params.timeslotId,
-                    date: params.date,
-                    reason: params.reason,
+                    patientId: patient.id,
+                    doctorId,
+                    timeSlotId: timeslotId,
+                    status: "PENDING"
                 };
                 const appointment = yield this.appointmentService.createAppointment(newAppointment);
-                return index_utils_1.default.handleSuccess(res, "Appointment booked successfully", { appointment }, code_enum_1.ResponseCode.SUCCESS);
+                // Update timeslot availability
+                yield this.timeSlotService.updateTimeSlot(timeslotId, { isAvailable: false });
+                res.status(201).json({
+                    status: true,
+                    message: "Appointment booked successfully",
+                    data: appointment,
+                });
             }
             catch (error) {
-                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
-            }
-        });
-    }
-    getAppointmentById(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const appointment = yield this.appointmentService.getAppointmentById(req.params.appointmentId);
-                if (!appointment)
-                    return index_utils_1.default.handleError(res, "Could not get appointment", code_enum_1.ResponseCode.NOT_FOUND);
-                else
-                    return index_utils_1.default.handleSuccess(res, "Account fetched successfully", { appointment }, code_enum_1.ResponseCode.SUCCESS);
-            }
-            catch (error) {
-                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
-            }
-        });
-    }
-    getAllAppointments(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const params = Object.assign({}, req.body);
-                let appointments = yield this.appointmentService.getAppointments();
-                return index_utils_1.default.handleSuccess(res, "Appointments fetched successfully", { appointments }, code_enum_1.ResponseCode.SUCCESS);
-            }
-            catch (error) {
-                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
+                res.status(400).json({
+                    status: false,
+                    message: error.message,
+                });
             }
         });
     }
     getPatientAppointments(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const params = Object.assign({}, req.body);
-                const patient = yield this.patientService.getPatientById(params.user.id);
+                const patient = req.user;
                 if (!patient) {
-                    return index_utils_1.default.handleError(res, "Patient not found", code_enum_1.ResponseCode.NOT_FOUND);
+                    res.status(401).json({
+                        status: false,
+                        message: "User not authenticated",
+                    });
+                    return;
                 }
-                const appointments = yield this.appointmentService.getAppointmentsByPatient(patient.id);
-                return index_utils_1.default.handleSuccess(res, "Patient appointments fetched successfully", { appointments }, code_enum_1.ResponseCode.SUCCESS);
+                const appointments = yield this.appointmentService.getAppointmentsByPatientId(patient.id);
+                res.status(200).json({
+                    status: true,
+                    message: "Appointments retrieved successfully",
+                    data: appointments,
+                });
             }
             catch (error) {
-                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
+                res.status(400).json({
+                    status: false,
+                    message: error.message,
+                });
             }
         });
     }
-    // async getAllAppointments(req: Request, res: Response) {
-    //   try {
-    //     const query = req.query;
-    //     const appointments = await this.appointmentService.fetchAllAppointments(query);
-    //     return Utility.handleSuccess(
-    //       res,
-    //       "Appointments fetched successfully",
-    //       { appointments },
-    //       ResponseCode.SUCCESS
-    //     );
-    //   } catch (error) {
-    //     return Utility.handleError(
-    //       res,
-    //       (error as TypeError).message,
-    //       ResponseCode.SERVER_ERROR
-    //     );
-    //   }
-    // }
+    getAllAppointments(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const appointments = yield this.appointmentService.getAllAppointments();
+                res.status(200).json({
+                    status: true,
+                    message: "Appointments retrieved successfully",
+                    data: appointments,
+                });
+            }
+            catch (error) {
+                res.status(400).json({
+                    status: false,
+                    message: error.message,
+                });
+            }
+        });
+    }
     updateAppointment(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield this.appointmentService.updateAppointment(req.params.id, req.body);
-                return index_utils_1.default.handleSuccess(res, "Appointment updated successfully", {}, code_enum_1.ResponseCode.SUCCESS);
+                const appointment = yield this.appointmentService.updateAppointment(req.params.id, req.body);
+                if (!appointment) {
+                    res.status(404).json({
+                        status: false,
+                        message: "Appointment not found",
+                    });
+                    return;
+                }
+                res.status(200).json({
+                    status: true,
+                    message: "Appointment updated successfully",
+                    data: appointment,
+                });
             }
             catch (error) {
-                res.status(code_enum_1.ResponseCode.SERVER_ERROR).json(error.message);
+                res.status(400).json({
+                    status: false,
+                    message: error.message,
+                });
+            }
+        });
+    }
+    getAppointmentById(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { id } = req.params;
+                const appointment = yield this.appointmentService.getAppointmentById(id);
+                if (!appointment) {
+                    return res.status(404).json({
+                        status: false,
+                        message: "Appointment not found",
+                    });
+                }
+                return res.status(200).json({
+                    status: true,
+                    message: "Appointment retrieved successfully",
+                    data: appointment,
+                });
+            }
+            catch (error) {
+                return res.status(500).json({
+                    status: false,
+                    message: error.message,
+                });
             }
         });
     }

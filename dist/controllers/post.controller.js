@@ -19,10 +19,18 @@ const doctor_service_1 = require("../services/doctor.service");
 const doctor_datasource_1 = __importDefault(require("../datasources/doctor.datasource"));
 const email_service_1 = __importDefault(require("../services/email.service"));
 const user_services_1 = __importDefault(require("../services/user.services"));
+const kycVerification_datasource_1 = __importDefault(require("../datasources/kycVerification.datasource"));
+const kycVerfication_service_1 = require("../services/kycVerfication.service");
+const user_datasource_1 = __importDefault(require("../datasources/user.datasource"));
+const token_datasource_1 = __importDefault(require("../datasources/token.datasource"));
+const userDataSource = new user_datasource_1.default();
+const tokenDataSource = new token_datasource_1.default();
+const userService = new user_services_1.default(userDataSource, tokenDataSource);
+const kycVerificationService = new kycVerfication_service_1.KycVerificationService(new kycVerification_datasource_1.default(), userService);
 class PostController {
     constructor() {
         this.postService = new post_service_1.default();
-        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, new user_services_1.default());
+        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, userService, kycVerificationService);
     }
     createPost(req, res) {
         return __awaiter(this, void 0, void 0, function* () {

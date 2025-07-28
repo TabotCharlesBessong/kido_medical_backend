@@ -11,12 +11,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const admin_controller_1 = require("../controllers/admin.controller");
-const auth_middleware_1 = require("../middleware/auth.middleware");
+const index_middlewares_1 = require("../middlewares/index.middlewares");
 const role_middleware_1 = require("../middleware/role.middleware");
 const router = (0, express_1.Router)();
 const adminController = new admin_controller_1.AdminController();
 // Get all pending doctor verifications
-router.get("/doctor-verifications/pending", auth_middleware_1.authenticateToken, role_middleware_1.isAdmin, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/doctor-verifications/pending", (0, index_middlewares_1.Auth)(), role_middleware_1.isAdmin, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield adminController.getPendingDoctorVerifications(req, res);
     }
@@ -24,8 +24,17 @@ router.get("/doctor-verifications/pending", auth_middleware_1.authenticateToken,
         next(error);
     }
 }));
+// Get all pending KYC verifications
+router.get("/kyc-verifications/pending", (0, index_middlewares_1.Auth)(), role_middleware_1.isAdmin, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield adminController.getPendingKycVerifications(req, res);
+    }
+    catch (error) {
+        next(error);
+    }
+}));
 // Get doctor verification details
-router.get("/doctor-verifications/:doctorId", auth_middleware_1.authenticateToken, role_middleware_1.isAdmin, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/doctor-verifications/:doctorId", (0, index_middlewares_1.Auth)(), role_middleware_1.isAdmin, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield adminController.getDoctorVerificationDetails(req, res);
     }
@@ -34,9 +43,18 @@ router.get("/doctor-verifications/:doctorId", auth_middleware_1.authenticateToke
     }
 }));
 // Verify doctor (approve/reject)
-router.post("/doctor-verifications/verify", auth_middleware_1.authenticateToken, role_middleware_1.isAdmin, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/doctor-verifications/verify", (0, index_middlewares_1.Auth)(), role_middleware_1.isAdmin, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield adminController.verifyDoctor(req, res);
+    }
+    catch (error) {
+        next(error);
+    }
+}));
+// Verify KYC (approve/reject)
+router.patch("/kyc-verifications/:userId/verify", (0, index_middlewares_1.Auth)(), role_middleware_1.isAdmin, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield adminController.verifyKyc(req, res);
     }
     catch (error) {
         next(error);

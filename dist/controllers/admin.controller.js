@@ -32,6 +32,17 @@ class AdminController {
             }
         });
     }
+    getPendingKycVerifications(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const pendingKycRequests = yield this.adminService.getPendingKycVerifications();
+                return index_utils_1.default.handleSuccess(res, "Pending KYC verifications fetched successfully", { kycRequests: pendingKycRequests }, code_enum_1.ResponseCode.SUCCESS);
+            }
+            catch (error) {
+                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
+            }
+        });
+    }
     verifyDoctor(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -48,6 +59,28 @@ class AdminController {
                 }
                 const doctor = yield this.adminService.verifyDoctor(email, status, notes);
                 return index_utils_1.default.handleSuccess(res, `Doctor verification ${status.toLowerCase()} successfully`, { doctor }, code_enum_1.ResponseCode.SUCCESS);
+            }
+            catch (error) {
+                return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
+            }
+        });
+    }
+    verifyKyc(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userId } = req.params;
+                const { status, reason } = req.body;
+                if (!userId) {
+                    return index_utils_1.default.handleError(res, "User ID is required", code_enum_1.ResponseCode.BAD_REQUEST);
+                }
+                if (!status || !['approved', 'rejected'].includes(status)) {
+                    return index_utils_1.default.handleError(res, "Invalid KYC status. Must be 'approved' or 'rejected'", code_enum_1.ResponseCode.BAD_REQUEST);
+                }
+                if (status === 'rejected' && !reason) {
+                    return index_utils_1.default.handleError(res, "Rejection reason is required", code_enum_1.ResponseCode.BAD_REQUEST);
+                }
+                const kycVerification = yield this.adminService.verifyKyc(userId, status, reason);
+                return index_utils_1.default.handleSuccess(res, `KYC verification ${status} successfully`, { kycVerification }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return index_utils_1.default.handleError(res, error.message, code_enum_1.ResponseCode.SERVER_ERROR);
