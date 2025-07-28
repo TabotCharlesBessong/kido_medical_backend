@@ -8,14 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const patient_datasource_1 = __importDefault(require("../datasources/patient.datasource"));
 class PatientService {
-    constructor() {
-        this.patientDataSource = new patient_datasource_1.default();
+    constructor(patientDataSource) {
+        this.patientDataSource = patientDataSource;
     }
     createPatient(data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -27,11 +23,20 @@ class PatientService {
             return yield this.patientDataSource.fetchOne({ where: { userId } });
         });
     }
-    updatePatient(patientId, updateData) {
+    updatePatient(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const filter = { where: { id: patientId } };
-            yield this.patientDataSource.updateOne(filter, updateData);
-            return this.getPatientById(patientId);
+            yield this.patientDataSource.updateOne({ where: { id } }, data);
+            return yield this.getPatientById(id);
+        });
+    }
+    getAllPatients() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.patientDataSource.fetchAll({ where: {} });
+        });
+    }
+    deletePatient(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.patientDataSource.deleteOne({ where: { id } });
         });
     }
 }

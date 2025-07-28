@@ -10,8 +10,10 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "baseUrl": "."
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "*.d.ts"],
   "exclude": ["node_modules"]
 }

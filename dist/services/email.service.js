@@ -12,20 +12,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const brevo_1 = require("@getbrevo/brevo");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const nodemailer_1 = __importDefault(require("nodemailer"));
 dotenv_1.default.config();
-const brevoApiKey = process.env.BREVO_API_KEY;
+const brevoApiKey = process.env.MAIL_PASSWORD;
 const frontendUrl = process.env.FRONTEND_URL;
 const apiUrl = process.env.API_URL;
+const brevoUser = process.env.MAIL_USER;
 if (!brevoApiKey) {
     throw new Error('BREVO_API_KEY is not set in environment variables');
 }
+if (!brevoUser) {
+    throw new Error('BREVO_USER is not set in environment variables');
+}
+// For Brevo SMTP, we need to use the SMTP key (which is stored in BREVO_API_KEY)
+// The user should be the SMTP login email address
+const brevoTransport = nodemailer_1.default.createTransport({
+    service: 'gmail',
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+        user: brevoUser, // SMTP login email
+        pass: brevoApiKey, // SMTP key
+    },
+});
+// Verify connection configuration
+brevoTransport.verify(function (error, success) {
+    if (error) {
+        console.error('SMTP server connection failed:', error);
+    }
+    else {
+        console.log('SMTP server is ready to take our messages');
+    }
+});
 const sender = {
-    name: 'Kido Medical',
-    email: 'ebezebeatrice@gmail.com'
+    name: "Kido Medical",
+    email: "ebezebeatrice@gmail.com",
 };
 // Load email templates
 const emailTemplate = path_1.default.join(__dirname, '..', 'template', 'email.html');
@@ -45,10 +70,6 @@ const templates = {
     'doctor-verification-rejected': fs_1.default.readFileSync(path_1.default.join(__dirname, '..', 'template', 'doctor-verification-rejected.html'), 'utf8')
 };
 class EmailService {
-    constructor() {
-        this.apiInstance = new brevo_1.TransactionalEmailsApi();
-        this.apiInstance.setApiKey(brevo_1.TransactionalEmailsApiApiKeys.apiKey, brevoApiKey);
-    }
     replaceTemplateConstant(template, key, data) {
         const regex = new RegExp(key, 'g');
         return template.replace(regex, data);
@@ -56,13 +77,15 @@ class EmailService {
     sendEmail(to, subject, htmlContent) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const sendSmtpEmail = {
-                    sender,
-                    to: [{ email: to }],
+                const result = yield brevoTransport.sendMail({
+                    from: {
+                        name: sender.name,
+                        address: sender.email
+                    },
+                    to: to,
                     subject,
-                    htmlContent
-                };
-                const result = yield this.apiInstance.sendTransacEmail(sendSmtpEmail);
+                    html: htmlContent
+                });
                 console.log(`Email sent successfully to ${to}`);
                 return result;
             }
@@ -224,7 +247,10 @@ class EmailService {
                     ? `<img src="${documentUrl}" alt="Doctor's Document" class="document-preview">`
                     : '<p>PDF document submitted. Please download to view.</p>';
                 html = this.replaceTemplateConstant(html, '#DOCUMENT_PREVIEW#', documentPreview);
-                return this.sendEmail(adminEmail, 'New Doctor Verification Request', html);
+                // Add KYC verification note
+                const kycNote = '<p><strong>Note:</strong> A KYC verification request has also been submitted for this doctor. Please review both the doctor registration and KYC verification before approval.</p>';
+                html = html.replace('</div>', kycNote + '</div>');
+                return this.sendEmail(adminEmail, 'New Doctor Verification Request (with KYC)', html);
             }
             catch (error) {
                 console.error('Failed to send doctor verification request email:', error);
@@ -251,6 +277,38 @@ class EmailService {
             html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
             html = this.replaceTemplateConstant(html, '#REJECTION_REASON#', data.reason);
             yield this.sendEmail(data.doctorEmail, 'Doctor Verification Rejected', html);
+        });
+    }
+    sendKycApprovalEmail(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const appName = process.env.APPNAME || 'Kido Medical';
+            const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+            // Use the verification status template for KYC approval
+            const statusText = 'VERIFIED';
+            const statusClass = 'status-approved';
+            let html = this.replaceTemplateConstant(templates.verificationStatus, '#APP_NAME#', appName);
+            html = this.replaceTemplateConstant(html, '#NAME#', data.doctorName);
+            html = this.replaceTemplateConstant(html, '#STATUS#', 'KYC VERIFIED');
+            html = this.replaceTemplateConstant(html, '#STATUS_CLASS#', statusClass);
+            html = this.replaceTemplateConstant(html, '#NOTES#', 'Your KYC verification has been approved. You can now proceed with your doctor verification.');
+            html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+            yield this.sendEmail(data.doctorEmail, 'KYC Verification Approved', html);
+        });
+    }
+    sendKycRejectionEmail(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const appName = process.env.APPNAME || 'Kido Medical';
+            const supportMail = process.env.VERIFICATION_EMAIL || 'charlesbessongtabot@gmail.com';
+            // Use the verification status template for KYC rejection
+            const statusText = 'REJECTED';
+            const statusClass = 'status-canceled';
+            let html = this.replaceTemplateConstant(templates.verificationStatus, '#APP_NAME#', appName);
+            html = this.replaceTemplateConstant(html, '#NAME#', data.doctorName);
+            html = this.replaceTemplateConstant(html, '#STATUS#', 'KYC REJECTED');
+            html = this.replaceTemplateConstant(html, '#STATUS_CLASS#', statusClass);
+            html = this.replaceTemplateConstant(html, '#NOTES#', `Your KYC verification has been rejected. Reason: ${data.reason}`);
+            html = this.replaceTemplateConstant(html, '#SUPPORT_MAIL#', supportMail);
+            yield this.sendEmail(data.doctorEmail, 'KYC Verification Rejected', html);
         });
     }
 }

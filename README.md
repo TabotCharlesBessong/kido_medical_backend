@@ -68,6 +68,10 @@ MAILTRAP_USER = "email address to mail trap user" // create it from google
 MAILTRAP_PASS = "password to mail trap user"
 VERIFICATION_EMAIL = "verification email address"
 PASSWORD_RESET_LINK = http://localhost:5001/reset-password.html
+BREVO_API_KEY = 'your brevo smtp key' // Get from Brevo dashboard > SMTP & API > SMTP tab
+BREVO_USER = 'your brevo user email' // Email address for Brevo SMTP login
+FRONTEND_URL = 'http://localhost:3000' // Your frontend URL
+API_URL = 'http://localhost:5000' // Your API URL
 ```
 
 2. Set up the database:

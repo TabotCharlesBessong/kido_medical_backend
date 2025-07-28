@@ -17,15 +17,29 @@ const email_service_1 = __importDefault(require("./email.service"));
 const doctor_enum_1 = require("../interfaces/enum/doctor.enum");
 const doctor_datasource_1 = __importDefault(require("../datasources/doctor.datasource"));
 const user_services_1 = __importDefault(require("./user.services"));
+const kycVerfication_service_1 = require("./kycVerfication.service");
+const kycVerification_datasource_1 = __importDefault(require("../datasources/kycVerification.datasource"));
+const user_datasource_1 = __importDefault(require("../datasources/user.datasource"));
+const token_datasource_1 = __importDefault(require("../datasources/token.datasource"));
+const userDataSource = new user_datasource_1.default();
+const tokenDataSource = new token_datasource_1.default();
+const userService = new user_services_1.default(userDataSource, tokenDataSource);
+const kycVerificationService = new kycVerfication_service_1.KycVerificationService(new kycVerification_datasource_1.default(), userService);
 class AdminService {
     constructor() {
-        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, new user_services_1.default());
+        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, userService, kycVerificationService);
         this.emailService = email_service_1.default;
-        this.userService = new user_services_1.default();
+        this.userService = userService;
+        this.kycVerificationService = kycVerificationService;
     }
     getPendingDoctorVerifications() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.doctorService.getDoctorsByVerificationStatus(doctor_enum_1.DoctorVerificationStatus.PENDING);
+        });
+    }
+    getPendingKycVerifications() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.kycVerificationService.getAllKycVerificationRequests();
         });
     }
     verifyDoctor(email, status, notes) {
@@ -38,7 +52,17 @@ class AdminService {
             if (!doctorUser) {
                 throw new Error('Doctor user not found');
             }
+            // Get KYC verification for this doctor
+            const kycVerification = yield this.kycVerificationService.getKycVerificationByUserId(doctor.userId);
+            // If KYC is not approved, doctor cannot be approved
+            if (status === doctor_enum_1.DoctorVerificationStatus.APPROVED && kycVerification && kycVerification.status !== 'approved') {
+                throw new Error('Doctor cannot be approved until KYC verification is completed');
+            }
             yield this.doctorService.verifyDoctor(email, status, notes);
+            // If doctor is approved and KYC exists, also approve KYC
+            if (status === doctor_enum_1.DoctorVerificationStatus.APPROVED && kycVerification) {
+                yield this.kycVerificationService.updateKycVerification({ where: { userId: doctor.userId } }, { status: 'approved' });
+            }
             // Send verification status email
             if (status === doctor_enum_1.DoctorVerificationStatus.APPROVED) {
                 yield this.emailService.sendDoctorVerificationApprovedEmail({
@@ -56,13 +80,45 @@ class AdminService {
             return doctor;
         });
     }
+    verifyKyc(userId, status, reason) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const kycVerification = yield this.kycVerificationService.getKycVerificationByUserId(userId);
+            if (!kycVerification) {
+                throw new Error('KYC verification request not found');
+            }
+            yield this.kycVerificationService.updateKycVerification({ where: { userId } }, { status, reason });
+            // Get doctor and user details for email
+            const doctor = yield this.doctorService.getDoctorByUserId(userId);
+            const user = yield this.userService.getUserByField({ id: userId });
+            if (user) {
+                if (status === 'approved') {
+                    // Send KYC approval email
+                    yield this.emailService.sendKycApprovalEmail({
+                        doctorEmail: user.email,
+                        doctorName: `${user.firstname} ${user.lastname}`
+                    });
+                }
+                else {
+                    // Send KYC rejection email
+                    yield this.emailService.sendKycRejectionEmail({
+                        doctorEmail: user.email,
+                        doctorName: `${user.firstname} ${user.lastname}`,
+                        reason: reason || 'No reason provided'
+                    });
+                }
+            }
+            return kycVerification;
+        });
+    }
     getDoctorVerificationDetails(doctorId) {
         return __awaiter(this, void 0, void 0, function* () {
             const doctor = yield this.doctorService.getDoctorByField({ where: { id: doctorId } });
             if (!doctor) {
                 throw new Error('Doctor not found');
             }
-            return Object.assign(Object.assign({}, doctor), { documents: doctor.documents, verificationStatus: doctor.verificationStatus, verificationNotes: doctor.verificationNotes, verifiedAt: doctor.verifiedAt });
+            // Get KYC verification details
+            const kycVerification = yield this.kycVerificationService.getKycVerificationByUserId(doctor.userId);
+            return Object.assign(Object.assign({}, doctor), { documents: doctor.documents, verificationStatus: doctor.verificationStatus, verificationNotes: doctor.verificationNotes, verifiedAt: doctor.verifiedAt, kycVerification });
         });
     }
 }

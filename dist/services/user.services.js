@@ -8,18 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-// import { where } from "sequelize"
-const token_datasource_1 = __importDefault(require("../datasources/token.datasource"));
-const user_datasource_1 = __importDefault(require("../datasources/user.datasource"));
 // import { raw } from "express"
 class UserService {
-    constructor() {
-        this.userDataSource = new user_datasource_1.default();
-        this.tokenDataSource = new token_datasource_1.default();
+    constructor(userDataSource, tokenDataSource) {
+        this.userDataSource = userDataSource;
+        this.tokenDataSource = tokenDataSource;
     }
     getUserByField(record) {
         return __awaiter(this, void 0, void 0, function* () {

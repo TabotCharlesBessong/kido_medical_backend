@@ -1,25 +1,49 @@
-// @ts-ignore
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 import { IEmailService } from '../interfaces/email.interface';
-import { Resend } from "resend";
 
 dotenv.config();
 
-const resendApiKey = process.env.RESEND_API_KEY as string;
+const brevoApiKey = process.env.MAIL_PASSWORD as string;
 const frontendUrl = process.env.FRONTEND_URL as string;
 const apiUrl = process.env.API_URL as string;
+const brevoUser = process.env.MAIL_USER as string;
 
-if (!resendApiKey) {
-  throw new Error('RESEND_API_KEY is not set in environment variables');
+if (!brevoApiKey) {
+  throw new Error('BREVO_API_KEY is not set in environment variables');
 }
 
-const resend = new Resend(resendApiKey);
+if (!brevoUser) {
+  throw new Error('BREVO_USER is not set in environment variables');
+}
+
+// For Brevo SMTP, we need to use the SMTP key (which is stored in BREVO_API_KEY)
+// The user should be the SMTP login email address
+const brevoTransport = nodemailer.createTransport({
+  service: 'gmail',
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: brevoUser, // SMTP login email
+    pass: brevoApiKey, // SMTP key
+  },
+});
+
+// Verify connection configuration
+brevoTransport.verify(function(error:any, success:any) {
+  if (error) {
+    console.error('SMTP server connection failed:', error);
+  } else {
+    console.log('SMTP server is ready to take our messages');
+  }
+});
 
 const sender = {
   name: "Kido Medical",
-  email: "info@lamuel.site",
+  email: "ebezebeatrice@gmail.com",
 };
 
 // Load email templates
@@ -49,20 +73,18 @@ class EmailService implements IEmailService {
 
   public async sendEmail(to: string, subject: string, htmlContent: string) {
     try {
-      const { data, error } = await resend.emails.send({
-        from: `${sender.name} <${sender.email}>`,
-        to: [to],
+      const result = await brevoTransport.sendMail({
+        from: {
+          name: sender.name,
+          address: sender.email
+        },
+        to: to,
         subject,
         html: htmlContent
       });
 
-      if (error) {
-        console.error('Failed to send email:', error);
-        throw error;
-      }
-
       console.log(`Email sent successfully to ${to}`);
-      return data;
+      return result;
     } catch (error) {
       console.error('Failed to send email:', error);
       throw error;
