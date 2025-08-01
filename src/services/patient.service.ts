@@ -21,12 +21,12 @@ class PatientService {
     return await this.patientDataSource.fetchOne({ where: { userId } });
   }
 
-  async updatePatient(id: string, data: Partial<IPatient>): Promise<IPatient | null> {
+  async updatePatient(userId: string, data: Partial<IPatient>): Promise<IPatient | null> {
     await this.patientDataSource.updateOne(
-      { where: { id } },
+      { where: { userId } },
       data
     );
-    return await this.getPatientById(id);
+    return await this.getPatientById(userId);
   }
 
   async getAllPatients(): Promise<IPatient[]> {
