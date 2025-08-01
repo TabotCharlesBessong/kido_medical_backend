@@ -115,8 +115,8 @@ export class DoctorController {
 
   async getDoctorById(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      const doctor = await this.doctorService.getDoctorByField({ where: { id } });
+      const { userId } = req.params;
+      const doctor = await this.doctorService.getDoctorByField({ where: { userId } });
       if (!doctor) {
         return res.status(404).json({
           status: 'error',
@@ -303,8 +303,8 @@ export class DoctorController {
 
   async getVitalsById(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      const vitalSign = await this.vitalsignService.getVitalSignsById(id);
+      const { vitalId } = req.params;
+      const vitalSign = await this.vitalsignService.getVitalSignsById(vitalId);
       if (!vitalSign) {
         return Utility.handleError(
           res,
@@ -329,9 +329,9 @@ export class DoctorController {
 
   async updateVitals(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const { vitalId } = req.params;
       const params = { ...req.body };
-      await this.vitalsignService.updateVitalSigns(id, params);
+      await this.vitalsignService.updateVitalSigns(vitalId, params);
       return Utility.handleSuccess(
         res,
         "Vital sign updated successfully",
@@ -349,8 +349,8 @@ export class DoctorController {
 
   async destroyVitals(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      await this.vitalsignService.deleteVitalSigns(id);
+      const { vitalId } = req.params;
+      await this.vitalsignService.deleteVitalSigns(vitalId);
       return Utility.handleSuccess(
         res,
         "Vital sign deleted successfully",
@@ -405,8 +405,8 @@ export class DoctorController {
 
   async getConsultationById(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      const consultation = await this.consultationService.getConsultationById(id);
+      const { consultationId } = req.params;
+      const consultation = await this.consultationService.getConsultationById(consultationId);
       if (!consultation) {
         return Utility.handleError(
           res,
@@ -431,9 +431,9 @@ export class DoctorController {
 
   async updateConsultation(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const { consultationId } = req.params;
       const params = { ...req.body };
-      await this.consultationService.updateConsultation(id, params);
+      await this.consultationService.updateConsultation(consultationId, params);
       return Utility.handleSuccess(
         res,
         "Consultation updated successfully",
@@ -451,8 +451,8 @@ export class DoctorController {
 
   async destroyConsultation(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      await this.consultationService.deleteConsultation(id);
+      const { consultationId } = req.params;
+      await this.consultationService.deleteConsultation(consultationId);
       return Utility.handleSuccess(
         res,
         "Consultation deleted successfully",
@@ -572,8 +572,8 @@ export class DoctorController {
 
   async destroyPrescription(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      await this.prescriptionService.deletePrescription(id);
+      const { prescriptionId } = req.params;
+      await this.prescriptionService.deletePrescription(prescriptionId);
       return Utility.handleSuccess(
         res,
         "Prescription deleted successfully",
@@ -591,8 +591,8 @@ export class DoctorController {
 
   async updateDoctor(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      await this.doctorService.updateDoctor(id, req.body);
+      const { doctorId } = req.params;
+      await this.doctorService.updateDoctor(doctorId, req.body);
       return res.status(200).json({
         status: 'success',
         message: 'Doctor updated successfully'

@@ -41,7 +41,7 @@ class PatientController {
 
   async getPatientById(req: Request, res: Response): Promise<void> {
     try {
-      const patient = await this.patientService.getPatientById(req.params.id);
+      const patient = await this.patientService.getPatientById(req.params.userId);
       if (!patient) {
         res.status(404).json({
           status: false,
@@ -64,7 +64,7 @@ class PatientController {
 
   async updatePatient(req: Request, res: Response): Promise<void> {
     try {
-      const patient = await this.patientService.updatePatient(req.params.id, req.body);
+      const patient = await this.patientService.updatePatient(req.params.userId, req.body);
       if (!patient) {
         res.status(404).json({
           status: false,
