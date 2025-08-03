@@ -486,3 +486,13 @@ notNull Violation: PrescriptionModel.medications cannot be null
 2025-07-31 07:14:50 error : jwt expired 
 2025-07-31 07:15:11 error : WHERE parameter "id" has invalid "undefined" value 
 2025-07-31 08:05:48 error : Consultation not found 
+2025-08-03 07:55:35 error : jwt expired 
+2025-08-03 08:10:03 error : jwt expired 
+2025-08-03 08:11:26 error : jwt expired 
+2025-08-03 08:36:46 error : startTime.getTime is not a function 
+2025-08-03 08:56:04 error : Timeslot validation failed: Start date must be today or a future date, Start time must be at least 30 minutes from the current time 
+2025-08-03 08:56:37 error : Timeslot validation failed: Start date must be today or a future date, Start time must be at least 30 minutes from the current time, End time must be at least 30 minutes after start time, Start time must be before end time 
+2025-08-03 08:56:43 error : Timeslot validation failed: End time must be at least 30 minutes after start time, Start time must be before end time 
+2025-08-03 08:56:59 error : Timeslot validation failed: End time must be at least 30 minutes after start time, Start time must be before end time 
+2025-08-03 08:58:15 error : Timeslot validation failed: End time must be at least 30 minutes after start time, Start time must be before end time 
+2025-08-03 08:58:56 error : Timeslot validation failed: End time must be at least 30 minutes after start time, Start time must be before end time 
