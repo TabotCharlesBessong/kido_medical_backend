@@ -21,9 +21,14 @@ const email_service_1 = __importDefault(require("../services/email.service"));
 const token_service_1 = __importDefault(require("../services/token.service"));
 const user_services_1 = __importDefault(require("../services/user.services"));
 const index_utils_1 = __importDefault(require("../utils/index.utils"));
+const user_datasource_1 = __importDefault(require("../datasources/user.datasource"));
+const token_datasource_1 = __importDefault(require("../datasources/token.datasource"));
+const userDataSource = new user_datasource_1.default();
+const tokenDataSource = new token_datasource_1.default();
+const userService = new user_services_1.default(userDataSource, tokenDataSource);
 class UserController {
     constructor() {
-        this.userService = new user_services_1.default();
+        this.userService = userService;
         this.tokenService = new token_service_1.default();
     }
     register(req, res) {

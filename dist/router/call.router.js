@@ -18,9 +18,46 @@ const index_middlewares_1 = require("../middlewares/index.middlewares");
 const createCallRoute = () => {
     const router = express_1.default.Router();
     const callController = new call_controller_1.default();
+    // Create a new call
     router.post("/create", (0, index_middlewares_1.DoctorMiddleware)(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             yield callController.callPatient(req, res);
+        }
+        catch (error) {
+            next(error);
+        }
+    }));
+    // End a call
+    router.post("/:callId/end", (0, index_middlewares_1.Auth)(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            yield callController.endCall(req, res);
+        }
+        catch (error) {
+            next(error);
+        }
+    }));
+    // Get all calls
+    router.get("/", (0, index_middlewares_1.Auth)(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            yield callController.getAllCalls(req, res);
+        }
+        catch (error) {
+            next(error);
+        }
+    }));
+    // Get call by ID
+    router.get("/:callId", (0, index_middlewares_1.Auth)(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            yield callController.getCallById(req, res);
+        }
+        catch (error) {
+            next(error);
+        }
+    }));
+    // Delete a call
+    router.delete("/:callId", (0, index_middlewares_1.Auth)(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            yield callController.deleteCall(req, res);
         }
         catch (error) {
             next(error);

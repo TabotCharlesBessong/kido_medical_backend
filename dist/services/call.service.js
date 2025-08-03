@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const call_datasource_1 = __importDefault(require("../datasources/call.datasource"));
 const patient_datasource_1 = __importDefault(require("../datasources/patient.datasource"));
-const twilio_service_1 = require("./twilio.service");
+const stream_service_1 = __importDefault(require("./stream.service"));
 class CallService {
     constructor() {
         this.callDataSource = new call_datasource_1.default();
@@ -22,23 +22,51 @@ class CallService {
     }
     createCall(record) {
         return __awaiter(this, void 0, void 0, function* () {
-            const call = yield this.callDataSource.create(record);
-            const patient = yield this.patientDataSource.fetchOne({
-                where: { userId: record.patientId },
-            });
-            console.log(patient);
-            // if (!patient || !patient.phoneNumber) {
-            //   throw new Error("Patient does not have a phone number.");
-            // }
             try {
-                yield (0, twilio_service_1.makeCall)("+13149364610", record.appointmentId);
-                yield this.callDataSource.updateOne({ where: { id: call.id } }, { status: "COMPLETED" });
+                // Create the call record in the DB
+                const call = yield this.callDataSource.create(record);
+                // If streamCallId is provided, update Stream channel status
+                if (record.streamCallId) {
+                    yield stream_service_1.default.setCallStatus(record.streamCallId, "ACTIVE");
+                }
+                return call;
             }
             catch (error) {
-                yield this.callDataSource.updateOne({ where: { id: call.id } }, { status: "FAILED" });
-                throw error;
+                console.error('Error creating call:', error);
+                throw new Error('Failed to create call record');
             }
-            return call;
+        });
+    }
+    getCallByAppointmentId(appointmentId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield this.callDataSource.fetchOne({
+                    where: { appointmentId }
+                });
+            }
+            catch (error) {
+                console.error('Error fetching call by appointment ID:', error);
+                throw new Error('Failed to fetch call record');
+            }
+        });
+    }
+    updateCallStatus(callId, status) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const call = yield this.getCallById(callId);
+                if (!call) {
+                    throw new Error('Call not found');
+                }
+                yield this.callDataSource.updateOne({ where: { id: callId } }, { status });
+                // If there's a Stream call ID, update its status
+                if (call.streamCallId) {
+                    yield stream_service_1.default.setCallStatus(call.streamCallId, status);
+                }
+            }
+            catch (error) {
+                console.error('Error updating call status:', error);
+                throw new Error('Failed to update call status');
+            }
         });
     }
     getCallById(callId) {
@@ -52,6 +80,20 @@ class CallService {
         return __awaiter(this, void 0, void 0, function* () {
             const query = { where: {}, raw: true };
             return this.callDataSource.fetchAll(query);
+        });
+    }
+    updateCall(callId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.callDataSource.updateOne({ where: { id: callId } }, data);
+            const updatedCall = yield this.getCallById(callId);
+            if (!updatedCall) {
+                throw new Error("Call not found after update");
+            }
+            // If status is being updated and streamCallId exists, update Stream channel status
+            if (data.status && updatedCall.streamCallId) {
+                yield stream_service_1.default.setCallStatus(updatedCall.streamCallId, data.status);
+            }
+            return updatedCall;
         });
     }
     deleteCall(callId) {

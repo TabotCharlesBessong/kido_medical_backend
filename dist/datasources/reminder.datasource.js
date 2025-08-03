@@ -12,44 +12,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const timeslot_datasource_1 = __importDefault(require("../datasources/timeslot.datasource"));
-class TimeSlotService {
-    constructor() {
-        this.timeSlotDatasource = new timeslot_datasource_1.default();
-    }
-    createTimeSlot(record) {
+const reminder_model_1 = __importDefault(require("../models/reminder.model"));
+class ReminderDataSource {
+    create(record) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.timeSlotDatasource.create(record);
+            return yield reminder_model_1.default.create(record);
         });
     }
-    getTimeSlots(query) {
+    fetchOne(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.timeSlotDatasource.fetchAll(query || { where: {}, raw: true });
+            return yield reminder_model_1.default.findOne(query);
         });
     }
-    getTimeSlotsByDoctor(doctorId) {
+    updateOne(searchBy, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const query = {
-                where: { doctorId },
-                raw: true,
-                order: [['startTime', 'ASC']] // Order by start time
-            };
-            return this.timeSlotDatasource.fetchAll(query);
+            yield reminder_model_1.default.update(data, searchBy);
         });
     }
-    getTimeSlotById(id) {
+    fetchAll(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.timeSlotDatasource.fetchOne({
-                where: { id },
-                returning: true
-            });
+            return yield reminder_model_1.default.findAll(query);
         });
     }
-    updateTimeSlot(id, data) {
+    deleteOne(searchBy) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.timeSlotDatasource.updateOne({ where: { id }, returning: true }, data);
-            return yield this.getTimeSlotById(id);
+            yield reminder_model_1.default.destroy(searchBy);
         });
     }
 }
-exports.default = TimeSlotService;
+exports.default = ReminderDataSource;

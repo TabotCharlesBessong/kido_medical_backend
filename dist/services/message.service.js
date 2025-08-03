@@ -12,55 +12,129 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const notification_enum_1 = require("../interfaces/enum/notification.enum");
 const user_services_1 = __importDefault(require("./user.services"));
+const stream_service_1 = __importDefault(require("./stream.service"));
+const user_datasource_1 = __importDefault(require("../datasources/user.datasource"));
+const token_datasource_1 = __importDefault(require("../datasources/token.datasource"));
+const userDataSource = new user_datasource_1.default();
+const tokenDataSource = new token_datasource_1.default();
+const userService = new user_services_1.default(userDataSource, tokenDataSource);
 class MessageService {
     constructor(messageDataSource, notificationDataSource) {
         this.messageDataSource = messageDataSource;
         this.notificationDataSource = notificationDataSource;
-        this.userService = new user_services_1.default();
+        this.userService = userService;
     }
     createMessage(record) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('Creating message with record:', record);
-            // First verify the receiver exists
-            const receiver = yield this.userService.getUserByField({ id: record.receiverId });
-            console.log('Receiver lookup result:', receiver ? 'Found' : 'Not found');
-            if (!receiver) {
-                throw new Error("Receiver not found");
+            try {
+                if (!record.senderId || !record.receiverId || !record.content) {
+                    throw new Error("Missing required message fields");
+                }
+                // Get or create a channel for the conversation
+                const channel = yield stream_service_1.default.getOrCreateUserChannel(record.senderId, record.receiverId);
+                if (!channel || !channel.id) {
+                    throw new Error("Failed to create or get channel");
+                }
+                // Send the message through Stream
+                const streamMessage = yield stream_service_1.default.sendMessage(channel.id, record.senderId, record.content);
+                if (!streamMessage || !streamMessage.message) {
+                    throw new Error("Failed to send message");
+                }
+                // Return a message object that matches our interface
+                return {
+                    id: streamMessage.message.id,
+                    senderId: record.senderId,
+                    receiverId: record.receiverId,
+                    content: record.content,
+                    read: false,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                };
             }
-            // Then verify the sender exists
-            const sender = yield this.userService.getUserByField({ id: record.senderId });
-            console.log('Sender lookup result:', sender ? 'Found' : 'Not found');
-            if (!sender) {
-                throw new Error("Sender not found");
+            catch (error) {
+                console.error("Error creating message:", error);
+                throw error;
             }
-            // Create the message
-            const message = yield this.messageDataSource.create(record);
-            // Create notification
-            yield this.notificationDataSource.create({
-                userId: record.receiverId,
-                referenceId: message.id,
-                message: `New message from ${sender.firstname} ${sender.lastname}`,
-                read: false,
-                type: notification_enum_1.NotificationType.MESSAGE,
-            });
-            return message;
         });
     }
     getAllMessagesByUserId(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.messageDataSource.fetchAllByUserId(userId);
+            try {
+                if (!userId) {
+                    throw new Error("User ID is required");
+                }
+                // Get all channels the user is a member of
+                const channels = yield stream_service_1.default.queryUserChannels(userId);
+                // Get messages from all channels
+                const messages = [];
+                for (const channel of channels) {
+                    if (!channel.id)
+                        continue;
+                    const channelMessages = yield stream_service_1.default.getChannelMessages(channel.id);
+                    for (const msg of channelMessages) {
+                        if (msg.id && msg.user_id && msg.text) {
+                            const otherMember = channel.state.members[userId] ?
+                                Object.keys(channel.state.members).find(id => id !== userId) :
+                                undefined;
+                            if (otherMember) {
+                                messages.push({
+                                    id: msg.id,
+                                    senderId: msg.user_id,
+                                    receiverId: otherMember,
+                                    content: msg.text,
+                                    read: false,
+                                    createdAt: new Date(),
+                                    updatedAt: new Date(),
+                                });
+                            }
+                        }
+                    }
+                }
+                return messages;
+            }
+            catch (error) {
+                console.error("Error getting messages:", error);
+                throw error;
+            }
         });
     }
     getConversation(senderId, receiverId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.messageDataSource.fetchConversation(senderId, receiverId);
+            try {
+                if (!senderId || !receiverId) {
+                    throw new Error("Both sender and receiver IDs are required");
+                }
+                // Get or create channel for the conversation
+                const channel = yield stream_service_1.default.getOrCreateUserChannel(senderId, receiverId);
+                if (!channel || !channel.id) {
+                    throw new Error("Failed to create or get channel");
+                }
+                // Get messages from the channel
+                const messages = yield stream_service_1.default.getChannelMessages(channel.id);
+                // Map Stream messages to our interface
+                return messages
+                    .filter(msg => msg.id && msg.user_id && msg.text)
+                    .map(msg => ({
+                    id: msg.id,
+                    senderId: msg.user_id,
+                    receiverId: msg.user_id === senderId ? receiverId : senderId,
+                    content: msg.text,
+                    read: false,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                }));
+            }
+            catch (error) {
+                console.error("Error getting conversation:", error);
+                throw error;
+            }
         });
     }
     markMessageAsRead(messageId) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.messageDataSource.markAsRead(messageId);
+            // Stream handles read receipts automatically
+            return;
         });
     }
     getAllNotificationsByUserId(userId) {

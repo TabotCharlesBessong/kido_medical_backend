@@ -22,10 +22,11 @@ var __rest = (this && this.__rest) || function (s, e) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DoctorService = void 0;
 class DoctorService {
-    constructor(doctorDataSource, emailService, userService) {
+    constructor(doctorDataSource, emailService, userService, kycVerificationService) {
         this.doctorDataSource = doctorDataSource;
         this.emailService = emailService;
         this.userService = userService;
+        this.kycVerificationService = kycVerificationService;
     }
     createDoctor(record) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -101,6 +102,13 @@ class DoctorService {
             const doctor = yield this.getDoctorByField({ where: { userId: doctorUser.id } });
             if (!doctor) {
                 throw new Error("Doctor profile not found");
+            }
+            // Check KYC verification status if trying to approve
+            if (status === 'APPROVED') {
+                const kycVerification = yield this.kycVerificationService.getKycVerificationByUserId(doctorUser.id);
+                if (kycVerification && kycVerification.status !== 'approved') {
+                    throw new Error("Doctor cannot be approved until KYC verification is completed");
+                }
             }
             // Update verification status
             yield this.updateDoctor(doctor.id, {

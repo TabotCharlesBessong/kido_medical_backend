@@ -40,8 +40,12 @@ const CallModel = database_1.default.define("CallModel", {
             key: "id",
         },
     },
+    streamCallId: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
     status: {
-        type: sequelize_1.DataTypes.ENUM("PENDING", "COMPLETED", "FAILED"),
+        type: sequelize_1.DataTypes.ENUM("PENDING", "ACTIVE", "COMPLETED", "FAILED"),
         allowNull: false,
         defaultValue: "PENDING",
     },
@@ -68,9 +72,6 @@ patient_model_1.default.hasMany(CallModel, {
     as: "patientCalls",
 });
 CallModel.belongsTo(patient_model_1.default, { foreignKey: "patientId" });
-appointment_model_1.default.hasOne(CallModel, {
-    foreignKey: "appointmentId",
-    as: "appointmentCall",
-});
+appointment_model_1.default.hasMany(CallModel, { foreignKey: "appointmentId", as: "appointmentCalls" });
 CallModel.belongsTo(appointment_model_1.default, { foreignKey: "appointmentId" });
 exports.default = CallModel;

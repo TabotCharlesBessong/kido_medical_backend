@@ -16,7 +16,6 @@ exports.DoctorController = void 0;
 const database_1 = __importDefault(require("../database"));
 const code_enum_1 = require("../interfaces/enum/code.enum");
 const user_enum_1 = require("../interfaces/enum/user.enum");
-const appointment_service_1 = __importDefault(require("../services/appointment.service"));
 const doctor_service_1 = require("../services/doctor.service");
 const timeslot_service_1 = __importDefault(require("../services/timeslot.service"));
 const user_services_1 = __importDefault(require("../services/user.services"));
@@ -27,18 +26,27 @@ const prescription_service_1 = __importDefault(require("../services/prescription
 const email_service_1 = __importDefault(require("../services/email.service"));
 const upload_service_1 = __importDefault(require("../services/upload.service"));
 const doctor_datasource_1 = __importDefault(require("../datasources/doctor.datasource"));
+const kycVerfication_service_1 = require("../services/kycVerfication.service");
+const kycVerification_datasource_1 = __importDefault(require("../datasources/kycVerification.datasource"));
+const user_datasource_1 = __importDefault(require("../datasources/user.datasource"));
+const token_datasource_1 = __importDefault(require("../datasources/token.datasource"));
+const index_1 = require("../services/index");
+const userDataSource = new user_datasource_1.default();
+const tokenDataSource = new token_datasource_1.default();
+const userService = new user_services_1.default(userDataSource, tokenDataSource);
+const kycVerificationService = new kycVerfication_service_1.KycVerificationService(new kycVerification_datasource_1.default(), userService);
 class DoctorController {
     constructor() {
-        const userService = new user_services_1.default();
-        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, userService);
+        this.doctorService = new doctor_service_1.DoctorService(new doctor_datasource_1.default(), email_service_1.default, userService, kycVerificationService);
         this.timeSlotService = new timeslot_service_1.default();
-        this.appointmentService = new appointment_service_1.default();
+        this.appointmentService = index_1.appointmentService;
         this.vitalsignService = new vitalsign_services_1.default();
         this.consultationService = new consultation_service_1.default();
         this.prescriptionService = new prescription_service_1.default();
         this.userService = userService;
         this.emailService = email_service_1.default;
         this.uploadService = upload_service_1.default;
+        this.kycVerificationService = kycVerificationService;
     }
     registerDoctor(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -58,15 +66,21 @@ class DoctorController {
                     language: params.language,
                     experience: params.experience
                 };
-                // checkign if the doctor already exist
+                // checking if the doctor already exist
                 let doctorExists = yield this.doctorService.getDoctorByUserId(newDoctor.userId);
                 if (doctorExists)
                     return index_utils_1.default.handleError(res, "We are sorry but you have already created a doctor account", code_enum_1.ResponseCode.ALREADY_EXIST);
                 // creating a new doctor
                 const doctor = yield this.doctorService.createDoctor(newDoctor);
+                // Create KYC verification request
+                const kycRequest = yield this.kycVerificationService.kycVerificationRequest({
+                    userId: params.user.id,
+                    documentType: "license", // Default to license for doctor registration
+                    documentUrl: params.documents || "",
+                });
                 // Update the user's role to "doctor"
                 yield this.userService.updateUserRole(params.user.id, user_enum_1.UserRoles.DOCTOR);
-                return index_utils_1.default.handleSuccess(res, "Doctor created successfully", { doctor }, code_enum_1.ResponseCode.SUCCESS);
+                return index_utils_1.default.handleSuccess(res, "Doctor created successfully. KYC verification request submitted.", { doctor, kycRequest }, code_enum_1.ResponseCode.SUCCESS);
             }
             catch (error) {
                 return res.status(code_enum_1.ResponseCode.SERVER_ERROR).json(error.message);
