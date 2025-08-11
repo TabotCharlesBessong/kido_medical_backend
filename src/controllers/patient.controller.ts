@@ -23,9 +23,26 @@ class PatientController {
     this.timeSlotService = new TimeSlotService();
   }
 
-  async createPatient(req: Request, res: Response): Promise<void> {
+  async createPatient(req: Request & { user?: IUser }, res: Response): Promise<void> {
     try {
-      const patient = await this.patientService.createPatient(req.body);
+      // The Auth middleware sets user in req.body.user, not req.user
+      const user = req.body.user;
+      
+      if (!user) {
+        res.status(401).json({
+          status: false,
+          message: "User not authenticated",
+        });
+        return;
+      }
+
+      // Add userId to the request body
+      const patientData = {
+        ...req.body,
+        userId: user.id
+      };
+
+      const patient = await this.patientService.createPatient(patientData);
       res.status(201).json({
         status: true,
         message: "Patient created successfully",
@@ -127,7 +144,7 @@ class PatientController {
   async bookAppointment(req: Request & { user?: IUser }, res: Response): Promise<void> {
     try {
       const { doctorId, timeslotId, date, reason } = req.body;
-      const patient = req.user;
+      const patient = req.body.user;
 
       if (!patient) {
         res.status(401).json({
@@ -183,7 +200,7 @@ class PatientController {
 
   async getPatientAppointments(req: Request & { user?: IUser }, res: Response): Promise<void> {
     try {
-      const patient = req.user;
+      const patient = req.body.user;
       if (!patient) {
         res.status(401).json({
           status: false,

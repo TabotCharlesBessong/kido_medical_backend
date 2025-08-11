@@ -2,19 +2,48 @@ import * as yup from "yup";
 
 const timeSlotSchema = yup.object({
   startTime: yup
-    .string()
-    .required()
-    .matches(
-      /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/, // Regular expression for HH:MM format
-      "startTime must be in the format HH:MM"
-    ),
+    .mixed()
+    .required("Start time is required")
+    .test("valid-date", "Invalid date format", (value: any) => {
+      if (!value) return false;
+      const date = new Date(value);
+      return !isNaN(date.getTime());
+    })
+    .test("future-date", "Start date must be today or a future date", (value: any) => {
+      if (!value) return false;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const inputDate = new Date(value);
+      inputDate.setHours(0, 0, 0, 0);
+      return inputDate >= today;
+    })
+    .test("minimum-time", "Start time must be at least 30 minutes from now", (value: any) => {
+      if (!value) return false;
+      const now = new Date();
+      const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+      return new Date(value) >= thirtyMinutesFromNow;
+    }),
   endTime: yup
-    .string()
-    .required()
-    .matches(
-      /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/, // Regular expression for HH:MM format
-      "endTime must be in the format HH:MM"
-    ),
+    .mixed()
+    .required("End time is required")
+    .test("valid-date", "Invalid date format", (value: any) => {
+      if (!value) return false;
+      const date = new Date(value);
+      return !isNaN(date.getTime());
+    })
+    .test("after-start", "End time must be after start time", function(value: any) {
+      const { startTime } = this.parent;
+      if (!value || !startTime) return false;
+      return new Date(value) > new Date(startTime);
+    })
+    .test("minimum-duration", "End time must be at least 30 minutes after start time", function(value: any) {
+      const { startTime } = this.parent;
+      if (!value || !startTime) return false;
+      const start = new Date(startTime);
+      const end = new Date(value);
+      const thirtyMinutesAfterStart = new Date(start.getTime() + 30 * 60 * 1000);
+      return end >= thirtyMinutesAfterStart;
+    }),
   isAvailable: yup.boolean().default(true),
 });
 
