@@ -282,9 +282,36 @@ export class DoctorController {
     }
   }
 
-  async createVitalSing(req: Request, res: Response) {
+  async createVitalSign(req: Request, res: Response) {
     try {
       const params = { ...req.body };
+      
+      // Validate required fields
+      const requiredFields = ['patientId', 'doctorId', 'appointmentId', 'weight', 'height', 'bloodPressure', 'pulse', 'respiratoryRate', 'temperature'];
+      const missingFields = requiredFields.filter(field => !params[field]);
+      
+      if (missingFields.length > 0) {
+        return Utility.handleError(
+          res,
+          `Missing required fields: ${missingFields.join(', ')}`,
+          ResponseCode.BAD_REQUEST
+        );
+      }
+
+      // Validate numeric fields
+      const numericFields = ['weight', 'height', 'pulse', 'respiratoryRate', 'temperature'];
+      const invalidNumericFields = numericFields.filter(field => 
+        isNaN(Number(params[field])) || Number(params[field]) <= 0
+      );
+      
+      if (invalidNumericFields.length > 0) {
+        return Utility.handleError(
+          res,
+          `Invalid numeric values for fields: ${invalidNumericFields.join(', ')}`,
+          ResponseCode.BAD_REQUEST
+        );
+      }
+
       const vitalSign = await this.vitalsignService.recordVitalSigns(params);
       return Utility.handleSuccess(
         res,
@@ -372,6 +399,25 @@ export class DoctorController {
       return Utility.handleSuccess(
         res,
         "Vital signs fetched successfully",
+        { vitalSigns },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getVitalSignsByPatientId(req: Request, res: Response) {
+    try {
+      const { patientId } = req.params;
+      const vitalSigns = await this.vitalsignService.getVitalSignsByPatientId(patientId);
+      return Utility.handleSuccess(
+        res,
+        "Patient vital signs fetched successfully",
         { vitalSigns },
         ResponseCode.SUCCESS
       );

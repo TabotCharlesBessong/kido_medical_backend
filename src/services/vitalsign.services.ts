@@ -12,9 +12,22 @@ class VitalSignService {
     return this.vitalsignDataSource.create(record);
   }
 
-  async getVitalSignsById(appointmentId: string): Promise<IVitalSign | null> {
+  async getVitalSignsById(vitalId: string): Promise<IVitalSign | null> {
     return await this.vitalsignDataSource.fetchOne({
-      where: { id: appointmentId },
+      where: { id: vitalId },
+    });
+  }
+
+  async getVitalSignsByAppointmentId(appointmentId: string): Promise<IVitalSign | null> {
+    return await this.vitalsignDataSource.fetchOne({
+      where: { appointmentId },
+    });
+  }
+
+  async getVitalSignsByPatientId(patientId: string): Promise<IVitalSign[]> {
+    return await this.vitalsignDataSource.fetchAll({
+      where: { patientId },
+      raw: true
     });
   }
 

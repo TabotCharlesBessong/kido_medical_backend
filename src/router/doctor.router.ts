@@ -117,7 +117,7 @@ const createDoctorRoute = () => {
     validator(validationSchema.vitalSignSchema),
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
-        await doctorController.createVitalSing(req, res);
+        await doctorController.createVitalSign(req, res);
       } catch (error) {
         next(error);
       }
@@ -142,6 +142,18 @@ const createDoctorRoute = () => {
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         await doctorController.getVitalsById(req, res);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  router.get(
+    "/record/sign/patient/:patientId",
+    Auth(),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getVitalSignsByPatientId(req, res);
       } catch (error) {
         next(error);
       }
