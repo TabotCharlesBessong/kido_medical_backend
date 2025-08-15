@@ -209,11 +209,122 @@ class PatientController {
         return;
       }
 
-      const appointments = await this.appointmentService.getAppointmentsByPatientId(patient.id);
+      // Get patient record to ensure we have the correct patient ID
+      const patientRecord = await this.patientService.getPatientById(patient.id);
+      if (!patientRecord) {
+        res.status(404).json({
+          status: false,
+          message: "Patient record not found",
+        });
+        return;
+      }
+
+      const appointments = await this.appointmentService.getAppointmentsByPatientId(patientRecord.id);
       res.status(200).json({
         status: true,
         message: "Appointments retrieved successfully",
         data: appointments,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async getPatientPrescriptions(req: Request & { user?: IUser }, res: Response): Promise<void> {
+    try {
+      const patient = req.body.user;
+      if (!patient) {
+        res.status(401).json({
+          status: false,
+          message: "User not authenticated",
+        });
+        return;
+      }
+
+      // Get patient record to ensure we have the correct patient ID
+      const patientRecord = await this.patientService.getPatientById(patient.id);
+      if (!patientRecord) {
+        res.status(404).json({
+          status: false,
+          message: "Patient record not found",
+        });
+        return;
+      }
+
+      // Get appointments for this patient
+      const appointments = await this.appointmentService.getAppointmentsByPatientId(patientRecord.id);
+      
+      // Get consultations for those appointments
+      const consultationService = new (await import("../services/consultation.service")).default();
+      const consultationPromises = appointments.map(appointment => 
+        consultationService.getConsultationById(appointment.id)
+      );
+      
+      const consultations = await Promise.all(consultationPromises);
+      const validConsultations = consultations.filter(consultation => consultation !== null);
+      
+      // Get prescriptions for those consultations
+      const prescriptionService = new (await import("../services/prescription.service")).default();
+      const prescriptionPromises = validConsultations.map(consultation => 
+        prescriptionService.getPrescriptionById(consultation!.id)
+      );
+      
+      const prescriptions = await Promise.all(prescriptionPromises);
+      const validPrescriptions = prescriptions.filter(prescription => prescription !== null);
+
+      res.status(200).json({
+        status: true,
+        message: "Patient prescriptions retrieved successfully",
+        data: validPrescriptions,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async getPatientConsultations(req: Request & { user?: IUser }, res: Response): Promise<void> {
+    try {
+      const patient = req.body.user;
+      if (!patient) {
+        res.status(401).json({
+          status: false,
+          message: "User not authenticated",
+        });
+        return;
+      }
+
+      // Get patient record to ensure we have the correct patient ID
+      const patientRecord = await this.patientService.getPatientById(patient.id);
+      if (!patientRecord) {
+        res.status(404).json({
+          status: false,
+          message: "Patient record not found",
+        });
+        return;
+      }
+
+      // Get appointments for this patient
+      const appointments = await this.appointmentService.getAppointmentsByPatientId(patientRecord.id);
+      
+      // Get consultations for those appointments
+      const consultationService = new (await import("../services/consultation.service")).default();
+      const consultationPromises = appointments.map(appointment => 
+        consultationService.getConsultationById(appointment.id)
+      );
+      
+      const consultations = await Promise.all(consultationPromises);
+      const validConsultations = consultations.filter(consultation => consultation !== null);
+
+      res.status(200).json({
+        status: true,
+        message: "Patient consultations retrieved successfully",
+        data: validConsultations,
       });
     } catch (error: any) {
       res.status(400).json({

@@ -34,6 +34,19 @@ class ConsultationService {
     return this.consultationDatasource.fetchAll(query);
   }
 
+  async getConsultationsByDoctorId(doctorId: string): Promise<IConsultation[]> {
+    // First get appointments by doctor ID, then get consultations for those appointments
+    const { appointmentService } = await import("../services/index");
+    const appointments = await appointmentService.getAppointmentsByDoctorId(doctorId);
+    
+    const consultationPromises = appointments.map(appointment => 
+      this.getConsultationById(appointment.id)
+    );
+    
+    const consultations = await Promise.all(consultationPromises);
+    return consultations.filter(consultation => consultation !== null) as IConsultation[];
+  }
+
   async deleteConsultation(postId: string): Promise<void> {
     await this.consultationDatasource.deleteOne({ where: { id: postId } });
   }

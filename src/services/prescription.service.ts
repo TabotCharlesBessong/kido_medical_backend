@@ -174,6 +174,27 @@ class PrescriptionService {
     return this.prescriptionDataSource.fetchAll(query);
   }
 
+  async getPrescriptionsByDoctorId(doctorId: string): Promise<IPrescription[]> {
+    // Get appointments by doctor ID
+    const appointments = await this.appointmentService.getAppointmentsByDoctorId(doctorId);
+    
+    // Get consultations for those appointments
+    const consultationPromises = appointments.map(appointment => 
+      this.consultationService.getConsultationById(appointment.id)
+    );
+    
+    const consultations = await Promise.all(consultationPromises);
+    const validConsultations = consultations.filter(consultation => consultation !== null);
+    
+    // Get prescriptions for those consultations
+    const prescriptionPromises = validConsultations.map(consultation => 
+      this.prescriptionDataSource.fetchOne({ where: { consultationId: consultation!.id } })
+    );
+    
+    const prescriptions = await Promise.all(prescriptionPromises);
+    return prescriptions.filter(prescription => prescription !== null) as IPrescription[];
+  }
+
   async deletePrescription(prescriptionId: string): Promise<void> {
     const transaction = await sequelize.transaction();
 

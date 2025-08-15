@@ -87,6 +87,42 @@ const createDoctorRoute = () => {
     }
   );
 
+  router.get(
+    "/appointments",
+    DoctorMiddleware(),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getDoctorAppointments(req, res);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  router.get(
+    "/consultations",
+    DoctorMiddleware(),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getDoctorConsultations(req, res);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  router.get(
+    "/prescriptions",
+    DoctorMiddleware(),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        await doctorController.getDoctorPrescriptions(req, res);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
   router.put(
     "/appointments/:id/cancel",
     DoctorMiddleware(),

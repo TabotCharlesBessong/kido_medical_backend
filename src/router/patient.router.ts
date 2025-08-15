@@ -103,6 +103,22 @@ const createPatientRoute = () => {
     }
   });
 
+  router.get("/prescriptions", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await patientController.getPatientPrescriptions(req, res);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get("/consultations", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await patientController.getPatientConsultations(req, res);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   return router;
 };
 
