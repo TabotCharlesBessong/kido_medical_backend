@@ -21,7 +21,15 @@ const timeSlotSchema = yup.object({
       if (!value) return false;
       const now = new Date();
       const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
-      return new Date(value) >= thirtyMinutesFromNow;
+      const inputDate = new Date(value);
+      const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      
+      // For dates far in the future (like 2025), they should be valid
+      if (inputDate > oneDayFromNow) {
+        return true;
+      }
+      
+      return inputDate >= thirtyMinutesFromNow;
     }),
   endTime: yup
     .mixed()

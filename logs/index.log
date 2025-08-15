@@ -496,3 +496,5 @@ notNull Violation: PrescriptionModel.medications cannot be null
 2025-08-03 08:56:59 error : Timeslot validation failed: End time must be at least 30 minutes after start time, Start time must be before end time 
 2025-08-03 08:58:15 error : Timeslot validation failed: End time must be at least 30 minutes after start time, Start time must be before end time 
 2025-08-03 08:58:56 error : Timeslot validation failed: End time must be at least 30 minutes after start time, Start time must be before end time 
+2025-08-03 09:36:40 error : Timeslot validation failed: End time must be at least 30 minutes after start time, Start time must be before end time 
+2025-08-03 09:36:53 error : Timeslot validation failed: End time must be at least 30 minutes after start time, Start time must be before end time 
