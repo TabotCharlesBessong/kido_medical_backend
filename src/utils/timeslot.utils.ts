@@ -37,6 +37,15 @@ export class TimeSlotUtils {
       const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
       const inputStartTime = this.toDate(startTime);
       
+      // For dates far in the future (like 2025), they should be valid
+      // Only check the 30-minute rule for dates within the next few hours
+      const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      
+      if (inputStartTime > oneDayFromNow) {
+        // If the date is more than 1 day in the future, it's automatically valid
+        return true;
+      }
+      
       return inputStartTime >= thirtyMinutesFromNow;
     } catch (error) {
       return false;
