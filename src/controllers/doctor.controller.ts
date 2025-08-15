@@ -200,6 +200,99 @@ export class DoctorController {
     }
   }
 
+  async getDoctorAppointments(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      
+      // First get the doctor using the user ID
+      const doctor = await this.doctorService.getDoctorByUserId(params.user.id);
+      
+      if (!doctor) {
+        return Utility.handleError(
+          res,
+          "Doctor not found",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      const appointments = await this.appointmentService.getAppointmentsByDoctorId(doctor.id);
+      return Utility.handleSuccess(
+        res,
+        "Doctor appointments fetched successfully",
+        { appointments },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getDoctorConsultations(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      
+      // First get the doctor using the user ID
+      const doctor = await this.doctorService.getDoctorByUserId(params.user.id);
+      
+      if (!doctor) {
+        return Utility.handleError(
+          res,
+          "Doctor not found",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      const consultations = await this.consultationService.getConsultationsByDoctorId(doctor.id);
+      return Utility.handleSuccess(
+        res,
+        "Doctor consultations fetched successfully",
+        { consultations },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
+  async getDoctorPrescriptions(req: Request, res: Response) {
+    try {
+      const params = { ...req.body };
+      
+      // First get the doctor using the user ID
+      const doctor = await this.doctorService.getDoctorByUserId(params.user.id);
+      
+      if (!doctor) {
+        return Utility.handleError(
+          res,
+          "Doctor not found",
+          ResponseCode.NOT_FOUND
+        );
+      }
+
+      const prescriptions = await this.prescriptionService.getPrescriptionsByDoctorId(doctor.id);
+      return Utility.handleSuccess(
+        res,
+        "Doctor prescriptions fetched successfully",
+        { prescriptions },
+        ResponseCode.SUCCESS
+      );
+    } catch (error) {
+      return Utility.handleError(
+        res,
+        (error as TypeError).message,
+        ResponseCode.SERVER_ERROR
+      );
+    }
+  }
+
   async createTimeSlot(req: Request, res: Response) {
     try {
       const params = { ...req.body };
