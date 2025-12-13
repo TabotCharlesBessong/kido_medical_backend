@@ -51,6 +51,24 @@ const createCallRoute = () => {
     }
   });
 
+  // Get Stream token for authenticated user (for mobile clients)
+  router.get("/token/stream", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await callController.getStreamToken(req, res);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Join a call (for mobile clients)
+  router.post("/:callId/join", Auth(), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await callController.joinCall(req, res);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   return router;
 };
 
