@@ -32,6 +32,7 @@ coverage/
 .nyc_output
 
 # Dependency directories
+temp_auto_push.bat
 jspm_packages/
 
 # Optional npm cache directory
@@ -50,7 +51,6 @@ jspm_packages/
 .env
 
 # IDE files
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -66,4 +66,5 @@ Thumbs.db
 
 # Temporary files
 tmp/
-temp/
+temp/.gitignore
+branch_structure.json
