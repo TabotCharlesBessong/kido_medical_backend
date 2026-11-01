@@ -31,7 +31,7 @@
     "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.31.0",
-    "multer": "^2.4.0",
+    "multer": "^2.5.0",
     "multer-storage-cloudinary": "^4.0.0",
     "node-cron": "^4.2.0",
     "nodemailer": "^10.0.9",
